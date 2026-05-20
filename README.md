@@ -59,15 +59,36 @@ Completed:
 - Environment variable configuration
 - Public-read database architecture
 - UUID-based schema design
+- Typed Supabase integration
+- Static/public Supabase client architecture
 - Initial species table
 - Species aliases/search table
 - Compatibility rules table
 - Tank size guidelines table
 - Database indexes
+- Typed query helper architecture
 - Starter freshwater fish seed data
 - Compatibility seed data
 - Tank guideline seed data
 - Verification queries completed successfully
+
+---
+
+## Static SEO + Data Architecture
+
+Completed:
+
+- Generated Supabase TypeScript types
+- Typed data query helpers
+- Static/server data fetching architecture
+- Revalidation strategy
+- Dynamic static species routes
+- Dynamic compatibility routes
+- SEO metadata generation
+- Shared species UI components
+- Shared compatibility UI components
+- Static route generation strategy
+- Compatibility query utilities
 
 ---
 
@@ -135,15 +156,21 @@ Supports:
 
 Searchable freshwater species database.
 
+Current functionality:
+
+- database-backed species pages
+- static SEO-generated routes
+- species quick facts
+- care information
+- tank requirement data
+
 Planned data includes:
 
-- temperament
-- care level
-- tank size
-- diet
 - lifespan
-- water parameters
-- compatibility information
+- advanced water parameter logic
+- compatibility recommendations
+- filtration guidance
+- beginner suitability
 
 ## Compatibility Checker
 
@@ -155,9 +182,24 @@ Tool for comparing aquarium species compatibility based on:
 - water parameters
 - activity level
 
+Current functionality:
+
+- static compatibility routes
+- compatibility confidence system
+- compatibility notes
+- cross-linked species pages
+
 ## Stocking Planner
 
 Utility for estimating aquarium stocking levels and identifying overcrowding risks.
+
+Planned functionality:
+
+- gallon-based stocking calculations
+- filtration recommendations
+- beginner warnings
+- bioload estimation
+- species grouping logic
 
 ---
 
@@ -198,6 +240,14 @@ tools for aquarium hobbyists.
 
 The UI should feel similar to older internet database websites, lightly modernized with responsive design and modern frontend tooling.
 
+GuideMyTank prioritizes:
+
+- static generation
+- server components
+- lightweight pages
+- crawlable content
+- minimal client-side JavaScript
+
 ---
 
 # Development Priorities
@@ -218,6 +268,7 @@ Avoid:
 - unnecessary client-side state
 - heavy frontend abstractions
 - SaaS-style complexity
+- unnecessary authentication systems
 
 ---
 
@@ -226,7 +277,9 @@ Avoid:
 ```txt
 /
  /piscidex
+ /piscidex/[slug]
  /compatibility
+ /compatibility/[speciesA]/[speciesB]
  /stocking
 ```
 
@@ -258,18 +311,19 @@ with your browser to see the result.
 
 # Planned Features
 
-- species detail pages
-- static SEO-generated species pages
-- compatibility matrix system
+- search and autocomplete
+- species filtering
+- pagination
 - advanced stocking calculations
 - aquarium gallon calculators
 - filtration recommendations
 - beginner aquarium guides
 - affiliate integrations
 - automated species ingestion pipelines
-- search and autocomplete
 - species comparison tools
 - tank planner utilities
+- advanced compatibility matrix system
+- sitemap expansion for generated pages
 
 ---
 
@@ -304,20 +358,24 @@ Completed:
 - PostgreSQL schema
 - Seed data initialization
 - Compatibility data architecture
+- Typed query architecture
+- Static SEO route architecture
+
+---
 
 ## Current Milestone
 
-### Milestone 1.5 — Backend / Data Architecture
+### Milestone 2 — Search + Discovery
 
-In progress:
+Planned:
 
-- typed Supabase integration
-- query layer architecture
-- static generation strategy
-- SEO metadata generation
-- dynamic species pages
-- compatibility query system
-- caching and revalidation strategy
+- species search
+- alias search
+- autocomplete
+- filter system
+- pagination
+- SEO-safe query handling
+- searchable species utilities
 
 ---
 
@@ -330,3 +388,13 @@ GuideMyTank aims to become a low-maintenance evergreen aquarium utility platform
 - old internet database websites
 
 with modern frontend performance and scalable SEO architecture.
+
+The platform is intentionally designed to prioritize:
+
+- evergreen search traffic
+- information density
+- utility-first UX
+- low maintenance
+- scalable database growth
+- affiliate monetization opportunities
+- static SEO performance

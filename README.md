@@ -45,6 +45,87 @@ Completed:
 - sitemap.xml generation
 - Loading and not-found pages
 - Accessible Radix UI components
+- Hydration issue fixes
+- Accessibility warning fixes
+
+---
+
+## Backend / Database Foundation
+
+Completed:
+
+- Supabase project setup
+- PostgreSQL database initialization
+- Environment variable configuration
+- Public-read database architecture
+- UUID-based schema design
+- Initial species table
+- Species aliases/search table
+- Compatibility rules table
+- Tank size guidelines table
+- Database indexes
+- Starter freshwater fish seed data
+- Compatibility seed data
+- Tank guideline seed data
+- Verification queries completed successfully
+
+---
+
+# Database Architecture
+
+## Core Tables
+
+### `species`
+
+Canonical freshwater species database.
+
+Includes:
+
+- common names
+- scientific names
+- taxonomy
+- temperament
+- care level
+- tank size requirements
+- water parameters
+- schooling behavior
+- diet
+- descriptions
+
+### `species_aliases`
+
+Search and SEO support table.
+
+Used for:
+
+- alternate names
+- common misspellings
+- scientific name lookups
+- autocomplete support
+- SEO search matching
+
+### `compatibility_rules`
+
+Species compatibility relationship system.
+
+Supports:
+
+- compatible
+- caution
+- incompatible
+
+relationships with confidence scoring and notes.
+
+### `tank_size_guidelines`
+
+Tank recommendation rules system.
+
+Supports:
+
+- solo setups
+- schooling requirements
+- community recommendations
+- future stocking calculations
 
 ---
 
@@ -84,7 +165,7 @@ Utility for estimating aquarium stocking levels and identifying overcrowding ris
 
 ## Frontend
 
-- Next.js
+- Next.js App Router
 - TypeScript
 - Tailwind CSS
 - shadcn/ui
@@ -102,7 +183,7 @@ Utility for estimating aquarium stocking levels and identifying overcrowding ris
 
 ---
 
-# Project Philosophy
+# Architecture Philosophy
 
 GuideMyTank is intentionally designed as a utility website rather than a startup-style application.
 
@@ -136,6 +217,7 @@ Avoid:
 - excessive animations
 - unnecessary client-side state
 - heavy frontend abstractions
+- SaaS-style complexity
 
 ---
 
@@ -148,7 +230,9 @@ Avoid:
  /stocking
 ```
 
-## Local Development
+---
+
+# Local Development
 
 First, run the development server:
 
@@ -162,22 +246,87 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-## Planned Features
+```txt
+http://localhost:3000
+```
+
+with your browser to see the result.
+
+---
+
+# Planned Features
+
 - species detail pages
+- static SEO-generated species pages
 - compatibility matrix system
 - advanced stocking calculations
-- tank parameter calculators
+- aquarium gallon calculators
 - filtration recommendations
 - beginner aquarium guides
 - affiliate integrations
 - automated species ingestion pipelines
-- SEO-generated species pages
-- Status
+- search and autocomplete
+- species comparison tools
+- tank planner utilities
+
+---
+
+# Current Seed Data
+
+Current starter species:
+
+- Betta
+- Neon Tetra
+- Corydoras Catfish
+- Guppy
+- Angelfish
+
+---
+
+# Current Status
 
 GuideMyTank is currently in active MVP development.
 
-Current milestone:
+## Completed Milestones
 
-Milestone 1 — Project Foundation
+### Milestone 1 — Project Foundation
+
+Completed:
+
+- Frontend initialization
+- Responsive layout system
+- SEO infrastructure
+- Utility homepage
+- Navigation system
+- Supabase setup
+- PostgreSQL schema
+- Seed data initialization
+- Compatibility data architecture
+
+## Current Milestone
+
+### Milestone 1.5 — Backend / Data Architecture
+
+In progress:
+
+- typed Supabase integration
+- query layer architecture
+- static generation strategy
+- SEO metadata generation
+- dynamic species pages
+- compatibility query system
+- caching and revalidation strategy
+
+---
+
+# Long-Term Vision
+
+GuideMyTank aims to become a low-maintenance evergreen aquarium utility platform similar in spirit to:
+
+- PCPartPicker
+- TractorData
+- old internet database websites
+
+with modern frontend performance and scalable SEO architecture.

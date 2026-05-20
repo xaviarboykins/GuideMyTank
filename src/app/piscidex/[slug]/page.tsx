@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+import { PageContainer } from "@/components/site/page-container";
+import { PageHeader } from "@/components/site/page-header";
+import { SpeciesStatCard } from "@/components/species/species-stat-card";
+
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 
 type SpeciesPageProps = {
@@ -34,7 +39,7 @@ export async function generateMetadata({
     title: `${species.common_name} Care Guide | GuideMyTank`,
     description:
       species.short_description ??
-      `Learn about ${species.common_name} care, tank size, temperament, and aquarium compatibility.`,
+      `Learn about ${species.common_name} care, tank size, temperament, diet, and aquarium compatibility.`,
   };
 }
 
@@ -47,62 +52,65 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <p className="text-sm text-muted-foreground">PisciDex Species Profile</p>
-
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">
-        {species.common_name}
-      </h1>
+    <PageContainer>
+      <PageHeader
+        eyebrow="PisciDex Species Profile"
+        title={species.common_name}
+        description={
+          species.short_description ??
+          "Freshwater aquarium species profile with care requirements and tank planning data."
+        }
+      />
 
       {species.scientific_name && (
-        <p className="mt-1 italic text-muted-foreground">
+        <p className="mt-2 italic text-muted-foreground">
           {species.scientific_name}
         </p>
       )}
 
-      {species.short_description && (
-        <p className="mt-4 max-w-2xl">{species.short_description}</p>
-      )}
-
-      <section className="mt-8 grid gap-4 sm:grid-cols-2">
-        <InfoCard label="Temperament" value={species.temperament} />
-        <InfoCard label="Care Level" value={species.care_level} />
-        <InfoCard
+      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <SpeciesStatCard label="Temperament" value={species.temperament} />
+        <SpeciesStatCard label="Care Level" value={species.care_level} />
+        <SpeciesStatCard
           label="Minimum Tank"
-          value={`${species.min_tank_gallons} gal`}
+          value={
+            species.min_tank_gallons ? `${species.min_tank_gallons} gal` : null
+          }
         />
-        <InfoCard label="Max Size" value={`${species.max_size_inches} in`} />
-        <InfoCard
+        <SpeciesStatCard
+          label="Max Size"
+          value={
+            species.max_size_inches ? `${species.max_size_inches} in` : null
+          }
+        />
+        <SpeciesStatCard
           label="Temperature"
-          value={`${species.min_temp_f}–${species.max_temp_f}°F`}
+          value={
+            species.min_temp_f && species.max_temp_f
+              ? `${species.min_temp_f}–${species.max_temp_f}°F`
+              : null
+          }
         />
-        <InfoCard
+        <SpeciesStatCard
           label="pH Range"
-          value={`${species.min_ph}–${species.max_ph}`}
+          value={
+            species.min_ph && species.max_ph
+              ? `${species.min_ph}–${species.max_ph}`
+              : null
+          }
         />
-        <InfoCard label="Diet" value={species.diet} />
-        <InfoCard
+        <SpeciesStatCard label="Diet" value={species.diet} />
+        <SpeciesStatCard label="Family" value={species.family} />
+        <SpeciesStatCard label="Origin" value={species.origin_region} />
+        <SpeciesStatCard
           label="Schooling"
           value={
-            species.schooling ? `Yes, ${species.minimum_group_size}+` : "No"
+            species.schooling
+              ? `Yes, ${species.minimum_group_size}+ recommended`
+              : "No"
           }
         />
       </section>
-    </main>
-  );
-}
-
-function InfoCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number | null;
-}) {
-  return (
-    <div className="rounded-lg border bg-card p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 font-medium">{value ?? "Unknown"}</p>
-    </div>
+    </PageContainer>
   );
 }

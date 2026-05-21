@@ -17,12 +17,22 @@ The platform focuses on:
 
 GuideMyTank prioritizes:
 
-- utility first design
+- utility-first design
 - fast performance
 - maintainability
 - SEO
 - database-driven architecture
 - functional over pretty UI
+
+---
+
+# Live Site
+
+Production:
+
+```txt
+https://guidemytank.com
+```
 
 ---
 
@@ -46,7 +56,8 @@ Completed:
 - Loading and not-found pages
 - Accessible Radix UI components
 - Hydration issue fixes
-- Accessibility warning fixes
+- ESLint cleanup and production linting fixes
+- Responsive utility-first layout system
 
 ---
 
@@ -89,6 +100,27 @@ Completed:
 - Shared compatibility UI components
 - Static route generation strategy
 - Compatibility query utilities
+- OpenGraph metadata support
+- Crawlable static page generation
+
+---
+
+## Infrastructure
+
+Completed:
+
+- GitHub repository setup
+- GitHub branch workflow
+- `main` production branch
+- `dev` integration branch
+- Branch protection for production
+- Vercel deployment pipeline
+- Production deployment
+- Custom domain configuration
+- HTTPS/SSL configuration
+- Environment variable deployment configuration
+- Production build verification
+- Production lint verification
 
 ---
 
@@ -285,18 +317,40 @@ Avoid:
 
 ---
 
+# Branch Workflow
+
+GuideMyTank uses a lightweight Git workflow.
+
+## Branches
+
+```txt
+main   → production
+dev    → integration/staging
+feature/* → issue/task branches
+```
+
+## Workflow
+
+```txt
+feature/* → dev → main
+```
+
+Production deployments are tied to the `main` branch.
+
+---
+
 # Local Development
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open:
@@ -311,7 +365,8 @@ with your browser to see the result.
 
 # Planned Features
 
-- search and autocomplete
+- species search
+- autocomplete
 - species filtering
 - pagination
 - advanced stocking calculations
@@ -341,7 +396,7 @@ Current starter species:
 
 # Current Status
 
-GuideMyTank is currently in active MVP development.
+GuideMyTank is currently in active MVP development and publicly deployed.
 
 ## Completed Milestones
 
@@ -360,22 +415,29 @@ Completed:
 - Compatibility data architecture
 - Typed query architecture
 - Static SEO route architecture
+- Production deployment
+- Custom domain setup
+- GitHub workflow setup
+- Branch protection setup
 
 ---
 
 ## Current Milestone
 
-### Milestone 2 — Search + Discovery
+### Milestone 2 — PisciDex Species Database
 
 Planned:
 
-- species search
-- alias search
-- autocomplete
-- filter system
-- pagination
-- SEO-safe query handling
-- searchable species utilities
+- searchable species database
+- expanded species schema
+- `/species/[slug]` routes
+- compatibility relationships
+- filtering system
+- SEO metadata scaling
+- OpenGraph support
+- structured data
+- species ingestion pipeline
+- 100–150 species import
 
 ---
 

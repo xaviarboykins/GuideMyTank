@@ -163,6 +163,56 @@ export type Database = {
           },
         ]
       }
+      stocking_profiles: {
+        Row: {
+          activity_level: string | null
+          created_at: string
+          id: string
+          lifespan_years_max: number | null
+          lifespan_years_min: number | null
+          max_size_inches: number | null
+          min_tank_gallons: number | null
+          minimum_group_size: number | null
+          schooling: boolean | null
+          species_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_level?: string | null
+          created_at?: string
+          id?: string
+          lifespan_years_max?: number | null
+          lifespan_years_min?: number | null
+          max_size_inches?: number | null
+          min_tank_gallons?: number | null
+          minimum_group_size?: number | null
+          schooling?: boolean | null
+          species_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_level?: string | null
+          created_at?: string
+          id?: string
+          lifespan_years_max?: number | null
+          lifespan_years_min?: number | null
+          max_size_inches?: number | null
+          min_tank_gallons?: number | null
+          minimum_group_size?: number | null
+          schooling?: boolean | null
+          species_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stocking_profiles_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: true
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tank_size_guidelines: {
         Row: {
           created_at: string | null
@@ -193,6 +243,47 @@ export type Database = {
             foreignKeyName: "tank_size_guidelines_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_parameters: {
+        Row: {
+          created_at: string
+          id: string
+          max_ph: number | null
+          max_temp_f: number | null
+          min_ph: number | null
+          min_temp_f: number | null
+          species_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_ph?: number | null
+          max_temp_f?: number | null
+          min_ph?: number | null
+          min_temp_f?: number | null
+          species_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_ph?: number | null
+          max_temp_f?: number | null
+          min_ph?: number | null
+          min_temp_f?: number | null
+          species_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_parameters_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: true
             referencedRelation: "species"
             referencedColumns: ["id"]
           },

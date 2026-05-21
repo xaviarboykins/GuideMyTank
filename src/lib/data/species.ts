@@ -5,7 +5,13 @@ export async function getAllSpecies() {
 
   const { data, error } = await supabase
     .from("species")
-    .select("*")
+    .select(
+      `
+  *,
+  water_parameters (*),
+  stocking_profiles (*)
+`,
+    )
     .order("common_name", { ascending: true });
 
   if (error) {
@@ -20,7 +26,13 @@ export async function getSpeciesBySlug(slug: string) {
 
   const { data, error } = await supabase
     .from("species")
-    .select("*")
+    .select(
+      `
+  *,
+  water_parameters (*),
+  stocking_profiles (*)
+`,
+    )
     .eq("slug", slug)
     .single();
 

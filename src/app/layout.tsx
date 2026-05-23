@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 
 export const metadata: Metadata = {
   title: "GuideMyTank | Aquarium Compatibility & Tank Planning",
@@ -20,9 +21,13 @@ export default function RootLayout({
       <body className="bg-background text-foreground antialiased">
         <div className="flex min-h-screen flex-col">
           <Navbar />
+
           <main className="flex-1">{children}</main>
+
           <Footer />
         </div>
+
+        <GoogleAnalytics />
       </body>
     </html>
   );

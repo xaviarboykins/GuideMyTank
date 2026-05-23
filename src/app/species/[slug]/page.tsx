@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { SpeciesStatCard } from "@/components/species/species-stat-card";
+import { SpeciesCompatibilitySections } from "@/components/species/species-compatibility-sections";
 
+import { getCompatibilityRulesForSpecies } from "@/lib/data/compatibility";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 
 type SpeciesPageProps = {
@@ -46,6 +48,7 @@ export async function generateMetadata({
 export default async function SpeciesPage({ params }: SpeciesPageProps) {
   const { slug } = await params;
   const species = await getSpeciesBySlug(slug);
+  const compatibility = await getCompatibilityRulesForSpecies(slug);
 
   if (!species) {
     notFound();
@@ -120,6 +123,11 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
           }
         />
       </section>
+
+      <SpeciesCompatibilitySections
+        currentSpeciesSlug={slug}
+        compatibility={compatibility}
+      />
     </PageContainer>
   );
 }

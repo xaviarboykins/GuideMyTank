@@ -35,14 +35,14 @@ export function CompatibilitySummary({
 
         <div className="mt-4 flex flex-col gap-2 text-sm">
           <Link
-            href={`/piscidex/${compatibility.species_a.slug}`}
+            href={`/species/${compatibility.species_a.slug}`}
             className="underline-offset-4 hover:underline"
           >
             {compatibility.species_a.common_name} Species Profile
           </Link>
 
           <Link
-            href={`/piscidex/${compatibility.species_b.slug}`}
+            href={`/species/${compatibility.species_a.slug}`}
             className="underline-offset-4 hover:underline"
           >
             {compatibility.species_b.common_name} Species Profile

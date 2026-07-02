@@ -1,0 +1,69 @@
+{
+  "species": [
+    {
+      "slug": "neon-tetra",
+      "common_name": "Neon Tetra",
+      "scientific_name": "Paracheirodon innesi",
+      "category": "freshwater-fish",
+      "family": "Characidae",
+      "origin_region": "South America",
+      "temperament": "Peaceful",
+      "care_level": "Beginner",
+      "diet": "Omnivore",
+      "short_description": "Small peaceful schooling fish commonly kept in planted freshwater community aquariums.",
+      "min_tank_gallons": 10,
+      "max_size_inches": 1.5,
+      "min_temp_f": 70,
+      "max_temp_f": 81,
+      "min_ph": 6,
+      "max_ph": 7.5,
+      "schooling": true,
+      "minimum_group_size": 6,
+      "reef_safe": null,
+      "aliases": [
+        "Neon",
+        "Neon Fish",
+        "Paracheirodon innesi"
+      ],
+      "water_parameters": {
+        "min_temp_f": 70,
+        "max_temp_f": 81,
+        "min_ph": 6,
+        "max_ph": 7.5
+      },
+      "stocking_profile": {
+        "min_tank_gallons": 10,
+        "max_size_inches": 1.5,
+        "schooling": true,
+        "minimum_group_size": 6,
+        "activity_level": "Active",
+        "lifespan_years_min": 5,
+        "lifespan_years_max": 8
+      }
+    },
+    {
+      "slug": "honey-gourami",
+      "common_name": "Honey Gourami",
+      "scientific_name": "Trichogaster chuna",
+      "category": "freshwater-fish",
+      "family": "Osphronemidae",
+      "origin_region": "South Asia",
+      "temperament": "Peaceful",
+      "care_level": "Beginner",
+      "diet": "Omnivore",
+      "short_description": "Small peaceful gourami suited to calm freshwater community tanks.",
+      "min_tank_gallons": 10,
+      "max_size_inches": 2,
+      "min_temp_f": 72,
+      "max_temp_f": 82,
+      "min_ph": 6,
+      "max_ph": 7.5,
+      "schooling": false,
+      "minimum_group_size": 1,
+      "aliases": [
+        "Sunset Honey Gourami",
+        "Trichogaster chuna"
+      ]
+    }
+  ]
+}

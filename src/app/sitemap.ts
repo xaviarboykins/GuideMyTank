@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+import { getSpeciesSlugs } from "@/lib/data/species";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://guidemytank.com";
+  const species = await getSpeciesSlugs();
 
   return [
     {
@@ -28,5 +31,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    ...species.map((item) => ({
+      url: `${baseUrl}/species/${item.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
   ];
 }

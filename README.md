@@ -1,6 +1,12 @@
 # GuideMyTank
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
+![Status](https://img.shields.io/badge/Status-MVP%20Development-orange)
 
-GuideMyTank is an ugly-but-useful aquarium utility platform inspired by websites like:
+GuideMyTank is a utility-first aquarium platform focused on practical tools for freshwater hobbyists.
+
+Inspired by websites like:
 
 - PCPartPicker
 - TractorData
@@ -36,6 +42,22 @@ https://guidemytank.com
 
 ---
 
+# Engineering Principles
+
+This project follows several engineering constraints:
+
+- Production-safe Git workflow
+- Protected production branch (`main`)
+- Development integration branch (`dev`)
+- Feature branch isolation
+- Static-first rendering where possible
+- SEO-first architecture decisions
+- Strong TypeScript typing
+- Database-first schema design
+- Utility-first product development
+
+The goal is long-term maintainability over rapid feature development.
+
 # Current Features
 
 ## Frontend Foundation
@@ -58,6 +80,11 @@ Completed:
 - Hydration issue fixes
 - ESLint cleanup and production linting fixes
 - Responsive utility-first layout system
+- Species search functionality
+- Multi-filter PisciDex filtering system
+- Combined client-side filtering logic
+- Filter reset / clear filters functionality
+- Responsive filter UI components
 
 ---
 
@@ -195,6 +222,10 @@ Current functionality:
 - species quick facts
 - care information
 - tank requirement data
+- species search by name
+- multi-filter species browsing
+- filter reset functionality
+- mobile responsive search/filter UI
 
 Planned data includes:
 
@@ -239,10 +270,10 @@ Planned functionality:
 
 ## Frontend
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
+- Next.js 15
+- React 19
+- TypeScript 5
+- Tailwind CSS 4
 
 ## Backend / Data
 
@@ -365,9 +396,7 @@ with your browser to see the result.
 
 # Planned Features
 
-- species search
-- autocomplete
-- species filtering
+- autocomplete search
 - pagination
 - advanced stocking calculations
 - aquarium gallon calculators
@@ -426,18 +455,26 @@ Completed:
 
 ### Milestone 2 — PisciDex Species Database
 
-Planned:
+In Progress
+
+Completed:
 
 - searchable species database
+- species filtering system
+- responsive filter UI
+- /piscidex/[slug] routes
+- compatibility relationship architecture
+- SEO metadata generation
+- species query architecture
+
+Remaining:
+
 - expanded species schema
-- `/species/[slug]` routes
-- compatibility relationships
-- filtering system
-- SEO metadata scaling
-- OpenGraph support
-- structured data
+- structured data support
 - species ingestion pipeline
-- 100–150 species import
+- bulk species import (100–150 species)
+- autocomplete search
+- pagination
 
 ---
 

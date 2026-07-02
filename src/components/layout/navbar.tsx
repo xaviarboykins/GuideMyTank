@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
 const navLinks = [
@@ -28,13 +27,8 @@ export function Navbar() {
           <span className="text-lg font-bold tracking-tight">GuideMyTank</span>
         </Link>
 
-        {/* Search */}
-        <div className="hidden flex-1 md:block">
-          <Input placeholder="Search fish, plants, tank mates..." />
-        </div>
-
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-2 md:flex">
+        <nav className="ml-auto hidden items-center gap-2 md:flex">
           {navLinks.map((link) => (
             <Button key={link.href} variant="ghost" asChild>
               <Link href={link.href}>{link.label}</Link>

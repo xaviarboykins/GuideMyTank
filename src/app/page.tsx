@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -29,25 +31,31 @@ export default function Home() {
           tools.
         </p>
 
-        {/* Search */}
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Input placeholder="Search fish, shrimp, snails, plants..." />
+        <form
+          action="/piscidex"
+          method="get"
+          className="mt-6 flex flex-col gap-3 sm:flex-row"
+        >
+          <Input
+            name="q"
+            placeholder="Search fish, shrimp, snails, plants..."
+          />
 
-          <Button>Search</Button>
-        </div>
+          <Button type="submit">Search</Button>
+        </form>
 
         {/* Quick Links */}
         <div className="mt-6 flex flex-wrap gap-2">
-          <Button variant="outline" size="sm">
-            PisciDex
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/piscidex">PisciDex</Link>
           </Button>
 
-          <Button variant="outline" size="sm">
-            Compatibility Checker
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/compatibility">Compatibility Checker</Link>
           </Button>
 
-          <Button variant="outline" size="sm">
-            Stocking Planner
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/stocking">Stocking Planner</Link>
           </Button>
         </div>
       </section>

@@ -9,9 +9,17 @@ type SpeciesTableProps = {
 };
 
 export function SpeciesTable({ species }: SpeciesTableProps) {
+  if (species.length === 0) {
+    return (
+      <div className="mt-3 rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        No species match the current filters.
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-8 overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
+    <div className="mt-3 overflow-x-auto rounded-lg border">
+      <table className="w-full min-w-[720px] text-sm">
         <thead className="bg-muted text-left">
           <tr>
             <th className="p-3">Common Name</th>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -50,9 +49,7 @@ export function MobileNav({ links }: MobileNavProps) {
           </SheetHeader>
 
           <div className="mt-6 flex flex-col gap-2">
-            <Input placeholder="Search..." />
-
-            <div className="mt-4 flex flex-col gap-1">
+            <div className="flex flex-col gap-1">
               {links.map((link) => (
                 <Button
                   key={link.href}

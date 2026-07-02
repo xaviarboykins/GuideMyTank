@@ -1,5 +1,5 @@
 # GuideMyTank
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
 ![Status](https://img.shields.io/badge/Status-MVP%20Development-orange)
@@ -163,14 +163,31 @@ Includes:
 
 - common names
 - scientific names
-- taxonomy
+- family, origin, and region
+- pH and temperature ranges
+- tank size, group size, and bioload rating
 - temperament
+- aggression level
 - care level
-- tank size requirements
-- water parameters
 - schooling behavior
 - diet
-- descriptions
+- lifespan and breeding difficulty
+- plant and invert safety
+- compatibility tags
+- local image paths
+- summaries
+
+The master source file is:
+
+```txt
+data/import/species.master.json
+```
+
+Species imports use the v2 flat schema documented in:
+
+```txt
+docs/species-import.md
+```
 
 ### `species_aliases`
 
@@ -270,7 +287,7 @@ Planned functionality:
 
 ## Frontend
 
-- Next.js 15
+- Next.js 16
 - React 19
 - TypeScript 5
 - Tailwind CSS 4
@@ -415,11 +432,12 @@ with your browser to see the result.
 
 Current starter species:
 
+- Angelfish
 - Betta
-- Neon Tetra
 - Corydoras Catfish
 - Guppy
-- Angelfish
+- Honey Gourami
+- Neon Tetra
 
 ---
 

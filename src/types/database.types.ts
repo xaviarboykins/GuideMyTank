@@ -61,74 +61,95 @@ export type Database = {
       }
       species: {
         Row: {
+          aggression_level: number | null
+          bioload_rating: number | null
+          breeding_difficulty: string | null
           care_level: string | null
-          category: string
           common_name: string
+          compatibility_tags: string[]
           created_at: string | null
           diet: string | null
           family: string | null
           id: string
+          image_url: string | null
+          invert_safe: boolean | null
+          lifespan_years: number | null
           max_ph: number | null
           max_size_inches: number | null
           max_temp_f: number | null
+          min_group_size: number | null
           min_ph: number | null
-          min_tank_gallons: number | null
           min_temp_f: number | null
-          minimum_group_size: number | null
-          origin_region: string | null
-          reef_safe: boolean | null
+          origin: string | null
+          plant_safe: boolean | null
+          region: string | null
           schooling: boolean | null
-          scientific_name: string | null
-          short_description: string | null
+          scientific_name: string
           slug: string
+          summary: string | null
+          tank_size_gal: number | null
           temperament: string | null
           updated_at: string | null
         }
         Insert: {
+          aggression_level?: number | null
+          bioload_rating?: number | null
+          breeding_difficulty?: string | null
           care_level?: string | null
-          category: string
           common_name: string
+          compatibility_tags?: string[]
           created_at?: string | null
           diet?: string | null
           family?: string | null
           id?: string
+          image_url?: string | null
+          invert_safe?: boolean | null
+          lifespan_years?: number | null
           max_ph?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
+          min_group_size?: number | null
           min_ph?: number | null
-          min_tank_gallons?: number | null
           min_temp_f?: number | null
-          minimum_group_size?: number | null
-          origin_region?: string | null
-          reef_safe?: boolean | null
+          origin?: string | null
+          plant_safe?: boolean | null
+          region?: string | null
           schooling?: boolean | null
-          scientific_name?: string | null
-          short_description?: string | null
+          scientific_name: string
           slug: string
+          summary?: string | null
+          tank_size_gal?: number | null
           temperament?: string | null
           updated_at?: string | null
         }
         Update: {
+          aggression_level?: number | null
+          bioload_rating?: number | null
+          breeding_difficulty?: string | null
           care_level?: string | null
-          category?: string
           common_name?: string
+          compatibility_tags?: string[]
           created_at?: string | null
           diet?: string | null
           family?: string | null
           id?: string
+          image_url?: string | null
+          invert_safe?: boolean | null
+          lifespan_years?: number | null
           max_ph?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
+          min_group_size?: number | null
           min_ph?: number | null
-          min_tank_gallons?: number | null
           min_temp_f?: number | null
-          minimum_group_size?: number | null
-          origin_region?: string | null
-          reef_safe?: boolean | null
+          origin?: string | null
+          plant_safe?: boolean | null
+          region?: string | null
           schooling?: boolean | null
-          scientific_name?: string | null
-          short_description?: string | null
+          scientific_name?: string
           slug?: string
+          summary?: string | null
+          tank_size_gal?: number | null
           temperament?: string | null
           updated_at?: string | null
         }
@@ -158,56 +179,6 @@ export type Database = {
             foreignKeyName: "species_aliases_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
-            referencedRelation: "species"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      stocking_profiles: {
-        Row: {
-          activity_level: string | null
-          created_at: string
-          id: string
-          lifespan_years_max: number | null
-          lifespan_years_min: number | null
-          max_size_inches: number | null
-          min_tank_gallons: number | null
-          minimum_group_size: number | null
-          schooling: boolean | null
-          species_id: string
-          updated_at: string
-        }
-        Insert: {
-          activity_level?: string | null
-          created_at?: string
-          id?: string
-          lifespan_years_max?: number | null
-          lifespan_years_min?: number | null
-          max_size_inches?: number | null
-          min_tank_gallons?: number | null
-          minimum_group_size?: number | null
-          schooling?: boolean | null
-          species_id: string
-          updated_at?: string
-        }
-        Update: {
-          activity_level?: string | null
-          created_at?: string
-          id?: string
-          lifespan_years_max?: number | null
-          lifespan_years_min?: number | null
-          max_size_inches?: number | null
-          min_tank_gallons?: number | null
-          minimum_group_size?: number | null
-          schooling?: boolean | null
-          species_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stocking_profiles_species_id_fkey"
-            columns: ["species_id"]
-            isOneToOne: true
             referencedRelation: "species"
             referencedColumns: ["id"]
           },
@@ -243,47 +214,6 @@ export type Database = {
             foreignKeyName: "tank_size_guidelines_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
-            referencedRelation: "species"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      water_parameters: {
-        Row: {
-          created_at: string
-          id: string
-          max_ph: number | null
-          max_temp_f: number | null
-          min_ph: number | null
-          min_temp_f: number | null
-          species_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          max_ph?: number | null
-          max_temp_f?: number | null
-          min_ph?: number | null
-          min_temp_f?: number | null
-          species_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          max_ph?: number | null
-          max_temp_f?: number | null
-          min_ph?: number | null
-          min_temp_f?: number | null
-          species_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "water_parameters_species_id_fkey"
-            columns: ["species_id"]
-            isOneToOne: true
             referencedRelation: "species"
             referencedColumns: ["id"]
           },

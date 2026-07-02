@@ -13,7 +13,7 @@ import {
   type PisciDexFilterSearchParams,
 } from "@/lib/data/species";
 
-import { SpeciesTable } from "@/components/species/species-table";
+import { SpeciesPaginatedTable } from "@/components/species/species-paginated-table";
 
 type PisciDexPageProps = {
   searchParams: Promise<PisciDexFilterSearchParams>;
@@ -157,12 +157,12 @@ export default async function PisciDexPage({
       <section className="mt-6">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="text-lg font-semibold">Species Results</h2>
-          <p className="text-sm text-muted-foreground">
-            Showing {species.length} of {allSpecies.length} species
-          </p>
         </div>
 
-        <SpeciesTable species={species} />
+        <SpeciesPaginatedTable
+          species={species}
+          totalSpeciesCount={allSpecies.length}
+        />
       </section>
     </PageContainer>
   );

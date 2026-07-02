@@ -1,4 +1,7 @@
 import { createStaticClient } from "@/lib/supabase/static";
+import type { Database } from "@/types/database.types";
+
+type SpeciesRow = Database["public"]["Tables"]["species"]["Row"];
 
 export type CompatibilitySpecies = {
   slug: string;
@@ -19,6 +22,128 @@ export type SpeciesCompatibilityGroup = {
   incompatible: CompatibilityResult[];
 };
 
+const invertebrateFamilies = new Set([
+  "Atyidae",
+  "Neritidae",
+  "Ampullariidae",
+  "Thiaridae",
+]);
+
+function hasWaterParameterOverlap(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+  minKey: "min_temp_f" | "min_ph",
+  maxKey: "max_temp_f" | "max_ph",
+) {
+  const minA = speciesA[minKey];
+  const maxA = speciesA[maxKey];
+  const minB = speciesB[minKey];
+  const maxB = speciesB[maxKey];
+
+  if (!minA || !maxA || !minB || !maxB) {
+    return true;
+  }
+
+  return Math.max(minA, minB) <= Math.min(maxA, maxB);
+}
+
+function isInvertebrate(species: SpeciesRow) {
+  return species.family ? invertebrateFamilies.has(species.family) : false;
+}
+
+function canEatTankmate(predator: SpeciesRow, tankmate: SpeciesRow) {
+  if (!predator.max_size_inches || !tankmate.max_size_inches) {
+    return false;
+  }
+
+  return (
+    predator.max_size_inches >= tankmate.max_size_inches * 2.5 &&
+    (predator.diet === "Carnivore" ||
+      predator.temperament === "Aggressive" ||
+      (predator.aggression_level ?? 0) >= 5)
+  );
+}
+
+function toCompatibilitySpecies(species: SpeciesRow): CompatibilitySpecies {
+  return {
+    slug: species.slug,
+    common_name: species.common_name,
+  };
+}
+
+export function calculateCompatibility(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+): CompatibilityResult {
+  const blockers: string[] = [];
+  const cautions: string[] = [];
+
+  if (
+    !hasWaterParameterOverlap(speciesA, speciesB, "min_temp_f", "max_temp_f")
+  ) {
+    blockers.push("temperature ranges do not overlap");
+  }
+
+  if (!hasWaterParameterOverlap(speciesA, speciesB, "min_ph", "max_ph")) {
+    blockers.push("pH ranges do not overlap");
+  }
+
+  if (
+    (isInvertebrate(speciesA) && speciesB.invert_safe === false) ||
+    (isInvertebrate(speciesB) && speciesA.invert_safe === false)
+  ) {
+    blockers.push("one species is not safe with invertebrates");
+  }
+
+  if (canEatTankmate(speciesA, speciesB) || canEatTankmate(speciesB, speciesA)) {
+    blockers.push("size and diet create a predation risk");
+  }
+
+  if (
+    speciesA.temperament === "Aggressive" ||
+    speciesB.temperament === "Aggressive"
+  ) {
+    blockers.push("aggressive temperament makes this pairing unsuitable");
+  }
+
+  const tankSizeGap = Math.abs(
+    (speciesA.tank_size_gal ?? 0) - (speciesB.tank_size_gal ?? 0),
+  );
+
+  if (tankSizeGap >= 50) {
+    cautions.push("tank size needs differ substantially");
+  }
+
+  if (
+    speciesA.temperament === "Semi-Aggressive" ||
+    speciesB.temperament === "Semi-Aggressive" ||
+    (speciesA.aggression_level ?? 0) >= 4 ||
+    (speciesB.aggression_level ?? 0) >= 4
+  ) {
+    cautions.push("territorial behavior may require extra space and cover");
+  }
+
+  const compatibility =
+    blockers.length > 0
+      ? "incompatible"
+      : cautions.length > 0
+        ? "caution"
+        : "compatible";
+
+  const notes =
+    compatibility === "compatible"
+      ? "Computed from species profile data: water parameters overlap and no major temperament, size, or invertebrate-safety conflicts were found."
+      : `Computed from species profile data: ${[...blockers, ...cautions].join("; ")}.`;
+
+  return {
+    compatibility,
+    confidence: 0.65,
+    notes,
+    species_a: toCompatibilitySpecies(speciesA),
+    species_b: toCompatibilitySpecies(speciesB),
+  };
+}
+
 export async function getCompatibilityRule(
   speciesASlug: string,
   speciesBSlug: string,
@@ -27,7 +152,7 @@ export async function getCompatibilityRule(
 
   const { data: species, error: speciesError } = await supabase
     .from("species")
-    .select("id, slug, common_name")
+    .select("*")
     .in("slug", [speciesASlug, speciesBSlug]);
 
   if (speciesError || !species || species.length !== 2) {
@@ -54,21 +179,15 @@ export async function getCompatibilityRule(
   }
 
   if (!rule) {
-    return null;
+    return calculateCompatibility(speciesA, speciesB);
   }
 
   return {
     compatibility: rule.compatibility as CompatibilityResult["compatibility"],
     confidence: rule.confidence,
     notes: rule.notes,
-    species_a: {
-      slug: speciesA.slug,
-      common_name: speciesA.common_name,
-    },
-    species_b: {
-      slug: speciesB.slug,
-      common_name: speciesB.common_name,
-    },
+    species_a: toCompatibilitySpecies(speciesA),
+    species_b: toCompatibilitySpecies(speciesB),
   };
 }
 
@@ -79,7 +198,7 @@ export async function getCompatibilityRulesForSpecies(
 
   const { data: species, error: speciesError } = await supabase
     .from("species")
-    .select("id, slug, common_name")
+    .select("*")
     .eq("slug", speciesSlug)
     .maybeSingle();
 
@@ -165,4 +284,26 @@ export async function getCompatibilityRulesForSpecies(
   }
 
   return grouped;
+}
+
+export async function getCompatibleSpeciesPairs() {
+  const supabase = createStaticClient();
+
+  const { data: species, error } = await supabase
+    .from("species")
+    .select("*")
+    .order("common_name", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch species for compatibility: ${error.message}`);
+  }
+
+  return species.map((speciesA) => ({
+    species: toCompatibilitySpecies(speciesA),
+    compatibleSpecies: species
+      .filter((speciesB) => speciesB.id !== speciesA.id)
+      .map((speciesB) => calculateCompatibility(speciesA, speciesB))
+      .filter((result) => result.compatibility === "compatible")
+      .map((result) => result.species_b),
+  }));
 }

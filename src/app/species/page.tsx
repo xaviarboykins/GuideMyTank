@@ -7,7 +7,6 @@ type Species = {
   slug: string;
   common_name: string;
   scientific_name: string | null;
-  category: string | null;
 };
 
 export const revalidate = 86400;
@@ -22,8 +21,7 @@ export default async function SpeciesIndexPage() {
       id,
       slug,
       common_name,
-      scientific_name,
-      category
+      scientific_name
     `,
     )
     .order("common_name", { ascending: true });
@@ -65,11 +63,9 @@ export default async function SpeciesIndexPage() {
                   )}
                 </div>
 
-                {fish.category && (
-                  <div className="text-sm text-muted-foreground">
-                    Category: {fish.category}
-                  </div>
-                )}
+                <div className="text-sm text-muted-foreground">
+                  Species profile
+                </div>
               </div>
             </Link>
           ))}

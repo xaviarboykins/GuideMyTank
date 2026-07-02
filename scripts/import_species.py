@@ -16,77 +16,130 @@ from pathlib import Path
 from typing import Any
 
 
-REQUIRED_SPECIES_FIELDS = ("slug", "common_name", "category")
+REQUIRED_SPECIES_FIELDS = ("slug", "common_name", "scientific_name")
+STRICT_SPECIES_FIELDS = (
+    "slug",
+    "common_name",
+    "scientific_name",
+    "family",
+    "origin",
+    "region",
+    "min_ph",
+    "max_ph",
+    "min_temp_f",
+    "max_temp_f",
+    "tank_size_gal",
+    "bioload_rating",
+    "min_group_size",
+    "temperament",
+    "aggression_level",
+    "schooling",
+    "diet",
+    "care_level",
+    "lifespan_years",
+    "breeding_difficulty",
+    "plant_safe",
+    "invert_safe",
+    "compatibility_tags",
+    "max_size_inches",
+    "image_url",
+    "summary",
+)
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+IMAGE_URL_PATTERN = re.compile(r"^/species/[a-z0-9]+(?:-[a-z0-9]+)*\.webp$")
+
+TEMPERAMENT_VALUES = {"Peaceful", "Semi-Aggressive", "Aggressive"}
+DIET_VALUES = {"Carnivore", "Herbivore", "Omnivore"}
+CARE_LEVEL_VALUES = {"Easy", "Intermediate", "Advanced"}
+COMPATIBILITY_TAG_VALUES = {
+    "community",
+    "nano_tank",
+    "large_tank",
+    "peaceful",
+    "semi_aggressive",
+    "aggressive",
+    "schooling",
+    "solitary",
+    "territorial",
+    "bottom_dweller",
+    "mid_water",
+    "top_water",
+    "plant_safe",
+    "invert_safe",
+    "shrimp_safe",
+    "beginner_friendly",
+    "blackwater",
+    "hardwater",
+    "softwater",
+    "sand_preferred",
+    "rockwork_preferred",
+}
 
 SPECIES_FIELDS = {
     "slug",
     "common_name",
     "scientific_name",
-    "category",
     "family",
-    "origin_region",
+    "origin",
+    "region",
     "temperament",
+    "aggression_level",
     "care_level",
     "diet",
-    "short_description",
-    "min_tank_gallons",
+    "summary",
+    "tank_size_gal",
+    "bioload_rating",
     "max_size_inches",
     "min_temp_f",
     "max_temp_f",
     "min_ph",
     "max_ph",
     "schooling",
-    "minimum_group_size",
-    "reef_safe",
-}
-
-WATER_PARAMETER_FIELDS = {
-    "min_temp_f",
-    "max_temp_f",
-    "min_ph",
-    "max_ph",
-}
-
-STOCKING_PROFILE_FIELDS = {
-    "min_tank_gallons",
-    "max_size_inches",
-    "schooling",
-    "minimum_group_size",
-    "activity_level",
-    "lifespan_years_min",
-    "lifespan_years_max",
+    "min_group_size",
+    "lifespan_years",
+    "breeding_difficulty",
+    "plant_safe",
+    "invert_safe",
+    "compatibility_tags",
+    "image_url",
 }
 
 TEXT_FIELDS = {
     "slug",
     "common_name",
     "scientific_name",
-    "category",
     "family",
-    "origin_region",
+    "origin",
+    "region",
     "temperament",
     "care_level",
     "diet",
-    "short_description",
-    "activity_level",
+    "summary",
+    "breeding_difficulty",
+    "image_url",
 }
 
 NUMBER_FIELDS = {
-    "min_tank_gallons",
+    "tank_size_gal",
+    "bioload_rating",
     "max_size_inches",
     "min_temp_f",
     "max_temp_f",
     "min_ph",
     "max_ph",
-    "minimum_group_size",
-    "lifespan_years_min",
-    "lifespan_years_max",
+    "min_group_size",
+    "aggression_level",
+    "lifespan_years",
 }
 
 BOOLEAN_FIELDS = {
     "schooling",
-    "reef_safe",
+    "plant_safe",
+    "invert_safe",
+}
+
+LIST_FIELDS = {
+    "compatibility_tags",
 }
 
 
@@ -96,8 +149,6 @@ class ImportStats:
     updated: int = 0
     skipped_existing: int = 0
     aliases_replaced: int = 0
-    water_parameters_upserted: int = 0
-    stocking_profiles_upserted: int = 0
 
 
 class ImportErrorWithContext(Exception):
@@ -128,7 +179,7 @@ def load_species_file(path: Path) -> list[dict[str, Any]]:
     return species
 
 
-def validate_species(species: list[dict[str, Any]]) -> None:
+def validate_species(species: list[dict[str, Any]], strict: bool = False) -> None:
     seen_slugs: set[str] = set()
     errors: list[str] = []
 
@@ -138,6 +189,9 @@ def validate_species(species: list[dict[str, Any]]) -> None:
         for field in REQUIRED_SPECIES_FIELDS:
             if not item.get(field):
                 errors.append(f"{label}: missing required field '{field}'.")
+
+        if strict:
+            validate_strict_fields(item, label, errors)
 
         slug = item.get("slug")
         if isinstance(slug, str):
@@ -150,8 +204,7 @@ def validate_species(species: list[dict[str, Any]]) -> None:
             seen_slugs.add(slug)
 
         validate_field_types(item, SPECIES_FIELDS, label, errors)
-        validate_nested_object(item, "water_parameters", WATER_PARAMETER_FIELDS, errors)
-        validate_nested_object(item, "stocking_profile", STOCKING_PROFILE_FIELDS, errors)
+        validate_species_values(item, label, errors)
         validate_aliases(item, label, errors)
 
     if errors:
@@ -160,22 +213,19 @@ def validate_species(species: list[dict[str, Any]]) -> None:
         )
 
 
-def validate_nested_object(
+def validate_strict_fields(
     item: dict[str, Any],
-    key: str,
-    allowed_fields: set[str],
+    label: str,
     errors: list[str],
 ) -> None:
-    if key not in item or item[key] is None:
-        return
-
-    label = item.get("slug") or "unknown species"
-    nested = item[key]
-    if not isinstance(nested, dict):
-        errors.append(f"{label}: '{key}' must be an object.")
-        return
-
-    validate_field_types(nested, allowed_fields, f"{label}.{key}", errors)
+    for field in STRICT_SPECIES_FIELDS:
+        value = item.get(field)
+        if value is None:
+            errors.append(f"{label}: missing strict field '{field}'.")
+        elif isinstance(value, str) and not value.strip():
+            errors.append(f"{label}: strict field '{field}' cannot be empty.")
+        elif isinstance(value, list) and not value:
+            errors.append(f"{label}: strict field '{field}' cannot be an empty array.")
 
 
 def validate_field_types(
@@ -185,7 +235,7 @@ def validate_field_types(
     errors: list[str],
 ) -> None:
     for field, value in item.items():
-        if field in {"aliases", "water_parameters", "stocking_profile"}:
+        if field == "aliases":
             continue
         if field not in allowed_fields:
             errors.append(f"{label}: unknown field '{field}'.")
@@ -198,6 +248,63 @@ def validate_field_types(
             errors.append(f"{label}: '{field}' must be a number or null.")
         if field in BOOLEAN_FIELDS and not isinstance(value, bool):
             errors.append(f"{label}: '{field}' must be a boolean or null.")
+        if field in LIST_FIELDS and not isinstance(value, list):
+            errors.append(f"{label}: '{field}' must be an array or null.")
+
+
+def validate_species_values(
+    item: dict[str, Any],
+    label: str,
+    errors: list[str],
+) -> None:
+    validate_allowed_value(item, "temperament", TEMPERAMENT_VALUES, label, errors)
+    validate_allowed_value(item, "diet", DIET_VALUES, label, errors)
+    validate_allowed_value(item, "care_level", CARE_LEVEL_VALUES, label, errors)
+    validate_rating(item, "bioload_rating", label, errors)
+    validate_rating(item, "aggression_level", label, errors)
+
+    slug = item.get("slug")
+    image_url = item.get("image_url")
+    if image_url is not None and (
+        not isinstance(image_url, str) or not IMAGE_URL_PATTERN.match(image_url)
+    ):
+        errors.append(
+            f"{label}: 'image_url' must use /species/{{slug}}.webp local paths."
+        )
+    elif isinstance(slug, str) and image_url not in (None, f"/species/{slug}.webp"):
+        errors.append(f"{label}: 'image_url' must match the species slug.")
+
+    compatibility_tags = item.get("compatibility_tags")
+    if compatibility_tags is not None:
+        for tag in compatibility_tags:
+            if not isinstance(tag, str):
+                errors.append(f"{label}: compatibility tags must be strings.")
+            elif tag not in COMPATIBILITY_TAG_VALUES:
+                errors.append(f"{label}: unknown compatibility tag '{tag}'.")
+
+
+def validate_allowed_value(
+    item: dict[str, Any],
+    field: str,
+    allowed_values: set[str],
+    label: str,
+    errors: list[str],
+) -> None:
+    value = item.get(field)
+    if value is not None and value not in allowed_values:
+        values = ", ".join(sorted(allowed_values))
+        errors.append(f"{label}: '{field}' must be one of: {values}.")
+
+
+def validate_rating(
+    item: dict[str, Any],
+    field: str,
+    label: str,
+    errors: list[str],
+) -> None:
+    value = item.get(field)
+    if value is not None and (not is_number(value) or value < 1 or value > 10):
+        errors.append(f"{label}: '{field}' must be a number from 1 to 10.")
 
 
 def validate_aliases(item: dict[str, Any], label: str, errors: list[str]) -> None:
@@ -321,22 +428,6 @@ class SupabaseRestClient:
             payload = [{"species_id": species_id, "alias": alias.strip()} for alias in aliases]
             self.request("POST", "species_aliases", payload=payload)
 
-    def upsert_one_to_one(
-        self,
-        table: str,
-        species_id: str,
-        payload: dict[str, Any],
-    ) -> None:
-        body = {"species_id": species_id, **payload}
-        self.request(
-            "POST",
-            table,
-            "?on_conflict=species_id",
-            payload=body,
-            prefer="resolution=merge-duplicates",
-        )
-
-
 def import_species(
     species: list[dict[str, Any]],
     client: SupabaseRestClient,
@@ -390,10 +481,6 @@ def import_species(
 def count_related(item: dict[str, Any], stats: ImportStats) -> None:
     if "aliases" in item:
         stats.aliases_replaced += 1
-    if "water_parameters" in item and item["water_parameters"] is not None:
-        stats.water_parameters_upserted += 1
-    if "stocking_profile" in item and item["stocking_profile"] is not None:
-        stats.stocking_profiles_upserted += 1
 
 
 def import_related_records(
@@ -406,16 +493,6 @@ def import_related_records(
         client.replace_aliases(species_id, item.get("aliases") or [])
         stats.aliases_replaced += 1
 
-    water_parameters = item.get("water_parameters")
-    if water_parameters is not None:
-        client.upsert_one_to_one("water_parameters", species_id, water_parameters)
-        stats.water_parameters_upserted += 1
-
-    stocking_profile = item.get("stocking_profile")
-    if stocking_profile is not None:
-        client.upsert_one_to_one("stocking_profiles", species_id, stocking_profile)
-        stats.stocking_profiles_upserted += 1
-
 
 def print_summary(stats: ImportStats, dry_run: bool) -> None:
     prefix = "Dry run complete" if dry_run else "Import complete"
@@ -424,8 +501,6 @@ def print_summary(stats: ImportStats, dry_run: bool) -> None:
     print(f"- Species updated: {stats.updated}")
     print(f"- Existing species skipped: {stats.skipped_existing}")
     print(f"- Alias sets replaced: {stats.aliases_replaced}")
-    print(f"- Water parameter rows upserted: {stats.water_parameters_upserted}")
-    print(f"- Stocking profile rows upserted: {stats.stocking_profiles_upserted}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -443,6 +518,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Update existing species matched by slug.",
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Require complete v2 dataset fields for every species.",
+    )
     return parser.parse_args()
 
 
@@ -451,7 +531,7 @@ def main() -> int:
 
     try:
         species = load_species_file(args.file)
-        validate_species(species)
+        validate_species(species, strict=args.strict)
 
         if args.dry_run:
             print(f"Validated {len(species)} species from {args.file}.")

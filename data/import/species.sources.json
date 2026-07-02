@@ -1,0 +1,676 @@
+{
+  "schema_version": 1,
+  "notes": [
+    "This file tracks source provenance for the importable species master dataset.",
+    "Species summaries in species.master.json are original GuideMyTank wording, not copied source text.",
+    "Seriously Fish remains the preferred primary care reference when accessible; secondary references fill gaps and taxonomy/range checks."
+  ],
+  "category_order": [
+    "schooling",
+    "bottom_dwellers",
+    "centerpiece_fish",
+    "livebearers",
+    "invertebrates",
+    "cichlids",
+    "advanced"
+  ],
+  "species": {
+    "angelfish": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "betta-splendens": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "corydoras-catfish": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "guppy": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "honey-gourami": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "neon-tetra": {
+      "category_batch": "starter",
+      "sources": []
+    },
+    "cardinal-tetra": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cardinal_tetra",
+        "https://en.wikipedia.org/wiki/Paracheirodon",
+        "https://www.thesprucepets.com/cardinal-tetra-1378417"
+      ]
+    },
+    "ember-tetra": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ember_tetra",
+        "https://fr.wikipedia.org/wiki/Hyphessobrycon_amandae",
+        "https://www.thesprucepets.com/ember-tetra-fish-species-profile-6826226"
+      ]
+    },
+    "harlequin-rasbora": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Harlequin_rasbora",
+        "https://en.wikipedia.org/wiki/Trigonostigma",
+        "https://www.thesprucepets.com/harlequin-rasbora-1378462"
+      ]
+    },
+    "zebra-danio": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zebrafish",
+        "https://en.wikipedia.org/wiki/Danio",
+        "https://www.thesprucepets.com/zebra-danio-1378473"
+      ]
+    },
+    "white-cloud-mountain-minnow": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tanichthys",
+        "https://es.wikipedia.org/wiki/Tanichthys_albonubes",
+        "https://www.thesprucepets.com/white-cloud-mountain-minnow-1380870"
+      ]
+    },
+    "glowlight-tetra": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hemigrammus_erythrozonus",
+        "https://www.thesprucepets.com/glowlight-tetra-1381833"
+      ]
+    },
+    "chili-rasbora": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Boraras_brigittae",
+        "https://fr.wikipedia.org/wiki/Boraras_brigittae"
+      ]
+    },
+    "brilliant-rummynose-tetra": {
+      "category_batch": "schooling",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Petitella_bleheri",
+        "https://en.wikipedia.org/wiki/Rummy-nose_tetra"
+      ]
+    },
+    "panda-cory": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://www.thesprucepets.com/panda-cory-1380838",
+        "https://www.thesprucepets.com/cory-species-1381075"
+      ]
+    },
+    "pygmy-cory": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pygmy_corydoras",
+        "https://fr.wikipedia.org/wiki/Corydoras_pygmaeus"
+      ]
+    },
+    "sterbai-cory": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sterba%27s_corydoras",
+        "https://es.wikipedia.org/wiki/Corydoras_sterbai"
+      ]
+    },
+    "kuhli-loach": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kuhli_loach",
+        "https://es.wikipedia.org/wiki/Pangio_kuhlii",
+        "https://www.thesprucepets.com/loach-species-1381078"
+      ]
+    },
+    "bristlenose-pleco": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://www.thesprucepets.com/bristlenose-catfish-1380837"
+      ]
+    },
+    "otocinclus-catfish": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Otocinclus"
+      ]
+    },
+    "reticulated-hillstream-loach": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sewellia_lineolata",
+        "https://en.wikipedia.org/wiki/Sewellia"
+      ]
+    },
+    "yoyo-loach": {
+      "category_batch": "bottom_dwellers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yoyo_loach",
+        "https://www.thesprucepets.com/loach-species-1381078"
+      ]
+    },
+    "dwarf-gourami": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dwarf_gourami",
+        "https://es.wikipedia.org/wiki/Trichogaster_lalius",
+        "https://www.thesprucepets.com/dwarf-gourami-1378310"
+      ]
+    },
+    "pearl-gourami": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pearl_gourami",
+        "https://www.thesprucepets.com/pearl-gourami-1381025"
+      ]
+    },
+    "sparkling-gourami": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pygmy_gourami",
+        "https://www.thesprucepets.com/gourami-species-1381077"
+      ]
+    },
+    "paradise-fish": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Paradise_fish",
+        "https://es.wikipedia.org/wiki/Macropodus_opercularis",
+        "https://www.thesprucepets.com/paradise-fish-macropodus-4022898"
+      ]
+    },
+    "three-spot-gourami": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Three_spot_gourami",
+        "https://es.wikipedia.org/wiki/Trichogaster_trichopterus",
+        "https://www.thesprucepets.com/gourami-species-1381077"
+      ]
+    },
+    "peacock-gudgeon": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Peacock_gudgeon"
+      ]
+    },
+    "boesemani-rainbowfish": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Boeseman%27s_rainbowfish",
+        "https://es.wikipedia.org/wiki/Melanotaenia_boesemani",
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+      ]
+    },
+    "dwarf-neon-rainbowfish": {
+      "category_batch": "centerpiece_fish",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dwarf_rainbowfish",
+        "https://es.wikipedia.org/wiki/Melanotaenia_praecox",
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+      ]
+    },
+    "endler-livebearer": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Poecilia_wingei"
+      ]
+    },
+    "platy": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Platy_%28fish%29",
+        "https://es.wikipedia.org/wiki/Xiphophorus_maculatus"
+      ]
+    },
+    "green-swordtail": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Green_swordtail",
+        "https://es.wikipedia.org/wiki/Xiphophorus_hellerii"
+      ]
+    },
+    "shortfin-molly": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Poecilia_sphenops"
+      ]
+    },
+    "sailfin-molly": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sailfin_molly"
+      ]
+    },
+    "least-killifish": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Heterandria_formosa"
+      ]
+    },
+    "wrestling-halfbeak": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wrestling_halfbeak",
+        "https://en.wikipedia.org/wiki/Dermogenys"
+      ]
+    },
+    "butterfly-splitfin": {
+      "category_batch": "livebearers",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Butterfly_splitfin"
+      ]
+    },
+    "zebra-nerite-snail": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Vittina_natalensis",
+        "https://en.wikipedia.org/wiki/Vitta_zebra"
+      ]
+    },
+    "mystery-snail": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pomacea_bridgesii"
+      ]
+    },
+    "malaysian-trumpet-snail": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red-rimmed_melania",
+        "https://es.wikipedia.org/wiki/Melanoides_tuberculata"
+      ]
+    },
+    "cherry-shrimp": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Neocaridina_davidi",
+        "https://en.wikipedia.org/wiki/Neocaridina"
+      ]
+    },
+    "amano-shrimp": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Caridina_multidentata"
+      ]
+    },
+    "crystal-red-shrimp": {
+      "category_batch": "invertebrates",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Caridina_cantonensis",
+        "https://en.wikipedia.org/wiki/Golden_bee_shrimp"
+      ]
+    },
+    "german-blue-ram": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ram_cichlid",
+        "https://www.thesprucepets.com/german-blue-ram-fish-profile-5088724"
+      ]
+    },
+    "bolivian-ram": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mikrogeophagus_altispinosus"
+      ]
+    },
+    "kribensis": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pelvicachromis_pulcher",
+        "https://www.thesprucepets.com/kribensis-1378289"
+      ]
+    },
+    "cockatoo-cichlid": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Apistogramma_cacatuoides"
+      ]
+    },
+    "keyhole-cichlid": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Keyhole_cichlid",
+        "https://es.wikipedia.org/wiki/Cleithracara_maronii"
+      ]
+    },
+    "convict-cichlid": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Convict_cichlid",
+        "https://www.thesprucepets.com/convict-cichlid-fish-species-profile-5188000"
+      ]
+    },
+    "oscar": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Oscar_%28fish%29"
+      ]
+    },
+    "electric-yellow-cichlid": {
+      "category_batch": "cichlids",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Labidochromis_caeruleus",
+        "https://en.wikipedia.org/wiki/Electric_yellow_cichlid"
+      ]
+    },
+    "ranchu-goldfish": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ranchu",
+        "https://www.thesprucepets.com/what-size-is-best-for-a-goldfish-tank-5210885"
+      ]
+    },
+    "bubble-eye-goldfish": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Bubble_Eye",
+        "https://www.thesprucepets.com/bubble-eye-goldfish-species-profile-6374323"
+      ]
+    },
+    "discus": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Symphysodon_discus",
+        "https://en.wikipedia.org/wiki/Discus_%28fish%29",
+        "https://es.wikipedia.org/wiki/Symphysodon_discus"
+      ]
+    },
+    "black-ghost-knifefish": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Black_ghost_knifefish"
+      ]
+    },
+    "silver-dollar": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Silver_dollar_%28fish%29",
+        "https://www.thesprucepets.com/silver-dollar-1381267"
+      ]
+    },
+    "peters-elephantnose-fish": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Peters%27s_elephantnose_fish"
+      ]
+    },
+    "freshwater-butterflyfish": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Freshwater_butterflyfish",
+        "https://es.wikipedia.org/wiki/Pantodon_buchholzi"
+      ]
+    },
+    "pea-puffer": {
+      "category_batch": "advanced",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dwarf_pufferfish",
+        "https://en.wikipedia.org/wiki/Carinotetraodon",
+        "https://es.wikipedia.org/wiki/Carinotetraodon_travancoricus"
+      ]
+    },
+    "black-neon-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Black_neon_tetra",
+        "https://www.thesprucepets.com/black-neon-tetra-1378291"
+      ]
+    },
+    "lemon-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lemon_tetra",
+        "https://es.wikipedia.org/wiki/Hyphessobrycon_pulchripinnis"
+      ]
+    },
+    "serpae-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Serpae_tetra",
+        "https://www.thesprucepets.com/serpae-tetra-1381825"
+      ]
+    },
+    "congo-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Congo_tetra",
+        "https://www.thesprucepets.com/congo-tetra-1380990"
+      ]
+    },
+    "x-ray-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pristella_maxillaris"
+      ]
+    },
+    "bloodfin-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Bloodfin_tetra"
+      ]
+    },
+    "buenos-aires-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Buenos_Aires_tetra"
+      ]
+    },
+    "red-eye-tetra": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Redeye_tetra"
+      ]
+    },
+    "celestial-pearl-danio": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Danio_margaritatus",
+        "https://es.wikipedia.org/wiki/Danio_margaritatus"
+      ]
+    },
+    "scissortail-rasbora": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Rasbora_trilineata",
+        "https://www.thesprucepets.com/scissortail-rasbora-1380865"
+      ]
+    },
+    "glass-catfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kryptopterus_vitreolus",
+        "https://en.wikipedia.org/wiki/Kryptopterus"
+      ]
+    },
+    "siamese-algae-eater": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Siamese_algae-eater"
+      ]
+    },
+    "zebra-loach": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zebra_loach",
+        "https://www.thesprucepets.com/zebra-loach-1381072"
+      ]
+    },
+    "dwarf-chain-loach": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ambastaia_sidthimunki"
+      ]
+    },
+    "clown-loach": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Clown_loach",
+        "https://www.thesprucepets.com/clown-loach-1378616"
+      ]
+    },
+    "weather-loach": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pond_loach",
+        "https://www.thesprucepets.com/loach-species-1381078"
+      ]
+    },
+    "upside-down-catfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Upside-down_catfish"
+      ]
+    },
+    "rainbow-shark": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Epalzeorhynchos_frenatum"
+      ]
+    },
+    "red-tail-shark": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Red-tailed_black_shark"
+      ]
+    },
+    "cherry-barb": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cherry_barb"
+      ]
+    },
+    "tiger-barb": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tiger_barb"
+      ]
+    },
+    "rosy-barb": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Rosy_barb"
+      ]
+    },
+    "odessa-barb": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Odessa_barb"
+      ]
+    },
+    "dwarf-pencilfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Nannostomus_marginatus"
+      ]
+    },
+    "clown-killifish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Epiplatys_annulatus"
+      ]
+    },
+    "golden-wonder-killifish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Aplocheilus_lineatus",
+        "https://www.thesprucepets.com/killifishes-or-egg-laying-tooth-carps-4107831"
+      ]
+    },
+    "american-flagfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jordanella_floridae"
+      ]
+    },
+    "threadfin-rainbowfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Threadfin_rainbowfish",
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+      ]
+    },
+    "celebes-rainbowfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Celebes_rainbowfish",
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+      ]
+    },
+    "lake-kutubu-rainbowfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Melanotaenia_lacustris",
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+      ]
+    },
+    "common-goldfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Goldfish",
+        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
+      ]
+    },
+    "oranda-goldfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Oranda",
+        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
+      ]
+    },
+    "black-moor-goldfish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Telescope_eye",
+        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
+      ]
+    },
+    "kissing-gourami": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kissing_gourami"
+      ]
+    },
+    "moonlight-gourami": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Moonlight_gourami"
+      ]
+    },
+    "firemouth-cichlid": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Firemouth_cichlid"
+      ]
+    },
+    "green-severum": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Heros_severus"
+      ]
+    },
+    "jack-dempsey-cichlid": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jack_Dempsey_%28fish%29"
+      ]
+    },
+    "rope-fish": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Erpetoichthys_calabaricus"
+      ]
+    },
+    "senegal-bichir": {
+      "category_batch": "final_100",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Polypterus_senegalus"
+      ]
+    }
+  }
+}

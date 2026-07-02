@@ -1,12 +1,8 @@
 import { createStaticClient } from "@/lib/supabase/static";
 
-const SPECIES_SELECT = `
-  *,
-  water_parameters (*),
-  stocking_profiles (*)
-`;
+const SPECIES_SELECT = "*";
 
-const BEGINNER_CARE_LEVELS = ["Beginner", "Easy"];
+const BEGINNER_CARE_LEVELS = ["Easy"];
 const FRESHWATER_TYPES = ["freshwater", "fresh"];
 
 export type PisciDexFilters = {
@@ -109,7 +105,7 @@ export async function getFilteredSpecies(filters: PisciDexFilters) {
   }
 
   if (filters.tankSizeGallons) {
-    query = query.lte("min_tank_gallons", filters.tankSizeGallons);
+    query = query.lte("tank_size_gal", filters.tankSizeGallons);
   }
 
   if (filters.temperament) {

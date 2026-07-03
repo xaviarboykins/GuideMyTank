@@ -151,6 +151,7 @@ function getSpeciesJsonLd(species: Species) {
 }
 
 export const revalidate = 86400;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const species = await getSpeciesSlugs();

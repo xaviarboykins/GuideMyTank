@@ -1,0 +1,27 @@
+{
+  "angelfish": {
+    "imageUrl": "/species/angelfish.webp",
+    "alt": "Angelfish freshwater aquarium fish",
+    "status": "ready"
+  },
+  "betta-splendens": {
+    "imageUrl": "/species/betta-splendens.webp",
+    "alt": "Betta splendens freshwater aquarium fish",
+    "status": "ready"
+  },
+  "corydoras-catfish": {
+    "imageUrl": "/species/corydoras-catfish.webp",
+    "alt": "Corydoras catfish freshwater aquarium fish",
+    "status": "ready"
+  },
+  "guppy": {
+    "imageUrl": "/species/guppy.webp",
+    "alt": "Guppy freshwater aquarium fish",
+    "status": "ready"
+  },
+  "honey-gourami": {
+    "imageUrl": "/species/honey-gourami.webp",
+    "alt": "Honey gourami freshwater aquarium fish",
+    "status": "ready"
+  }
+}

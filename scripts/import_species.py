@@ -181,6 +181,7 @@ def load_species_file(path: Path) -> list[dict[str, Any]]:
 
 def validate_species(species: list[dict[str, Any]], strict: bool = False) -> None:
     seen_slugs: set[str] = set()
+    seen_common_names: dict[str, str] = {}
     errors: list[str] = []
 
     for index, item in enumerate(species, start=1):
@@ -202,6 +203,14 @@ def validate_species(species: list[dict[str, Any]], strict: bool = False) -> Non
             if slug in seen_slugs:
                 errors.append(f"{label}: duplicate slug in import file.")
             seen_slugs.add(slug)
+
+        track_unique_text(
+            item,
+            "common_name",
+            seen_common_names,
+            label,
+            errors,
+        )
 
         validate_field_types(item, SPECIES_FIELDS, label, errors)
         validate_species_values(item, label, errors)
@@ -262,6 +271,17 @@ def validate_species_values(
     validate_allowed_value(item, "care_level", CARE_LEVEL_VALUES, label, errors)
     validate_rating(item, "bioload_rating", label, errors)
     validate_rating(item, "aggression_level", label, errors)
+    validate_positive_number(item, "tank_size_gal", label, errors)
+    validate_ordered_range(item, "min_ph", "max_ph", "pH", label, errors)
+    validate_ordered_range(
+        item,
+        "min_temp_f",
+        "max_temp_f",
+        "temperature",
+        label,
+        errors,
+    )
+    validate_ph_bounds(item, label, errors)
 
     slug = item.get("slug")
     image_url = item.get("image_url")
@@ -305,6 +325,71 @@ def validate_rating(
     value = item.get(field)
     if value is not None and (not is_number(value) or value < 1 or value > 10):
         errors.append(f"{label}: '{field}' must be a number from 1 to 10.")
+
+
+def validate_positive_number(
+    item: dict[str, Any],
+    field: str,
+    label: str,
+    errors: list[str],
+) -> None:
+    value = item.get(field)
+    if value is not None and (not is_number(value) or value <= 0):
+        errors.append(f"{label}: '{field}' must be a positive number.")
+
+
+def validate_ordered_range(
+    item: dict[str, Any],
+    min_field: str,
+    max_field: str,
+    name: str,
+    label: str,
+    errors: list[str],
+) -> None:
+    min_value = item.get(min_field)
+    max_value = item.get(max_field)
+    if not is_number(min_value) or not is_number(max_value):
+        return
+    if min_value > max_value:
+        errors.append(
+            f"{label}: {name} range must have '{min_field}' less than or equal to "
+            f"'{max_field}'."
+        )
+
+
+def validate_ph_bounds(
+    item: dict[str, Any],
+    label: str,
+    errors: list[str],
+) -> None:
+    for field in ("min_ph", "max_ph"):
+        value = item.get(field)
+        if value is not None and (not is_number(value) or value < 0 or value > 14):
+            errors.append(f"{label}: '{field}' must be a number from 0 to 14.")
+
+
+def track_unique_text(
+    item: dict[str, Any],
+    field: str,
+    seen_values: dict[str, str],
+    label: str,
+    errors: list[str],
+) -> None:
+    value = item.get(field)
+    if not isinstance(value, str):
+        return
+
+    normalized_value = value.strip().casefold()
+    if not normalized_value:
+        return
+
+    if normalized_value in seen_values:
+        errors.append(
+            f"{label}: duplicate '{field}' also used by {seen_values[normalized_value]}."
+        )
+        return
+
+    seen_values[normalized_value] = label
 
 
 def validate_aliases(item: dict[str, Any], label: str, errors: list[str]) -> None:

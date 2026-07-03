@@ -1,0 +1,47 @@
+{
+  "angelfish": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=48452607",
+    "author": "Alexxx1979",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+    "verified": true,
+    "notes": "Pterophyllum scalare"
+  },
+  "betta-splendens": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=23294037",
+    "author": "Ltshears",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/deed.en",
+    "verified": true,
+    "notes": "Half Moon Betta"
+  },
+  "corydoras-catfish": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=2348176",
+    "author": "Marrabbio2",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/deed.en",
+    "verified": true,
+    "notes": "Corydoras paleatus"
+  },
+  "guppy": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=26431744",
+    "author": "Holger Krisp",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+    "verified": true,
+    "notes": "Millionfish or Guppy (female), Poecilia reticulata, Family: Poeciliidae"
+  },
+  "honey-gourami": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=5044231",
+    "author": "Vincent Lim Show Chen",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/deed.en",
+    "verified": true,
+    "notes": "A yellow variety of the Honey gourami originally posted to Flickr as Honey gourami"
+  }
+}

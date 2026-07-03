@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { SpeciesCompatibilitySections } from "@/components/species/species-compatibility-sections";
@@ -8,6 +9,7 @@ import { PageHeader } from "@/components/site/page-header";
 
 import { getCompatibilityRulesForSpecies } from "@/lib/data/compatibility";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
+import { getSpeciesImage } from "@/lib/images";
 
 const SITE_URL = "https://guidemytank.com";
 
@@ -206,6 +208,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
 
   const jsonLd = getSpeciesJsonLd(species);
   const compatibilityTags = species.compatibility_tags ?? [];
+  const speciesImage = getSpeciesImage(species.slug);
 
   return (
     <>
@@ -224,6 +227,22 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
             "Freshwater aquarium species profile with care requirements and tank planning data."
           }
         />
+
+        <section className="mt-6">
+          <div className="w-fit rounded-lg border bg-card p-4">
+            <div className="flex flex-col gap-4">
+              <div className="relative h-96 w-96">
+                <Image
+                  src={speciesImage}
+                  alt={`${species.common_name} aquarium species`}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="mt-6 space-y-2">
           <p className="text-lg italic text-muted-foreground">
@@ -250,7 +269,10 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
               label="Adult Size"
               value={formatNumber(species.max_size_inches, " inches")}
             />
-            <SpeciesStatCard label="Group Size" value={formatGroupSize(species)} />
+            <SpeciesStatCard
+              label="Group Size"
+              value={formatGroupSize(species)}
+            />
             <SpeciesStatCard
               label="Bioload"
               value={
@@ -265,18 +287,20 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SpeciesStatCard
               label="Temperature"
-              value={formatRange(
-                species.min_temp_f,
-                species.max_temp_f,
-                " F",
-              )}
+              value={formatRange(species.min_temp_f, species.max_temp_f, " F")}
             />
             <SpeciesStatCard
               label="pH"
               value={formatRange(species.min_ph, species.max_ph)}
             />
-            <SpeciesStatCard label="Plant Safe" value={formatBoolean(species.plant_safe)} />
-            <SpeciesStatCard label="Invert Safe" value={formatBoolean(species.invert_safe)} />
+            <SpeciesStatCard
+              label="Plant Safe"
+              value={formatBoolean(species.plant_safe)}
+            />
+            <SpeciesStatCard
+              label="Invert Safe"
+              value={formatBoolean(species.invert_safe)}
+            />
           </div>
         </section>
 

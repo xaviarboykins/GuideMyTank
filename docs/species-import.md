@@ -135,11 +135,16 @@ It rejects:
 
 - missing required fields
 - duplicate slugs inside the same file
+- duplicate common names inside the same file
 - slugs outside lowercase letters, numbers, and hyphens
 - unknown fields
 - wrong field types
 - unsupported enum values
 - `bioload_rating` or `aggression_level` outside `1` through `10`
+- `tank_size_gal` values that are not positive numbers
+- pH ranges where `min_ph` is greater than `max_ph`
+- pH values outside `0` through `14`
+- temperature ranges where `min_temp_f` is greater than `max_temp_f`
 - unknown compatibility tags
 - `image_url` values that do not match `/species/{slug}.webp`
 - invalid alias arrays
@@ -190,7 +195,7 @@ Supabase and does not write data.
 For the master dataset, use strict validation:
 
 ```bash
-python scripts/import_species.py data/import/species.master.json --dry-run --strict
+npm run validate:species
 ```
 
 Strict mode requires every species to include complete v2 product fields:
@@ -211,7 +216,7 @@ Strict mode requires every species to include complete v2 product fields:
 After dry run passes, run:
 
 ```bash
-python scripts/import_species.py data/import/species.master.json
+npm run import:species
 ```
 
 By default, the script blocks the import if any file slug already exists in
@@ -222,7 +227,7 @@ Supabase. This prevents accidental duplicate or unintended updates.
 To update existing species matched by slug:
 
 ```bash
-python scripts/import_species.py data/import/species.master.json --update-existing
+npm run import:species:update
 ```
 
 With `--update-existing`:

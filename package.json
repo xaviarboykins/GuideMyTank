@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate:species": "python scripts/import_species.py data/import/species.master.json --dry-run --strict",
+    "import:species": "python scripts/import_species.py data/import/species.master.json",
+    "import:species:update": "python scripts/import_species.py data/import/species.master.json --update-existing"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

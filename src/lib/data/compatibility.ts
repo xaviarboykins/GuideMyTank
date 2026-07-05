@@ -1,6 +1,9 @@
 import { createStaticClient } from "@/lib/supabase/static";
 import type { Database } from "@/types/database.types";
 
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 type SpeciesRow = Database["public"]["Tables"]["species"]["Row"];
 
 export type CompatibilitySpecies = {
@@ -46,6 +49,9 @@ const invertebrateFamilies = new Set([
   "Thiaridae",
 ]);
 
+// -----------------------------------------------------------------------------
+// Scoring Constants
+// -----------------------------------------------------------------------------
 const COMPATIBILITY_WEIGHTS = {
   temperature: 20,
   ph: 15,
@@ -55,24 +61,9 @@ const COMPATIBILITY_WEIGHTS = {
   tankSize: 10,
 } as const;
 
-function hasWaterParameterOverlap(
-  speciesA: SpeciesRow,
-  speciesB: SpeciesRow,
-  minKey: "min_temp_f" | "min_ph",
-  maxKey: "max_temp_f" | "max_ph",
-) {
-  const minA = speciesA[minKey];
-  const maxA = speciesA[maxKey];
-  const minB = speciesB[minKey];
-  const maxB = speciesB[maxKey];
-
-  if (minA == null || maxA == null || minB == null || maxB == null) {
-    return true;
-  }
-
-  return Math.max(minA, minB) <= Math.min(maxA, maxB);
-}
-
+// -----------------------------------------------------------------------------
+// Shared Helpers
+// -----------------------------------------------------------------------------
 function isInvertebrate(species: SpeciesRow) {
   return species.family ? invertebrateFamilies.has(species.family) : false;
 }
@@ -117,6 +108,24 @@ function determineStatus(score: number): CompatibilityStatus {
   return "Incompatible";
 }
 
+function legacyCompatibilityToScore(
+  compatibility: CompatibilityResult["compatibility"],
+) {
+  if (compatibility === "compatible") {
+    return 100;
+  }
+
+  if (compatibility === "caution") {
+    return 60;
+  }
+
+  if (compatibility === "incompatible") {
+    return 25;
+  }
+
+  return 0;
+}
+
 function createEvaluation(
   points: number,
   ...reasons: string[]
@@ -136,6 +145,9 @@ function getRangeOverlap(
   return Math.min(maxA, maxB) - Math.max(minA, minB);
 }
 
+// -----------------------------------------------------------------------------
+// Compatibility Evaluators
+// -----------------------------------------------------------------------------
 function evaluateTemperatureCompatibility(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
@@ -300,6 +312,13 @@ function evaluatePredationRisk(
   speciesB: SpeciesRow,
 ): EvaluationResult {
   if (
+    (isInvertebrate(speciesA) && speciesB.invert_safe === false) ||
+    (isInvertebrate(speciesB) && speciesA.invert_safe === false)
+  ) {
+    return createEvaluation(0, "One species is not safe with invertebrates.");
+  }
+
+  if (
     canEatTankmate(speciesA, speciesB) ||
     canEatTankmate(speciesB, speciesA)
   ) {
@@ -319,7 +338,7 @@ function evaluateTankSizeCompatibility(
   const tankSizeA = speciesA.tank_size_gal;
   const tankSizeB = speciesB.tank_size_gal;
 
-  if (!tankSizeA || !tankSizeB) {
+  if (tankSizeA == null || tankSizeB == null) {
     return createEvaluation(8, "Tank size data is incomplete.");
   }
 
@@ -346,96 +365,44 @@ function evaluateTankSizeCompatibility(
   );
 }
 
+// -----------------------------------------------------------------------------
+// Public Compatibility Engine
+// -----------------------------------------------------------------------------
 export function calculateCompatibility(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
 ): CompatibilityResult {
-  const blockers: string[] = [];
-  const cautions: string[] = [];
+  const evaluations = [
+    evaluateTemperatureCompatibility(speciesA, speciesB),
+    evaluatePhCompatibility(speciesA, speciesB),
+    evaluateAggressionCompatibility(speciesA, speciesB),
+    evaluateSchoolingCompatibility(speciesA, speciesB),
+    evaluatePredationRisk(speciesA, speciesB),
+    evaluateTankSizeCompatibility(speciesA, speciesB),
+  ];
 
-  if (
-    !hasWaterParameterOverlap(speciesA, speciesB, "min_temp_f", "max_temp_f")
-  ) {
-    blockers.push("temperature ranges do not overlap");
-  }
-
-  if (!hasWaterParameterOverlap(speciesA, speciesB, "min_ph", "max_ph")) {
-    blockers.push("pH ranges do not overlap");
-  }
-
-  if (
-    (isInvertebrate(speciesA) && speciesB.invert_safe === false) ||
-    (isInvertebrate(speciesB) && speciesA.invert_safe === false)
-  ) {
-    blockers.push("one species is not safe with invertebrates");
-  }
-
-  if (
-    canEatTankmate(speciesA, speciesB) ||
-    canEatTankmate(speciesB, speciesA)
-  ) {
-    blockers.push("size and diet create a predation risk");
-  }
-
-  if (
-    speciesA.temperament === "Aggressive" ||
-    speciesB.temperament === "Aggressive"
-  ) {
-    blockers.push("aggressive temperament makes this pairing unsuitable");
-  }
-
-  const tankSizeGap = Math.abs(
-    (speciesA.tank_size_gal ?? 0) - (speciesB.tank_size_gal ?? 0),
+  const score = evaluations.reduce(
+    (total, evaluation) => total + evaluation.points,
+    0,
   );
 
-  if (tankSizeGap >= 50) {
-    cautions.push("tank size needs differ substantially");
-  }
-
-  if (
-    speciesA.temperament === "Semi-Aggressive" ||
-    speciesB.temperament === "Semi-Aggressive" ||
-    (speciesA.aggression_level ?? 0) >= 4 ||
-    (speciesB.aggression_level ?? 0) >= 4
-  ) {
-    cautions.push("territorial behavior may require extra space and cover");
-  }
+  const reasons = evaluations.flatMap((evaluation) => evaluation.reasons);
+  const status = determineStatus(score);
 
   const compatibility =
-    blockers.length > 0
-      ? "incompatible"
-      : cautions.length > 0
-        ? "caution"
-        : "compatible";
+    score >= 70 ? "compatible" : score >= 50 ? "caution" : "incompatible";
 
   const notes =
-    compatibility === "compatible"
-      ? "Computed from species profile data: water parameters overlap and no major temperament, size, or invertebrate-safety conflicts were found."
-      : `Computed from species profile data: ${[...blockers, ...cautions].join("; ")}.`;
+    reasons.length > 0
+      ? `Computed from species profile data: ${reasons.join(" ")}`
+      : null;
 
   return {
-    score:
-      compatibility === "compatible"
-        ? 100
-        : compatibility === "caution"
-          ? 60
-          : 25,
-
-    status: determineStatus(
-      compatibility === "compatible"
-        ? 100
-        : compatibility === "caution"
-          ? 60
-          : 25,
-    ),
-
-    reasons:
-      compatibility === "compatible"
-        ? ["No major compatibility concerns detected."]
-        : [...blockers, ...cautions],
-
+    score,
+    status,
+    reasons,
     compatibility,
-    confidence: 0.65,
+    confidence: score / 100,
     notes,
     species_a: toCompatibilitySpecies(speciesA),
     species_b: toCompatibilitySpecies(speciesB),
@@ -486,17 +453,20 @@ export async function getCompatibilityRule(
   const score = legacyCompatibilityToScore(compatibility);
 
   return {
-    score: score,
+    score,
     status: determineStatus(score),
     reasons: rule.notes ? [rule.notes] : ["Manual compatibility rule found."],
-    compatibility: compatibility,
+    compatibility,
     confidence: rule.confidence,
     notes: rule.notes,
-    species_a: speciesA,
-    species_b: speciesB,
+    species_a: toCompatibilitySpecies(speciesA),
+    species_b: toCompatibilitySpecies(speciesB),
   };
 }
 
+// -----------------------------------------------------------------------------
+// Data Access
+// -----------------------------------------------------------------------------
 export async function getCompatibilityRulesForSpecies(
   speciesSlug: string,
 ): Promise<SpeciesCompatibilityGroup> {
@@ -622,22 +592,4 @@ export async function getCompatibleSpeciesPairs() {
       .filter((result) => result.compatibility === "compatible")
       .map((result) => result.species_b),
   }));
-}
-
-function legacyCompatibilityToScore(
-  compatibility: CompatibilityResult["compatibility"],
-) {
-  if (compatibility === "compatible") {
-    return 100;
-  }
-
-  if (compatibility === "caution") {
-    return 60;
-  }
-
-  if (compatibility === "incompatible") {
-    return 25;
-  }
-
-  return 0;
 }

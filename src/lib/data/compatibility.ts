@@ -8,10 +8,27 @@ export type CompatibilitySpecies = {
   common_name: string;
 };
 
+export type CompatibilityStatus =
+  | "Overwhelmingly Compatible"
+  | "Very Compatible"
+  | "Compatible"
+  | "Caution"
+  | "Incompatible";
+
+type EvaluationResult = {
+  points: number;
+  reasons: string[];
+};
+
 export type CompatibilityResult = {
+  score: number;
+  status: CompatibilityStatus;
+  reasons: string[];
+
   compatibility: "compatible" | "caution" | "incompatible" | null;
   confidence: number | null;
   notes: string | null;
+
   species_a: CompatibilitySpecies;
   species_b: CompatibilitySpecies;
 };
@@ -28,6 +45,15 @@ const invertebrateFamilies = new Set([
   "Ampullariidae",
   "Thiaridae",
 ]);
+
+const COMPATIBILITY_WEIGHTS = {
+  temperature: 20,
+  ph: 15,
+  aggression: 25,
+  schooling: 10,
+  predation: 20,
+  tankSize: 10,
+} as const;
 
 function hasWaterParameterOverlap(
   speciesA: SpeciesRow,
@@ -71,6 +97,26 @@ function toCompatibilitySpecies(species: SpeciesRow): CompatibilitySpecies {
   };
 }
 
+function determineStatus(score: number): CompatibilityStatus {
+  if (score >= 96) {
+    return "Overwhelmingly Compatible";
+  }
+
+  if (score >= 90) {
+    return "Very Compatible";
+  }
+
+  if (score >= 70) {
+    return "Compatible";
+  }
+
+  if (score >= 50) {
+    return "Caution";
+  }
+
+  return "Incompatible";
+}
+
 export function calculateCompatibility(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
@@ -95,7 +141,10 @@ export function calculateCompatibility(
     blockers.push("one species is not safe with invertebrates");
   }
 
-  if (canEatTankmate(speciesA, speciesB) || canEatTankmate(speciesB, speciesA)) {
+  if (
+    canEatTankmate(speciesA, speciesB) ||
+    canEatTankmate(speciesB, speciesA)
+  ) {
     blockers.push("size and diet create a predation risk");
   }
 
@@ -136,6 +185,26 @@ export function calculateCompatibility(
       : `Computed from species profile data: ${[...blockers, ...cautions].join("; ")}.`;
 
   return {
+    score:
+      compatibility === "compatible"
+        ? 100
+        : compatibility === "caution"
+          ? 60
+          : 25,
+
+    status: determineStatus(
+      compatibility === "compatible"
+        ? 100
+        : compatibility === "caution"
+          ? 60
+          : 25,
+    ),
+
+    reasons:
+      compatibility === "compatible"
+        ? ["No major compatibility concerns detected."]
+        : [...blockers, ...cautions],
+
     compatibility,
     confidence: 0.65,
     notes,
@@ -182,12 +251,20 @@ export async function getCompatibilityRule(
     return calculateCompatibility(speciesA, speciesB);
   }
 
+  const compatibility =
+    rule.compatibility as CompatibilityResult["compatibility"];
+
+  const score = legacyCompatibilityToScore(compatibility);
+
   return {
-    compatibility: rule.compatibility as CompatibilityResult["compatibility"],
+    score: score,
+    status: determineStatus(score),
+    reasons: rule.notes ? [rule.notes] : ["Manual compatibility rule found."],
+    compatibility: compatibility,
     confidence: rule.confidence,
     notes: rule.notes,
-    species_a: toCompatibilitySpecies(speciesA),
-    species_b: toCompatibilitySpecies(speciesB),
+    species_a: speciesA,
+    species_b: speciesB,
   };
 }
 
@@ -256,7 +333,15 @@ export async function getCompatibilityRulesForSpecies(
       continue;
     }
 
+    const compatibility =
+      rule.compatibility as CompatibilityResult["compatibility"];
+
+    const score = legacyCompatibilityToScore(compatibility);
+
     const result: CompatibilityResult = {
+      score,
+      status: determineStatus(score),
+      reasons: rule.notes ? [rule.notes] : ["Manual compatibility rule found."],
       compatibility: rule.compatibility as CompatibilityResult["compatibility"],
       confidence: rule.confidence,
       notes: rule.notes,
@@ -295,7 +380,9 @@ export async function getCompatibleSpeciesPairs() {
     .order("common_name", { ascending: true });
 
   if (error) {
-    throw new Error(`Failed to fetch species for compatibility: ${error.message}`);
+    throw new Error(
+      `Failed to fetch species for compatibility: ${error.message}`,
+    );
   }
 
   return species.map((speciesA) => ({
@@ -306,4 +393,64 @@ export async function getCompatibleSpeciesPairs() {
       .filter((result) => result.compatibility === "compatible")
       .map((result) => result.species_b),
   }));
+}
+
+function legacyCompatibilityToScore(
+  compatibility: CompatibilityResult["compatibility"],
+) {
+  if (compatibility === "compatible") {
+    return 100;
+  }
+
+  if (compatibility === "caution") {
+    return 60;
+  }
+
+  if (compatibility === "incompatible") {
+    return 25;
+  }
+
+  return 0;
+}
+
+function evaluateTemperatureCompatibility() {
+  return {
+    points: 0,
+    reasons: [],
+  };
+}
+
+function evaluatePhCompatibility() {
+  return {
+    points: 0,
+    reasons: [],
+  };
+}
+
+function evaluateAggressionCompatibility() {
+  return {
+    points: 0,
+    reasons: [],
+  };
+}
+
+function evaluateSchoolingCompatibility() {
+  return {
+    points: 0,
+    reasons: [],
+  };
+}
+
+function evaluatePredationRisk() {
+  return {
+    points: 0,
+    reasons: [],
+  };
+}
+
+function evaluateTankSizeCompatibility() {
+  return {
+    points: 0,
+    reasons: [],
+  };
 }

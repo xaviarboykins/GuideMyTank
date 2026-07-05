@@ -543,3 +543,28 @@ Compatibility scores are generated using measurable husbandry data and transpare
 The engine should always provide users with enough information to understand **why** a compatibility score was assigned, enabling informed decisions rather than relying solely on a numeric result.
 
 As GuideMyTank evolves, new evaluators and improved biological data can be incorporated while preserving the engine's modular architecture, transparency, and maintainability.
+
+# Compatibility Disclaimer
+
+The GuideMyTank Compatibility Score is designed to help you evaluate how likely two aquarium species are to coexist successfully based on known aquarium husbandry data.
+
+Our compatibility engine analyzes multiple factors, including:
+
+- 🌡️ Temperature compatibility
+- 💧 pH compatibility
+- 😌 Temperament and aggression
+- 🐟 Schooling and social behavior
+- 🦈 Predation risk
+- 🏠 Minimum tank size requirements
+
+These factors are combined into an overall compatibility score and accompanied by clear explanations to help you understand the recommendation.
+
+Compatibility scores are recommendations, not guarantees. Individual fish behavior can vary based on age, sex, temperament, tank size, aquascape, stocking density, water quality, and introduction method.
+
+A future `/compatibility/disclaimer` page should explain:
+
+- How compatibility scores work
+- Recommendations versus guarantees
+- Why fish behavior can vary
+- Best practices when introducing new tankmates
+- GuideMyTank’s transparent recommendation philosophy

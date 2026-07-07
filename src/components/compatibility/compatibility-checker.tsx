@@ -249,9 +249,9 @@ export function CompatibilityChecker({
             <div className="mt-6 rounded-lg border bg-background p-4">
               <h3 className="font-semibold">Why this result?</h3>
 
-              <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
                 {visibleResult.reasons.map((reason) => (
-                  <li key={reason}>• {reason}</li>
+                  <li key={reason}>{reason}</li>
                 ))}
               </ul>
             </div>

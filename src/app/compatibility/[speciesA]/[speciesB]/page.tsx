@@ -22,6 +22,7 @@ type CompatibilityPageProps = {
 };
 
 export const revalidate = 86400;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const species = await getSpeciesSlugs();
@@ -124,13 +125,13 @@ export default async function CompatibilityDetailPage({
           "@type": "ListItem",
           position: 1,
           name: "Home",
-          item: "https://guidemytank.com",
+          item: "https://www.guidemytank.com",
         },
         {
           "@type": "ListItem",
           position: 2,
           name: "Compatibility",
-          item: "https://guidemytank.com/compatibility",
+          item: "https://www.guidemytank.com/compatibility",
         },
         {
           "@type": "ListItem",

@@ -63,13 +63,13 @@ export default function CompatibilityDisclaimerPage() {
             Best practices for new tankmates
           </h2>
 
-          <ul className="mt-3 space-y-2 text-sm leading-7 text-muted-foreground">
-            <li>• Research both species before purchase.</li>
-            <li>• Quarantine new fish when possible.</li>
-            <li>• Match temperature, pH, hardness, and tank size needs.</li>
-            <li>• Provide hiding places, visual breaks, and swimming space.</li>
-            <li>• Introduce new tankmates slowly and observe closely.</li>
-            <li>• Have a backup plan if aggression or stress appears.</li>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-muted-foreground">
+            <li>Research both species before purchase.</li>
+            <li>Quarantine new fish when possible.</li>
+            <li>Match temperature, pH, hardness, and tank size needs.</li>
+            <li>Provide hiding places, visual breaks, and swimming space.</li>
+            <li>Introduce new tankmates slowly and observe closely.</li>
+            <li>Have a backup plan if aggression or stress appears.</li>
           </ul>
         </section>
 

@@ -7,7 +7,7 @@ import { SpeciesStatCard } from "@/components/species/species-stat-card";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 
-import { getCompatibilityRulesForSpecies } from "@/lib/data/compatibility";
+import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
 

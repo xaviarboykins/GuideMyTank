@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       compatibility_rules: {
@@ -219,6 +244,53 @@ export type Database = {
           },
         ]
       }
+      water_parameters: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_hardness_dgh: number | null
+          max_ph: number | null
+          max_temp_f: number | null
+          min_hardness_dgh: number | null
+          min_ph: number | null
+          min_temp_f: number | null
+          species_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_hardness_dgh?: number | null
+          max_ph?: number | null
+          max_temp_f?: number | null
+          min_hardness_dgh?: number | null
+          min_ph?: number | null
+          min_temp_f?: number | null
+          species_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_hardness_dgh?: number | null
+          max_ph?: number | null
+          max_temp_f?: number | null
+          min_hardness_dgh?: number | null
+          min_ph?: number | null
+          min_temp_f?: number | null
+          species_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_parameters_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: true
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -353,6 +425,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

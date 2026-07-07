@@ -145,8 +145,7 @@ export async function getCompatibilityRulesForSpecies(
   const { data: species, error: speciesError } = await supabase
     .from("species")
     .select("*")
-    .eq("slug", speciesSlug)
-    .maybeSingle();
+    .order("common_name", { ascending: true });
 
   if (speciesError || !species) {
     return {
@@ -156,26 +155,9 @@ export async function getCompatibilityRulesForSpecies(
     };
   }
 
-  const { data: rules, error } = await supabase
-    .from("compatibility_rules")
-    .select(
-      `
-      compatibility,
-      confidence,
-      notes,
-      species_a:species_a_id (
-        slug,
-        common_name
-      ),
-      species_b:species_b_id (
-        slug,
-        common_name
-      )
-    `,
-    )
-    .or(`species_a_id.eq.${species.id},species_b_id.eq.${species.id}`);
+  const currentSpecies = species.find((item) => item.slug === speciesSlug);
 
-  if (error || !rules) {
+  if (!currentSpecies) {
     return {
       compatible: [],
       caution: [],
@@ -183,56 +165,115 @@ export async function getCompatibilityRulesForSpecies(
     };
   }
 
+  const speciesIds = species.map((item) => item.id);
+
+  const { data: waterParameters, error: waterParametersError } = await supabase
+    .from("water_parameters")
+    .select(
+      "species_id, min_temp_f, max_temp_f, min_ph, max_ph, min_hardness_dgh, max_hardness_dgh",
+    )
+    .in("species_id", speciesIds)
+    .returns<WaterParametersRow[]>();
+
+  if (waterParametersError) {
+    throw new Error(
+      `Failed to fetch water parameters: ${waterParametersError.message}`,
+    );
+  }
+
+  const waterParametersBySpeciesId = new Map(
+    (waterParameters ?? []).map((row) => [row.species_id, row]),
+  );
+
+  const speciesWithWaterParameters = species.map((item) =>
+    applyWaterParameters(item, waterParametersBySpeciesId.get(item.id)),
+  );
+
+  const currentSpeciesWithWaterParameters = speciesWithWaterParameters.find(
+    (item) => item.slug === speciesSlug,
+  );
+
+  if (!currentSpeciesWithWaterParameters) {
+    return {
+      compatible: [],
+      caution: [],
+      incompatible: [],
+    };
+  }
+
+  const { data: rules, error: rulesError } = await supabase
+    .from("compatibility_rules")
+    .select("compatibility, confidence, notes, species_a_id, species_b_id")
+    .or(
+      `species_a_id.eq.${currentSpecies.id},species_b_id.eq.${currentSpecies.id}`,
+    );
+
+  if (rulesError) {
+    throw new Error(
+      `Failed to fetch compatibility rules: ${rulesError.message}`,
+    );
+  }
+
+  const manualRulesBySpeciesId = new Map(
+    (rules ?? []).map((rule) => {
+      const relatedSpeciesId =
+        rule.species_a_id === currentSpecies.id
+          ? rule.species_b_id
+          : rule.species_a_id;
+
+      return [relatedSpeciesId, rule];
+    }),
+  );
+
   const grouped: SpeciesCompatibilityGroup = {
     compatible: [],
     caution: [],
     incompatible: [],
   };
 
-  for (const rule of rules) {
-    const speciesA = Array.isArray(rule.species_a)
-      ? rule.species_a[0]
-      : rule.species_a;
-
-    const speciesB = Array.isArray(rule.species_b)
-      ? rule.species_b[0]
-      : rule.species_b;
-
-    if (!speciesA || !speciesB) {
+  for (const relatedSpecies of speciesWithWaterParameters) {
+    if (relatedSpecies.id === currentSpecies.id) {
       continue;
     }
 
-    const compatibility =
-      rule.compatibility as CompatibilityResult["compatibility"];
+    const manualRule = manualRulesBySpeciesId.get(relatedSpecies.id);
 
-    const score = legacyCompatibilityToScore(compatibility);
+    const computedResult = calculateCompatibility(
+      currentSpeciesWithWaterParameters,
+      relatedSpecies,
+    );
 
-    const result: CompatibilityResult = {
-      score,
-      status: determineStatus(score),
-      reasons: rule.notes ? [rule.notes] : ["Manual compatibility rule found."],
-      compatibility,
-      confidence: rule.confidence,
-      notes: rule.notes,
-      species_a: {
-        slug: speciesA.slug,
-        common_name: speciesA.common_name,
-      },
-      species_b: {
-        slug: speciesB.slug,
-        common_name: speciesB.common_name,
-      },
-    };
+    const result: CompatibilityResult = manualRule
+      ? {
+          score: legacyCompatibilityToScore(
+            manualRule.compatibility as CompatibilityResult["compatibility"],
+          ),
+          status: determineStatus(
+            legacyCompatibilityToScore(
+              manualRule.compatibility as CompatibilityResult["compatibility"],
+            ),
+          ),
+          reasons: manualRule.notes
+            ? [manualRule.notes]
+            : ["Manual compatibility rule found."],
+          compatibility:
+            manualRule.compatibility as CompatibilityResult["compatibility"],
+          confidence: manualRule.confidence,
+          notes: manualRule.notes,
+          species_a: toCompatibilitySpecies(currentSpecies),
+          species_b: toCompatibilitySpecies(relatedSpecies),
+        }
+      : computedResult;
 
-    if (rule.compatibility === "compatible") {
+    if (result.compatibility === "compatible") {
       grouped.compatible.push(result);
     }
 
-    if (rule.compatibility === "caution") {
+    if (result.compatibility === "caution") {
       grouped.caution.push(result);
     }
 
-    if (rule.compatibility === "incompatible") {
+    if (result.compatibility === "incompatible") {
       grouped.incompatible.push(result);
     }
   }

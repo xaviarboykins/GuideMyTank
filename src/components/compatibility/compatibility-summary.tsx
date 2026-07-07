@@ -42,7 +42,7 @@ export function CompatibilitySummary({
           </Link>
 
           <Link
-            href={`/species/${compatibility.species_a.slug}`}
+            href={`/species/${compatibility.species_b.slug}`}
             className="underline-offset-4 hover:underline"
           >
             {compatibility.species_b.common_name} Species Profile

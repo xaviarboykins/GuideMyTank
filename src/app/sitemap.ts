@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next";
 
 import { getSpeciesSlugs } from "@/lib/data/species";
+import {
+  generateCanonicalCompatibilityPairs,
+  getCompatibilityUrl,
+} from "@/lib/compatibility/urls";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://guidemytank.com";
   const species = await getSpeciesSlugs();
+  const compatibilityPairs = generateCanonicalCompatibilityPairs(species);
 
   return [
     {
@@ -74,6 +79,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.7,
+    })),
+    ...compatibilityPairs.map((pair) => ({
+      url: getCompatibilityUrl(pair.speciesA, pair.speciesB),
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
   ];
 }

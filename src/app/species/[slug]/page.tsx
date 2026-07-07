@@ -230,17 +230,16 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
         />
 
         <section className="mt-6">
-          <div className="w-fit rounded-lg border bg-card p-4">
-            <div className="flex flex-col gap-4">
-              <div className="relative h-96 w-96">
-                <Image
-                  src={speciesImage}
-                  alt={`${species.common_name} aquarium species`}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+          <div className="flex flex-col gap-4">
+            <div className="relative aspect-[4/3] w-full max-w-sm sm:max-w-md lg:max-w-lg">
+              <Image
+                src={speciesImage}
+                alt={`${species.common_name} aquarium species`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 520px"
+                className="object-contain"
+                priority
+              />
             </div>
           </div>
         </section>

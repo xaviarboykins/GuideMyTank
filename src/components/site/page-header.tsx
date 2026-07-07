@@ -6,7 +6,7 @@ type PageHeaderProps = {
 
 export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
   return (
-    <header className="border border-border bg-card p-6">
+    <header className="bg-card p-6">
       {eyebrow ? (
         <p className="text-sm font-medium text-muted-foreground">{eyebrow}</p>
       ) : null}

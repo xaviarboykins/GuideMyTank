@@ -49,16 +49,16 @@ export function CompatibilityChecker({
     [species, speciesB],
   );
 
-  useEffect(() => {
-    if (!speciesA || !speciesB) {
-      setResult(null);
-      setError("");
-      return;
-    }
+  const selectionError =
+    speciesA && speciesB && speciesA === speciesB
+      ? "Choose two different species to compare."
+      : "";
 
-    if (speciesA === speciesB) {
-      setResult(null);
-      setError("Choose two different species to compare.");
+  const visibleResult = speciesA && speciesB && !selectionError ? result : null;
+  const visibleError = selectionError || error;
+
+  useEffect(() => {
+    if (!speciesA || !speciesB || selectionError) {
       return;
     }
 
@@ -106,7 +106,7 @@ export function CompatibilityChecker({
     });
 
     return () => controller.abort();
-  }, [speciesA, speciesB]);
+  }, [speciesA, speciesB, selectionError]);
 
   function handleSwapSpecies() {
     setSpeciesA(speciesB);
@@ -197,18 +197,18 @@ export function CompatibilityChecker({
               reasoning, confidence, and quick profile links.
             </p>
           </div>
-        ) : error ? (
+        ) : visibleError ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
             <h2 className="font-semibold text-destructive">
               Compatibility unavailable
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{visibleError}</p>
           </div>
-        ) : isPending && !result ? (
+        ) : isPending && !visibleResult ? (
           <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed bg-background p-6 text-sm text-muted-foreground">
             Checking compatibility...
           </div>
-        ) : result ? (
+        ) : visibleResult ? (
           <div>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -216,32 +216,32 @@ export function CompatibilityChecker({
                   Compatibility Result
                 </p>
                 <h2 className="mt-2 text-3xl font-bold tracking-tight">
-                  {result.status}
+                  {visibleResult.status}
                 </h2>
               </div>
 
               <CompatibilityBadge
-                compatibility={getSimplifiedCompatibility(result.status)}
+                compatibility={getSimplifiedCompatibility(visibleResult.status)}
               />
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-lg border bg-background p-4">
                 <p className="text-sm text-muted-foreground">Score</p>
-                <p className="mt-2 text-3xl font-bold">{result.score}</p>
+                <p className="mt-2 text-3xl font-bold">{visibleResult.score}</p>
               </div>
 
               <div className="rounded-lg border bg-background p-4">
                 <p className="text-sm text-muted-foreground">Status</p>
-                <p className="mt-2 font-semibold">{result.status}</p>
+                <p className="mt-2 font-semibold">{visibleResult.status}</p>
               </div>
 
               <div className="rounded-lg border bg-background p-4">
                 <p className="text-sm text-muted-foreground">Confidence</p>
                 <p className="mt-2 font-semibold">
-                  {result.confidence === null
+                  {visibleResult.confidence === null
                     ? "Not available"
-                    : `${Math.round(result.confidence * 100)}%`}
+                    : `${Math.round(visibleResult.confidence * 100)}%`}
                 </p>
               </div>
             </div>
@@ -250,7 +250,7 @@ export function CompatibilityChecker({
               <h3 className="font-semibold">Why this result?</h3>
 
               <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-                {result.reasons.map((reason) => (
+                {visibleResult.reasons.map((reason) => (
                   <li key={reason}>• {reason}</li>
                 ))}
               </ul>

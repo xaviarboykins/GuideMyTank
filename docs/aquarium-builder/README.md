@@ -7,7 +7,7 @@ The Aquarium Builder is the backend foundation for GuideMyTank's flagship planni
 The builder should help users assemble a practical tank plan from reusable parts:
 
 - tank configuration
-- livestock
+- livestock, including fish, shrimp, snails, and other aquarium animals
 - equipment products
 - estimated cost
 - notes
@@ -19,7 +19,7 @@ The builder is an orchestration layer. It should coordinate existing GuideMyTank
 
 The long-term product goal is "PCPartPicker for aquariums."
 
-Users should eventually be able to choose a tank size, add fish, add equipment, review cost, spot compatibility problems, and save or share a build. The experience should remain ugly-but-useful: fast, searchable, practical, and focused on hobbyist decisions rather than visual polish.
+Users should eventually be able to choose a tank, add livestock, add equipment, review cost, spot compatibility problems, and save or share a build. The experience should remain ugly-but-useful: fast, searchable, practical, and focused on hobbyist decisions rather than visual polish.
 
 ## Current M5 Scope
 
@@ -125,6 +125,10 @@ The Aquarium Builder reuses:
 - Existing species fields such as `tank_size_gal`, `min_group_size`, and `bioload_rating`
 
 The builder should not directly call `calculateCompatibility()` from the engine. Calling the service preserves existing manual-rule handling and water-parameter overlay behavior.
+
+## UI Derivation Direction
+
+The builder UI should stay component-driven like PCPartPicker. Tank size should be derived from a selected tank, flow estimate from the selected filtration setup, and planted level from selected plants. These derived values should not be entered through separate manual configuration controls.
 
 ## Stocking Guidance
 

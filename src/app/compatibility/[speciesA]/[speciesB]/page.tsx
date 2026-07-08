@@ -78,6 +78,60 @@ export async function generateMetadata({
   };
 }
 
+export async function generateStaticParams() {
+  const species = await getSpeciesSlugs();
+
+  return generateCanonicalCompatibilityPairs(species).map((pair) => ({
+    speciesA: pair.speciesA,
+    speciesB: pair.speciesB,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: CompatibilityPageProps): Promise<Metadata> {
+  const { speciesA, speciesB } = await params;
+
+  const canonicalUrl = getCompatibilityUrl(speciesA, speciesB);
+  const compatibility = await getCompatibilityRule(speciesA, speciesB);
+
+  if (!compatibility) {
+    return {
+      title: "Compatibility Report Not Found | GuideMyTank",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const speciesAName = compatibility.species_a.common_name;
+  const speciesBName = compatibility.species_b.common_name;
+
+  const title = `Can ${speciesAName} Live With ${speciesBName}? Compatibility Guide`;
+  const description = `See the GuideMyTank compatibility score for ${speciesAName} and ${speciesBName}, including temperament, water parameters, tank size, confidence, and care considerations.`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "GuideMyTank",
+      type: "article",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+  };
+}
+
 export default async function CompatibilityDetailPage({
   params,
 }: CompatibilityPageProps) {

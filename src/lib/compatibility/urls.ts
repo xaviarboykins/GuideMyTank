@@ -1,4 +1,4 @@
-export const COMPATIBILITY_BASE_URL = "https://guidemytank.com";
+export const COMPATIBILITY_BASE_URL = "https://www.guidemytank.com";
 
 export type CompatibilityPair = {
   speciesA: string;

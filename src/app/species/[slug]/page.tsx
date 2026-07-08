@@ -11,7 +11,7 @@ import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
 
-const SITE_URL = "https://guidemytank.com";
+const SITE_URL = "https://www.guidemytank.com";
 
 type SpeciesPageProps = {
   params: Promise<{

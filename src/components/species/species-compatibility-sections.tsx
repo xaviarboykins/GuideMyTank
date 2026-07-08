@@ -11,6 +11,7 @@ import type {
   CompatibilityResult,
   SpeciesCompatibilityGroup,
 } from "@/lib/compatibility/types";
+import { getCompatibilityPath } from "@/lib/compatibility/urls";
 
 type SpeciesCompatibilitySectionsProps = {
   currentSpeciesSlug: string;
@@ -45,6 +46,10 @@ function CompatibilityList({
     <div className="max-h-[24rem] space-y-3 overflow-y-auto pr-2 md:max-h-[30rem]">
       {rules.map((rule) => {
         const relatedSpecies = getRelatedSpecies(rule, currentSpeciesSlug);
+        const compatibilityPath = getCompatibilityPath(
+          currentSpeciesSlug,
+          relatedSpecies.slug,
+        );
 
         return (
           <article
@@ -54,14 +59,14 @@ function CompatibilityList({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <Link
-                  href={`/compatibility/${currentSpeciesSlug}/${relatedSpecies.slug}`}
+                  href={compatibilityPath}
                   className="font-medium underline-offset-4 hover:underline"
                 >
                   {relatedSpecies.common_name}
                 </Link>
 
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Score: {rule.score} · {rule.status}
+                  Score: {rule.score} - {rule.status}
                 </p>
               </div>
 
@@ -74,7 +79,7 @@ function CompatibilityList({
 
             <div className="mt-4 flex flex-wrap gap-3 text-sm">
               <Link
-                href={`/compatibility/${currentSpeciesSlug}/${relatedSpecies.slug}`}
+                href={compatibilityPath}
                 className="font-medium underline-offset-4 hover:underline"
               >
                 View compatibility report

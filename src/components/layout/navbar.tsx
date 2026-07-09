@@ -17,6 +17,10 @@ const navLinks = [
     label: "Stocking",
   },
   {
+    href: "/products",
+    label: "Products",
+  },
+  {
     href: "/aquarium-builder",
     label: "Aquarium Builder",
   },

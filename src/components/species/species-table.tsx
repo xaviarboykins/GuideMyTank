@@ -52,7 +52,7 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
         <table className="w-full min-w-[1120px] text-sm">
           <thead className="bg-muted text-left">
             <tr>
-              <th className="p-3">Common Name</th>
+              <th className="p-3">Species</th>
               <th className="p-3">Scientific Name</th>
               <th className="p-3">Tank</th>
               <th className="p-3">Size</th>
@@ -68,33 +68,47 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
           <tbody>
             {species.map((item) => (
               <tr key={item.id} className="border-t">
-                <td className="p-3 font-medium">
-                  <Link
-                    href={`/piscidex/${item.slug}`}
-                    className="underline-offset-4 hover:underline"
-                    onMouseEnter={(event) =>
-                      setPreview({
-                        slug: item.slug,
-                        commonName: item.common_name,
-                        x: event.clientX,
-                        y: event.clientY,
-                      })
-                    }
-                    onMouseMove={(event) =>
-                      setPreview((currentPreview) =>
-                        currentPreview
-                          ? {
-                              ...currentPreview,
-                              x: event.clientX,
-                              y: event.clientY,
-                            }
-                          : null,
-                      )
-                    }
-                    onMouseLeave={() => setPreview(null)}
-                  >
-                    {item.common_name}
-                  </Link>
+                <td className="p-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="relative size-10 shrink-0 overflow-hidden border border-border bg-muted"
+                      onMouseEnter={(event) =>
+                        setPreview({
+                          slug: item.slug,
+                          commonName: item.common_name,
+                          x: event.clientX,
+                          y: event.clientY,
+                        })
+                      }
+                      onMouseMove={(event) =>
+                        setPreview((currentPreview) =>
+                          currentPreview
+                            ? {
+                                ...currentPreview,
+                                x: event.clientX,
+                                y: event.clientY,
+                              }
+                            : null,
+                        )
+                      }
+                      onMouseLeave={() => setPreview(null)}
+                    >
+                      <Image
+                        src={getSpeciesImage(item.slug)}
+                        alt={`${item.common_name} aquarium species thumbnail`}
+                        fill
+                        className="object-contain p-1"
+                        sizes="40px"
+                      />
+                    </div>
+
+                    <Link
+                      href={`/piscidex/${item.slug}`}
+                      className="font-medium underline-offset-4 hover:underline"
+                    >
+                      {item.common_name}
+                    </Link>
+                  </div>
                 </td>
 
                 <td className="p-3 italic text-muted-foreground">

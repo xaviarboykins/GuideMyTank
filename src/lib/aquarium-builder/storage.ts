@@ -1,5 +1,8 @@
 import type {
   AquariumBuild,
+  AquariumEquipmentCategory,
+  AquariumEquipmentProduct,
+  AquariumEquipmentProductSelections,
   AquariumFiltrationLevel,
   AquariumLivestockEntry,
   AquariumPlantEntry,
@@ -17,6 +20,7 @@ export const defaultAquariumBuild: AquariumBuild = {
   livestock: [],
   plants: [],
   equipment: [],
+  equipmentProductIds: {},
 };
 
 function isFiltrationLevel(value: unknown): value is AquariumFiltrationLevel {
@@ -29,6 +33,21 @@ function isPlantedLevel(value: unknown): value is AquariumPlantedLevel {
     value === "light" ||
     value === "moderate" ||
     value === "heavy"
+  );
+}
+
+function isEquipmentCategory(value: unknown): value is AquariumEquipmentCategory {
+  return (
+    value === "tank" ||
+    value === "filter" ||
+    value === "heater" ||
+    value === "lighting" ||
+    value === "substrate" ||
+    value === "hardscape" ||
+    value === "maintenance" ||
+    value === "water-treatment" ||
+    value === "food" ||
+    value === "other"
   );
 }
 
@@ -104,6 +123,142 @@ export function normalizeAquariumPlants(plants: unknown): AquariumPlantEntry[] {
   return Array.from(entriesBySlug.values());
 }
 
+export function normalizeAquariumEquipment(
+  equipment: unknown,
+): AquariumEquipmentProduct[] {
+  if (!Array.isArray(equipment)) {
+    return [];
+  }
+
+  const normalizedEquipment: AquariumEquipmentProduct[] = [];
+
+  for (const entry of equipment) {
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+
+    const rawEntry = entry as Partial<AquariumEquipmentProduct>;
+    const name = typeof rawEntry.name === "string" ? rawEntry.name.trim() : "";
+    const quantity = Number(rawEntry.quantity);
+    const estimatedPrice = Number(rawEntry.estimatedPrice);
+
+    if (!name || !isEquipmentCategory(rawEntry.category)) {
+      continue;
+    }
+
+    const normalizedEntry: AquariumEquipmentProduct = {
+      name,
+      category: rawEntry.category,
+      quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : 1,
+      estimatedPrice:
+        Number.isFinite(estimatedPrice) && estimatedPrice >= 0
+          ? estimatedPrice
+          : 0,
+      flowRateGph:
+        typeof rawEntry.flowRateGph === "number" &&
+        Number.isFinite(rawEntry.flowRateGph) &&
+        rawEntry.flowRateGph > 0
+          ? rawEntry.flowRateGph
+          : null,
+      imageUrl:
+        typeof rawEntry.imageUrl === "string" ? rawEntry.imageUrl : null,
+      productUrl:
+        typeof rawEntry.productUrl === "string" ? rawEntry.productUrl : null,
+      notes: typeof rawEntry.notes === "string" ? rawEntry.notes : null,
+    };
+
+    if (typeof rawEntry.productId === "string" && rawEntry.productId.trim()) {
+      normalizedEntry.productId = rawEntry.productId.trim();
+    }
+
+    normalizedEquipment.push(normalizedEntry);
+  }
+
+  return normalizedEquipment;
+}
+
+export function deriveAquariumEquipmentProductSelections(
+  equipment: AquariumEquipmentProduct[],
+): AquariumEquipmentProductSelections {
+  const selections: AquariumEquipmentProductSelections = {};
+
+  for (const item of equipment) {
+    if (!item.productId) {
+      continue;
+    }
+
+    if (item.category === "tank") {
+      selections.tankProductId = item.productId;
+    }
+
+    if (item.category === "filter") {
+      selections.filterProductId = item.productId;
+    }
+
+    if (item.category === "heater") {
+      selections.heaterProductId = item.productId;
+    }
+
+    if (item.category === "lighting") {
+      selections.lightingProductId = item.productId;
+    }
+
+    if (item.category === "substrate") {
+      selections.substrateProductId = item.productId;
+    }
+
+    if (item.category === "hardscape") {
+      selections.decorProductIds = Array.from(
+        new Set([...(selections.decorProductIds ?? []), item.productId]),
+      );
+    }
+  }
+
+  return selections;
+}
+
+export function normalizeAquariumEquipmentProductSelections(
+  value: unknown,
+  equipment: AquariumEquipmentProduct[],
+): AquariumEquipmentProductSelections {
+  const derivedSelections = deriveAquariumEquipmentProductSelections(equipment);
+
+  if (!value || typeof value !== "object") {
+    return derivedSelections;
+  }
+
+  const rawSelections = value as Partial<AquariumEquipmentProductSelections>;
+
+  return {
+    ...derivedSelections,
+    tankProductId:
+      typeof rawSelections.tankProductId === "string"
+        ? rawSelections.tankProductId
+        : derivedSelections.tankProductId,
+    filterProductId:
+      typeof rawSelections.filterProductId === "string"
+        ? rawSelections.filterProductId
+        : derivedSelections.filterProductId,
+    heaterProductId:
+      typeof rawSelections.heaterProductId === "string"
+        ? rawSelections.heaterProductId
+        : derivedSelections.heaterProductId,
+    lightingProductId:
+      typeof rawSelections.lightingProductId === "string"
+        ? rawSelections.lightingProductId
+        : derivedSelections.lightingProductId,
+    substrateProductId:
+      typeof rawSelections.substrateProductId === "string"
+        ? rawSelections.substrateProductId
+        : derivedSelections.substrateProductId,
+    decorProductIds: Array.isArray(rawSelections.decorProductIds)
+      ? rawSelections.decorProductIds.filter(
+          (productId): productId is string => typeof productId === "string",
+        )
+      : derivedSelections.decorProductIds,
+  };
+}
+
 export function parseAquariumBuild(value: string | null): AquariumBuild {
   if (!value) {
     return defaultAquariumBuild;
@@ -112,6 +267,7 @@ export function parseAquariumBuild(value: string | null): AquariumBuild {
   try {
     const parsedValue = JSON.parse(value) as Partial<AquariumBuild>;
     const tank = parsedValue.tank ?? defaultAquariumBuild.tank;
+    const equipment = normalizeAquariumEquipment(parsedValue.equipment);
 
     return {
       ...defaultAquariumBuild,
@@ -133,9 +289,11 @@ export function parseAquariumBuild(value: string | null): AquariumBuild {
       },
       livestock: normalizeAquariumLivestock(parsedValue.livestock),
       plants: normalizeAquariumPlants(parsedValue.plants),
-      equipment: Array.isArray(parsedValue.equipment)
-        ? parsedValue.equipment
-        : defaultAquariumBuild.equipment,
+      equipment,
+      equipmentProductIds: normalizeAquariumEquipmentProductSelections(
+        parsedValue.equipmentProductIds,
+        equipment,
+      ),
     };
   } catch {
     return defaultAquariumBuild;
@@ -143,9 +301,16 @@ export function parseAquariumBuild(value: string | null): AquariumBuild {
 }
 
 export function serializeAquariumBuild(build: AquariumBuild) {
+  const equipment = normalizeAquariumEquipment(build.equipment);
+
   return JSON.stringify({
     ...build,
     livestock: normalizeAquariumLivestock(build.livestock),
     plants: normalizeAquariumPlants(build.plants),
+    equipment,
+    equipmentProductIds: normalizeAquariumEquipmentProductSelections(
+      build.equipmentProductIds,
+      equipment,
+    ),
   });
 }

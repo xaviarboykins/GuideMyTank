@@ -17,6 +17,7 @@ export type CompatibilityStatus =
 export type EvaluationResult = {
   points: number;
   reasons: string[];
+  scoreCap?: number;
 };
 
 export type CompatibilityResult = {
@@ -27,6 +28,7 @@ export type CompatibilityResult = {
   compatibility: "compatible" | "caution" | "incompatible" | null;
   confidence: number | null;
   notes: string | null;
+  expertValidated: boolean;
 
   species_a: CompatibilitySpecies;
   species_b: CompatibilitySpecies;

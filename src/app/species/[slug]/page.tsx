@@ -10,6 +10,12 @@ import { PageHeader } from "@/components/site/page-header";
 import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
+import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
+import {
+  formatRecommendedTemperature,
+  formatToleratedTemperature,
+  hasDifferentToleratedTemperature,
+} from "@/lib/species/temperature-label";
 
 const SITE_URL = "https://www.guidemytank.com";
 
@@ -62,16 +68,6 @@ function formatBoolean(value: boolean | null | undefined) {
   }
 
   return null;
-}
-
-function formatGroupSize(species: Species) {
-  if (species.schooling) {
-    return species.min_group_size
-      ? `${species.min_group_size}+`
-      : "Group recommended";
-  }
-
-  return species.min_group_size ? `${species.min_group_size}` : "Solo/pair";
 }
 
 function formatTag(tag: string) {
@@ -209,6 +205,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
 
   const jsonLd = getSpeciesJsonLd(species);
   const compatibilityTags = species.compatibility_tags ?? [];
+  const careWarnings = species.care_warnings ?? [];
   const speciesImage = getSpeciesImage(species.slug);
 
   return (
@@ -271,7 +268,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
             />
             <SpeciesStatCard
               label="Group Size"
-              value={formatGroupSize(species)}
+              value={formatSpeciesGroupLabel(species)}
             />
             <SpeciesStatCard
               label="Bioload"
@@ -287,8 +284,14 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SpeciesStatCard
               label="Temperature"
-              value={formatRange(species.min_temp_f, species.max_temp_f, " F")}
+              value={formatRecommendedTemperature(species)}
             />
+            {hasDifferentToleratedTemperature(species) ? (
+              <SpeciesStatCard
+                label="Tolerated Temp"
+                value={formatToleratedTemperature(species)}
+              />
+            ) : null}
             <SpeciesStatCard
               label="pH"
               value={formatRange(species.min_ph, species.max_ph)}
@@ -301,8 +304,28 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
               label="Invert Safe"
               value={formatBoolean(species.invert_safe)}
             />
+            <SpeciesStatCard
+              label="Data Confidence"
+              value={species.data_confidence}
+            />
           </div>
+          {species.temp_source_notes ? (
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Temperature note: {species.temp_source_notes}
+            </p>
+          ) : null}
         </section>
+
+        {careWarnings.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="text-xl font-semibold">Care Warnings</h2>
+            <ul className="mt-4 list-disc space-y-2 rounded-lg border bg-card p-5 pl-8 text-sm leading-6 text-muted-foreground">
+              {careWarnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="mt-8">
           <h2 className="text-xl font-semibold">Behavior & Husbandry</h2>

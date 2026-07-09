@@ -2,569 +2,323 @@
 
 ## Overview
 
-The GuideMyTank Compatibility Engine is a deterministic, rule-based scoring system that evaluates the compatibility between two aquarium species.
+The GuideMyTank compatibility engine is a deterministic, rule-based scoring system for comparing two aquarium species.
 
-Unlike a simple pass/fail system, the engine produces:
+It returns:
 
-* A numeric compatibility score (0–100)
-* A compatibility status
-* Human-readable reasons explaining the result
+- A numeric compatibility score from 0 to 100
+- A compatibility status
+- Human-readable reasons explaining the result
 
-The primary goal is transparency. Every point earned or lost can be traced back to a specific compatibility rule, making the engine explainable rather than a "black box."
+The goal is not to guarantee that two animals will coexist. The goal is to give hobbyists a fast, transparent planning signal that catches obvious husbandry conflicts before they buy livestock.
 
----
+## Design Goals
 
-# Design Goals
+- Deterministic: the same two species and the same data always produce the same result.
+- Explainable: every result includes reasons tied to rule behavior.
+- Conservative: severe behavior conflicts can override otherwise good water-parameter matches.
+- Modular: each compatibility factor is isolated so new husbandry rules can be added without rewriting the engine.
+- Useful over pretty: the result should help users avoid bad stocking choices.
 
-The compatibility engine was designed around the following principles:
+## Current Evaluation Pipeline
 
-* Deterministic
+`calculateCompatibility()` runs these checks:
 
-  * The same two species will always produce the same result using the same data.
+1. Temperature compatibility
+2. pH compatibility
+3. Aggression and territorial compatibility
+4. Schooling, shoaling, and group-size compatibility
+5. Predation and invertebrate risk
+6. Minimum tank-size compatibility
+7. Structured water, setup, body-shape, and activity risk caps
+8. Species-specific special rules
+9. Severe behavior risk caps
 
-* Explainable
+Most evaluators add points to the raw score. Predation and severe behavior rules can also apply a maximum score cap. This prevents cases where overlapping temperature, pH, tank size, and body size incorrectly make a dangerous pairing look compatible.
 
-  * Every compatibility decision includes reasons that explain why the score was assigned.
+Example: a betta and a pea puffer may share temperature and pH ranges, but the puffer's specialist fin-nipping behavior plus the betta's slow, long-finned, territorial profile should cap the final score in the caution range.
 
-* Modular
+Risk hierarchy:
 
-  * Every compatibility rule is isolated into its own evaluator.
+1. Predation: one animal is likely to eat the other.
+2. Temperament and social conflict: aggression level, territorial behavior, solitary fish with schooling fish.
+3. Fin-nipping, attacking, or injury risk: usually caution unless predation also applies.
+4. Other husbandry mismatches: flow, hardness, activity level, specialist tank style, and tank size.
 
-* Extensible
+## Scoring Weights
 
-  * New compatibility factors can be added without rewriting the engine.
+| Rule | Maximum Points |
+| --- | ---: |
+| Temperature | 20 |
+| pH | 15 |
+| Aggression | 25 |
+| Schooling / social needs | 10 |
+| Predation | 20 |
+| Tank size | 10 |
 
-* Testable
+The base score totals 100 points before behavior caps are applied.
 
-  * Each evaluator can be tested independently.
+## Compatibility Status Thresholds
 
----
+| Score | Status |
+| ---: | --- |
+| 96-100 | Overwhelmingly Compatible |
+| 90-95 | Very Compatible |
+| 70-89 | Compatible |
+| 50-69 | Caution |
+| 0-49 | Incompatible |
 
-# Engine Architecture
+## Rule Details
 
-The engine follows a simple evaluation pipeline.
+### Temperature Compatibility
 
-```
-Species A
-Species B
+Compares preferred temperature ranges.
 
-        │
-        ▼
+True temperature conflicts apply a hard cap because there is no stable target temperature that satisfies both species. Narrow overlap is treated as caution, especially for species that already have specialist or stability-sensitive needs.
 
-calculateCompatibility()
+Typical reasons:
 
-        │
-        ▼
+- Temperature ranges overlap well.
+- Temperature ranges have limited overlap.
+- Temperature requirements conflict.
 
-Temperature Evaluator
-        │
+### pH Compatibility
 
-pH Evaluator
-        │
+Compares preferred pH ranges.
 
-Aggression Evaluator
-        │
+pH conflicts apply a hard cap. Narrow overlap is treated as caution because a technically possible value is not always a stable long-term target for both fish.
 
-Schooling Evaluator
-        │
+Typical reasons:
 
-Predation Evaluator
-        │
+- pH requirements overlap well.
+- pH ranges have limited overlap.
+- pH requirements conflict.
 
-Tank Size Evaluator
+### Aggression and Territorial Compatibility
 
-        │
-        ▼
+Compares temperament, numeric aggression level, and territorial tags.
 
-Aggregate Score
+Important behavior:
 
-        │
-        ▼
+- Peaceful/semi-aggressive mixes are reduced but not automatically rejected.
+- Aggressive species with peaceful species score poorly.
+- Two territorial species with high combined aggression receive a severe penalty.
 
-Determine Status
+Typical reasons:
 
-        │
-        ▼
+- Species have similar temperament.
+- One species may be semi-aggressive and require planning.
+- Both species are territorial with high aggression, creating a serious space conflict.
 
-Generate Reasons
+### Schooling, Shoaling, and Group-Size Compatibility
 
-        │
-        ▼
+Uses `schooling`, `min_group_size`, and social tags such as `schooling`, `shoaling`, and `group`.
 
-Return Final Result
-```
+This rule should catch cases where one animal needs a same-species group while the other is solitary, territorial, or likely to be stressed by busy tankmates.
 
-Each evaluator contributes:
+Typical reasons:
 
-* A score
-* One or more human-readable reasons
+- Both species have compatible schooling or group behavior.
+- One species should be maintained in a proper school or group.
+- One species needs a group while the other is solitary or territorial.
 
-The engine then combines every evaluator into a final compatibility score.
+### Predation Risk
 
----
+Checks body-size difference, predator traits, mouth-gape risk, surface-predator behavior, aggressive large predators, invertebrate safety, and prey body shape.
 
-# Output
+Predation is treated as the highest-risk compatibility failure. If one species may eat the other, or if a fish is unsafe with an invertebrate, the final score is capped in the incompatible range.
 
-Example output:
+Carnivorous diet alone is not enough to trigger predation. For example, bettas are carnivorous but should not be treated as generic predators of armored pygmy corys.
 
-```json
-{
-  "score": 92,
-  "status": "Very Compatible",
-  "reasons": [
-    "Temperature ranges overlap.",
-    "pH requirements overlap.",
-    "Species have similar temperament.",
-    "No predation risk detected.",
-    "Tank size requirements align."
-  ]
-}
-```
+Body shape changes the predation threshold:
 
----
+- `slender_prey_body` lowers the size ratio needed to flag predation.
+- `deep_bodied` raises the threshold because the fish is harder to swallow.
+- `armored_body` raises the threshold further and helps avoid false predation calls for corys, plecos, otocinclus, and similar fish.
 
-# Compatibility Rules
+Typical reasons:
 
-## 1. Temperature Compatibility
+- No predation risk detected.
+- Size and diet create a predation risk.
+- One species is not safe with invertebrates.
 
-Weight:
+Current cap:
 
-**20 Points**
+- Fish or invertebrate predation risk: capped at 40.
 
-Purpose:
+### Tank Size Compatibility
 
-Determines whether the preferred temperature ranges overlap.
+Compares minimum tank-size requirements.
 
-Possible outcomes:
+Typical reasons:
 
-* Full overlap
-* Partial overlap
-* No overlap
+- Tank size requirements align.
+- Tank size requirements differ moderately.
+- One species requires a significantly larger aquarium.
 
-Example reasons:
+### Severe Behavior Risk Caps
 
-* Temperature ranges overlap.
-* Partial temperature overlap.
-* Temperature requirements conflict.
+Behavior caps are not normal point deductions. They apply a maximum possible score when the pair has a known high-risk pattern.
 
----
+These are separate from predation. Fish attacking, stressing, fin-nipping, or injuring each other is an aggression/behavior problem, not a prey relationship. It is the second major risk category after predation, and it generally belongs in caution because spacing, cover, planting, stocking density, and individual behavior can change the outcome.
 
-## 2. pH Compatibility
+Current caps include:
 
-Weight:
+- Other puffer with non-puffer fish: capped at 60 because freshwater puffers are specialist fin-nipping hunters and poor community tankmates.
+- Likely fin-nipper with long-finned or slow tankmate: capped at 60.
+- Two highly aggressive territorial species: capped at 60.
+- Territorial footprint and swimming-zone overlap: capped at 60.
+- Breeding aggression in overlapping zones: capped at 60.
+- Two solitary species where at least one is highly aggressive: capped at 60 unless predation also applies.
+- Schooling or shoaling species with a solitary territorial tankmate: capped at 60 unless predation also applies.
 
-**15 Points**
+These caps exist because some husbandry conflicts are not solved by water-parameter overlap.
 
-Purpose:
+### Species-Specific Special Rules
 
-Determines whether preferred pH ranges overlap.
+Some species need named rules that are more specific than generic temperament, size, and tag checks. These live in `src/lib/compatibility/special-rules.ts`.
 
-Possible outcomes:
+Use special rules when a species has well-known husbandry exceptions, such as:
 
-* Full overlap
-* Partial overlap
-* No overlap
+- Species-only recommendations
+- Narrow known tankmate candidates
+- Specialist diet or hunting behavior
+- Unusual territorial behavior
+- Known incompatibilities that generic scoring would miss
 
-Example reasons:
+Current special rules:
 
-* pH requirements overlap.
-* Partial pH overlap.
-* pH requirements conflict.
+- Pea puffer with unsuitable tankmate: capped at 45 because pea puffers are best treated as species-only fish unless companions are fast, non-sedentary, and carefully selected.
+- Pea puffer with narrow caution tankmate candidates, such as chili rasboras, clown killifish, zebra danios, or otocinclus catfish: capped at 60 and should still require a heavily planted aquarium.
 
----
+When adding species in the future, first try to represent care needs with normal species data. Add a special rule only when a species has a known exception that generic data cannot model accurately.
 
-## 3. Aggression Compatibility
+## Data Signals Used Today
 
-Weight:
+The engine currently uses fields from the `species` table:
 
-**25 Points**
+- `min_temp_f`, `max_temp_f`
+- `recommended_min_temp_f`, `recommended_max_temp_f`
+- `tolerated_min_temp_f`, `tolerated_max_temp_f`
+- `temp_source_notes`
+- `data_confidence`
+- `min_ph`, `max_ph`
+- `tank_size_gal`
+- `min_group_size`
+- `temperament`
+- `aggression_level`
+- `schooling`
+- `diet`
+- `family`
+- `invert_safe`
+- `compatibility_tags`
+- `max_size_inches`
+- `flow_preference`
+- `activity_level`
+- `hardness_preference`
+- `temperature_category`
+- `preferred_tank_style`
+- `territory_zone`
+- `territory_footprint`
+- `fin_nipping_risk`
+- `long_fin_vulnerable`
+- `slow_moving`
+- `surface_predator`
+- `mouth_gape_risk`
+- `armored_body`
+- `deep_bodied`
+- `slender_prey_body`
+- `specialist_setup`
+- `delicate_species`
+- `competitive_feeder`
+- `species_only_preferred`
+- `care_warnings`
+- `breeding_aggression`
+- `min_gh_dgh`, `max_gh_dgh`
+- `min_kh_dkh`, `max_kh_dkh`
+- `ph_stability_required`
+- `summary` for limited text-pattern detection such as fin-nipping notes
 
-Purpose:
+Structured trait fields are preferred over parsing summary text. Summary text should be treated as a fallback only.
 
-Determines how well both species coexist based on temperament and aggression level.
+## Structured Trait Risk Caps
 
-Possible considerations:
+Structured trait caps are reusable compatibility checks backed by database columns.
 
-* Peaceful
-* Semi-Aggressive
-* Aggressive
-* Aggression score
+Current structured caps include:
 
-Example reasons:
+- Species-only preferred fish with other species: capped at 45.
+- Softwater and hardwater preference conflict: capped at 60.
+- GH or KH range conflict: capped at 60.
+- Narrow pH, GH, or KH overlap with stability-sensitive species: capped at 60.
+- Cool-water and warm-water preference conflict: capped at 60.
+- Low-flow and high-flow preference conflict: capped at 60.
+- Active, boisterous, or competitive feeders with slow, delicate, or long-finned species: capped at 60.
+- Specialist tank style mismatch, such as stream, rockwork, goldfish, blackwater, predator, or species-only setups: capped at 60.
 
-* Species have similar temperament.
-* One species may become territorial.
-* Aggression levels create a significant conflict.
+## Known-Pair Test Matrix
 
----
+Compatibility changes should be checked against `data/compatibility/test-matrix.json` with:
 
-## 4. Schooling Compatibility
-
-Weight:
-
-**10 Points**
-
-Purpose:
-
-Evaluates whether schooling requirements create compatibility concerns.
-
-Example considerations:
-
-* Both species are schooling fish.
-* One species requires a school.
-* Both species have compatible social behavior.
-
-Example reasons:
-
-* Social requirements align.
-* One species should be kept in a proper school.
-* Different social requirements require planning.
-
----
-
-## 5. Predation Risk
-
-Weight:
-
-**20 Points**
-
-Purpose:
-
-Determines whether one species may prey upon the other based on size, diet, and behavior.
-
-Example reasons:
-
-* No predation risk detected.
-* Large size difference creates predation risk.
-* Carnivorous behavior increases risk.
-
----
-
-## 6. Tank Size Compatibility
-
-Weight:
-
-**10 Points**
-
-Purpose:
-
-Compares minimum tank size requirements.
-
-Example reasons:
-
-* Tank size requirements align.
-* One species requires a substantially larger aquarium.
-* Larger aquarium recommended.
-
----
-
-# Scoring Weights
-
-| Rule        | Maximum Points |
-| ----------- | -------------: |
-| Temperature |             20 |
-| pH          |             15 |
-| Aggression  |             25 |
-| Schooling   |             10 |
-| Predation   |             20 |
-| Tank Size   |             10 |
-
-Total:
-
-```
-100 Points
+```bash
+npm run validate:compatibility
 ```
 
----
+The matrix is grouped into:
 
-# Compatibility Status Thresholds
+- Known good
+- Known caution
+- Known bad
+- Controversial/context-dependent
 
-|  Score | Status                    |
-| -----: | ------------------------- |
-| 96–100 | Overwhelmingly Compatible |
-|  90–95 | Very Compatible           |
-|  70–89 | Compatible                |
-|  50–69 | Caution                   |
-|   0–49 | Incompatible              |
+This is not a replacement for expert review, but it prevents obvious regressions such as treating harassment as predation or treating predator/prey pairings as compatible.
 
-These thresholds are intentionally designed to provide users with a more intuitive understanding of compatibility.
+The matrix must contain at least 25% as many cases as there are species in `data/import/species.master.json`. With 100 species, the minimum matrix size is 25 known pairings.
 
-A score in the 90s represents an excellent pairing, while scores approaching 100 indicate species that are exceptionally well suited for living together.
+Manual rows in `compatibility_rules` are expert overrides when `expert_validated` is true. Expert-validated compatibility results display an `Expert validated` badge.
 
----
+Expert overrides are maintained in `data/compatibility/expert-overrides.json`.
 
-# Reason Generation
+Use:
 
-Every evaluator is responsible for generating its own explanations.
-
-Reasons should always be:
-
-* Human readable
-* Concise
-* Positive when appropriate
-* Actionable when caution is required
-
-Example:
-
-```
-Temperature ranges overlap.
-Species have similar temperament.
-No predation risk detected.
-Tank size requirements align.
+```bash
+npm run validate:expert-overrides
+npm run import:expert-overrides
 ```
 
-Example caution:
+The validator rejects unknown species, duplicate unordered pairs, missing notes, invalid confidence values, and invalid compatibility values.
 
-```
-One species requires a larger school.
-Territorial behavior may require additional hiding places.
-```
+## Factors That Need Better Data Next
 
-Example incompatibility:
+The pea puffer / betta issue happened because the engine knew general aggression and water overlap, but not enough specific behavior. Several broad trait fields now exist, but future improvements should still add more explicit data for:
 
-```
-Temperature requirements conflict.
-Predation risk detected.
-Aggression levels are incompatible.
-```
+- Shoaling vs schooling distinction
+- Minimum same-species group size confidence
+- Mouth-gape predation risk separate from adult length
+- More specific aquascape needs such as dense planting, caves, smooth decor, sand depth, or rockwork
+- Shrimp/snail predation separately from generic `invert_safe`
+- More source-specific confidence, so user-facing results can distinguish strong consensus from rough default data
 
-The engine should avoid vague messages whenever possible.
+## Adding a New Compatibility Factor
 
----
+1. Add or normalize the species data needed for the factor.
+2. Create one focused evaluator in `src/lib/compatibility/engine.ts`.
+3. Return points and clear reasons.
+4. Use a score cap instead of only point deductions when the conflict should override otherwise good numeric matches.
+5. Update this README with purpose, scoring behavior, assumptions, and example reasons.
+6. Validate representative pairs, including at least one expected compatible pair and one expected incompatible pair.
 
-# Why a Rule-Based System?
+## Adding a Species-Specific Rule
 
-A rule-based system provides several important advantages:
+1. Add the rule to `src/lib/compatibility/special-rules.ts`.
+2. Key it by `speciesSlug` so it only runs for the named species.
+3. Keep the rule narrow and explainable.
+4. Prefer a caution cap for manageable risk and an incompatible cap for predation or strongly unsuitable tankmates.
+5. Add representative pair checks for the species, including an unsuitable pair and any known caution tankmate candidates.
+6. Document the rule in this README.
 
-* Predictable
-* Transparent
-* Easy to debug
-* Easy to test
-* Easy to expand
-* No hidden decision making
+## Guiding Philosophy
 
-Each compatibility decision can be traced back to measurable biological or husbandry data.
+GuideMyTank should be conservative when animal welfare is at stake. A false "Compatible" result is worse than a cautious warning because it can encourage a user to buy animals that will stress, injure, or kill each other.
 
----
-
-# Extending the Compatibility Engine
-
-The compatibility engine is intentionally modular.
-
-Each compatibility factor is implemented independently.
-
-Adding a new compatibility factor should never require rewriting the engine.
-
-Instead, follow the existing evaluation pattern.
-
-## Implementation Workflow
-
-### Step 1
-
-Add any required species data.
-
-Example:
-
-```
-minimum_GH
-maximum_GH
-preferred_flow
-swimming_zone
-```
-
----
-
-### Step 2
-
-Create a new evaluator.
-
-Example:
-
-```
-evaluateWaterHardness()
-
-evaluateFlow()
-
-evaluateSwimmingZone()
-```
-
-Each evaluator should:
-
-* Evaluate only one rule
-* Return a score contribution
-* Generate one or more reasons
-* Remain independent from other evaluators
-
----
-
-### Step 3
-
-Assign a scoring weight.
-
-Example:
-
-```
-Water Hardness
-
-Maximum:
-10 Points
-```
-
-Every new evaluator should have a clearly documented maximum contribution to the overall score.
-
-If necessary, rebalance existing weights so the total remains meaningful.
-
----
-
-### Step 4
-
-Integrate into the scoring pipeline.
-
-```
-Temperature
-
-↓
-
-pH
-
-↓
-
-Aggression
-
-↓
-
-Schooling
-
-↓
-
-Predation
-
-↓
-
-Tank Size
-
-↓
-
-NEW RULE
-
-↓
-
-Aggregate Score
-```
-
-The evaluator should simply become another step in the existing pipeline.
-
-No other evaluator should require modification.
-
----
-
-### Step 5
-
-Generate reasons.
-
-Every evaluator should generate:
-
-Positive reasons
-
-Example:
-
-```
-Water hardness requirements align.
-```
-
-Caution reasons
-
-Example:
-
-```
-Water hardness differs slightly.
-```
-
-Negative reasons
-
-Example:
-
-```
-Water hardness requirements conflict.
-```
-
----
-
-### Step 6
-
-Document the rule.
-
-Every new evaluator should be added to this README, including:
-
-* Purpose
-* Weight
-* Scoring behavior
-* Example reasons
-* Any assumptions
-
-Keeping the documentation synchronized with the implementation ensures future contributors can understand and extend the engine confidently.
-
----
-
-# Potential Future Compatibility Factors
-
-The architecture is intentionally designed to support future expansion.
-
-Possible future evaluators include:
-
-* Water hardness (GH/KH)
-* Flow preference
-* Swimming zone
-* Breeding aggression
-* Fin-nipping tendencies
-* Plant safety
-* Reef-safe behavior (for future saltwater support)
-* Bioload interactions
-* Territorial footprint
-* Activity level
-* Lighting preference
-* Aquascape preference
-* Water current tolerance
-* Species-specific exceptions
-* Expert override rules
-
-These additions should follow the same implementation workflow described above.
-
-Because every rule is isolated, future enhancements should not require redesigning or rewriting the engine.
-
----
-
-# Guiding Philosophy
-
-The GuideMyTank Compatibility Engine is intended to assist aquarium planning—not replace responsible fishkeeping.
-
-Compatibility scores are generated using measurable husbandry data and transparent evaluation rules.
-
-The engine should always provide users with enough information to understand **why** a compatibility score was assigned, enabling informed decisions rather than relying solely on a numeric result.
-
-As GuideMyTank evolves, new evaluators and improved biological data can be incorporated while preserving the engine's modular architecture, transparency, and maintainability.
-
-# Compatibility Disclaimer
-
-The GuideMyTank Compatibility Score is designed to help you evaluate how likely two aquarium species are to coexist successfully based on known aquarium husbandry data.
-
-Our compatibility engine analyzes multiple factors, including:
-
-- 🌡️ Temperature compatibility
-- 💧 pH compatibility
-- 😌 Temperament and aggression
-- 🐟 Schooling and social behavior
-- 🦈 Predation risk
-- 🏠 Minimum tank size requirements
-
-These factors are combined into an overall compatibility score and accompanied by clear explanations to help you understand the recommendation.
-
-Compatibility scores are recommendations, not guarantees. Individual fish behavior can vary based on age, sex, temperament, tank size, aquascape, stocking density, water quality, and introduction method.
-
-A future `/compatibility/disclaimer` page should explain:
-
-- How compatibility scores work
-- Recommendations versus guarantees
-- Why fish behavior can vary
-- Best practices when introducing new tankmates
-- GuideMyTank’s transparent recommendation philosophy
+Compatibility scores are planning tools. Users should still verify care requirements, avoid overcrowding, quarantine new livestock when possible, and watch behavior after introduction.

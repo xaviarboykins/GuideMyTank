@@ -44,6 +44,8 @@ export type Database = {
           compatibility: string
           confidence: number | null
           created_at: string | null
+          expert_notes: string | null
+          expert_validated: boolean
           id: string
           notes: string | null
           species_a_id: string
@@ -53,6 +55,8 @@ export type Database = {
           compatibility: string
           confidence?: number | null
           created_at?: string | null
+          expert_notes?: string | null
+          expert_validated?: boolean
           id?: string
           notes?: string | null
           species_a_id: string
@@ -62,6 +66,8 @@ export type Database = {
           compatibility?: string
           confidence?: number | null
           created_at?: string | null
+          expert_notes?: string | null
+          expert_validated?: boolean
           id?: string
           notes?: string | null
           species_a_id?: string
@@ -174,95 +180,194 @@ export type Database = {
       species: {
         Row: {
           aggression_level: number | null
+          activity_level: string | null
+          armored_body: boolean
           bioload_rating: number | null
+          bonded_pair_suitable: boolean
+          breeding_aggression: boolean
           breeding_difficulty: string | null
           care_level: string | null
+          care_warnings: string[]
           common_name: string
           compatibility_tags: string[]
+          competitive_feeder: boolean
           created_at: string | null
+          data_confidence: string
+          delicate_species: boolean
+          deep_bodied: boolean
           diet: string | null
           family: string | null
+          fin_nipping_risk: boolean
+          flow_preference: string | null
+          hardness_preference: string | null
           id: string
           image_url: string | null
           invert_safe: boolean | null
           lifespan_years: number | null
+          long_fin_vulnerable: boolean
           max_ph: number | null
+          max_gh_dgh: number | null
+          max_kh_dkh: number | null
           max_size_inches: number | null
           max_temp_f: number | null
+          recommended_max_temp_f: number | null
+          min_gh_dgh: number | null
           min_group_size: number | null
+          min_kh_dkh: number | null
           min_ph: number | null
           min_temp_f: number | null
+          recommended_min_temp_f: number | null
+          mouth_gape_risk: boolean
           origin: string | null
           plant_safe: boolean | null
+          preferred_tank_style: string | null
+          ph_stability_required: boolean
           region: string | null
           schooling: boolean | null
           scientific_name: string
           slug: string
+          slow_moving: boolean
+          specialist_setup: boolean
+          species_only_preferred: boolean
+          slender_prey_body: boolean
           summary: string | null
+          surface_predator: boolean
           tank_size_gal: number | null
+          temp_source_notes: string | null
           temperament: string | null
+          temperature_category: string | null
+          tolerated_max_temp_f: number | null
+          tolerated_min_temp_f: number | null
+          territory_footprint: string | null
+          territory_zone: string | null
           updated_at: string | null
         }
         Insert: {
           aggression_level?: number | null
+          activity_level?: string | null
+          armored_body?: boolean
           bioload_rating?: number | null
+          bonded_pair_suitable?: boolean
+          breeding_aggression?: boolean
           breeding_difficulty?: string | null
           care_level?: string | null
+          care_warnings?: string[]
           common_name: string
           compatibility_tags?: string[]
+          competitive_feeder?: boolean
           created_at?: string | null
+          data_confidence?: string
+          delicate_species?: boolean
+          deep_bodied?: boolean
           diet?: string | null
           family?: string | null
+          fin_nipping_risk?: boolean
+          flow_preference?: string | null
+          hardness_preference?: string | null
           id?: string
           image_url?: string | null
           invert_safe?: boolean | null
           lifespan_years?: number | null
+          long_fin_vulnerable?: boolean
           max_ph?: number | null
+          max_gh_dgh?: number | null
+          max_kh_dkh?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
+          recommended_max_temp_f?: number | null
+          min_gh_dgh?: number | null
           min_group_size?: number | null
+          min_kh_dkh?: number | null
           min_ph?: number | null
           min_temp_f?: number | null
+          recommended_min_temp_f?: number | null
+          mouth_gape_risk?: boolean
           origin?: string | null
           plant_safe?: boolean | null
+          preferred_tank_style?: string | null
+          ph_stability_required?: boolean
           region?: string | null
           schooling?: boolean | null
           scientific_name: string
           slug: string
+          slow_moving?: boolean
+          specialist_setup?: boolean
+          species_only_preferred?: boolean
+          slender_prey_body?: boolean
           summary?: string | null
+          surface_predator?: boolean
           tank_size_gal?: number | null
+          temp_source_notes?: string | null
           temperament?: string | null
+          temperature_category?: string | null
+          tolerated_max_temp_f?: number | null
+          tolerated_min_temp_f?: number | null
+          territory_footprint?: string | null
+          territory_zone?: string | null
           updated_at?: string | null
         }
         Update: {
           aggression_level?: number | null
+          activity_level?: string | null
+          armored_body?: boolean
           bioload_rating?: number | null
+          bonded_pair_suitable?: boolean
+          breeding_aggression?: boolean
           breeding_difficulty?: string | null
           care_level?: string | null
+          care_warnings?: string[]
           common_name?: string
           compatibility_tags?: string[]
+          competitive_feeder?: boolean
           created_at?: string | null
+          data_confidence?: string
+          delicate_species?: boolean
+          deep_bodied?: boolean
           diet?: string | null
           family?: string | null
+          fin_nipping_risk?: boolean
+          flow_preference?: string | null
+          hardness_preference?: string | null
           id?: string
           image_url?: string | null
           invert_safe?: boolean | null
           lifespan_years?: number | null
+          long_fin_vulnerable?: boolean
           max_ph?: number | null
+          max_gh_dgh?: number | null
+          max_kh_dkh?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
+          recommended_max_temp_f?: number | null
+          min_gh_dgh?: number | null
           min_group_size?: number | null
+          min_kh_dkh?: number | null
           min_ph?: number | null
           min_temp_f?: number | null
+          recommended_min_temp_f?: number | null
+          mouth_gape_risk?: boolean
           origin?: string | null
           plant_safe?: boolean | null
+          preferred_tank_style?: string | null
+          ph_stability_required?: boolean
           region?: string | null
           schooling?: boolean | null
           scientific_name?: string
           slug?: string
+          slow_moving?: boolean
+          specialist_setup?: boolean
+          species_only_preferred?: boolean
+          slender_prey_body?: boolean
           summary?: string | null
+          surface_predator?: boolean
           tank_size_gal?: number | null
+          temp_source_notes?: string | null
           temperament?: string | null
+          temperature_category?: string | null
+          tolerated_max_temp_f?: number | null
+          tolerated_min_temp_f?: number | null
+          territory_footprint?: string | null
+          territory_zone?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -289,6 +394,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "species_aliases_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      species_source_references: {
+        Row: {
+          confidence: string
+          created_at: string
+          id: string
+          notes: string | null
+          source_category: string
+          source_label: string | null
+          source_url: string
+          species_id: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          source_category?: string
+          source_label?: string | null
+          source_url: string
+          species_id: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          source_category?: string
+          source_label?: string | null
+          source_url?: string
+          species_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_source_references_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
             referencedRelation: "species"

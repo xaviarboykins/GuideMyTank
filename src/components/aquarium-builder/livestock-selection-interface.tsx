@@ -21,6 +21,8 @@ import {
 } from "@/lib/aquarium-builder/storage";
 import { calculateCompatibility } from "@/lib/compatibility/engine";
 import { getSpeciesImage } from "@/lib/images";
+import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
+import { formatRecommendedTemperature } from "@/lib/species/temperature-label";
 
 type LivestockSelectionInterfaceProps = {
   species: AquariumSpecies[];
@@ -43,26 +45,6 @@ const defaultFilters: FilterState = {
 };
 
 const pageSize = 45;
-
-function formatRange(
-  min: number | null | undefined,
-  max: number | null | undefined,
-  suffix = "",
-) {
-  if (min != null && max != null) {
-    return `${min}-${max}${suffix}`;
-  }
-
-  if (min != null) {
-    return `${min}${suffix}+`;
-  }
-
-  if (max != null) {
-    return `Up to ${max}${suffix}`;
-  }
-
-  return "Unknown";
-}
 
 function formatMinimumTankSize(value: number | null) {
   return value ? `${value} gal` : "Unknown";
@@ -629,7 +611,7 @@ export function LivestockSelectionInterface({
                 >
                   <option value="all">All</option>
                   <option value="schooling">Schooling/group</option>
-                  <option value="solo">Solo/pair</option>
+                  <option value="solo">Solo/non-schooling</option>
                 </select>
               </FilterField>
 
@@ -743,16 +725,14 @@ export function LivestockSelectionInterface({
                       {formatMinimumTankSize(item.tank_size_gal)}
                     </td>
                     <td className="px-2 py-2">
-                      {formatRange(item.min_temp_f, item.max_temp_f, " F")}
+                      {formatRecommendedTemperature(item)}
                     </td>
                     <td className="px-2 py-2">
                       {item.temperament ?? "Unknown"}
                     </td>
                     <td className="px-2 py-2">{item.care_level ?? "Unknown"}</td>
                     <td className="px-2 py-2">
-                      {item.schooling
-                        ? `Group ${item.min_group_size ?? "?"}+`
-                        : "Solo/pair"}
+                      {formatSpeciesGroupLabel(item)}
                     </td>
                     <td className="py-2 pl-2 pr-4 text-right">
                       <Button

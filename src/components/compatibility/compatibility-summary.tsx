@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
+import { ExpertValidationBadge } from "@/components/compatibility/expert-validation-badge";
 import type { CompatibilityResult } from "@/lib/data/compatibility";
 
 type CompatibilitySummaryProps = {
@@ -13,7 +14,12 @@ export function CompatibilitySummary({
   return (
     <section className="mt-8 grid gap-6 lg:grid-cols-3">
       <div className="rounded-lg border bg-card p-6 lg:col-span-2">
-        <h2 className="text-xl font-semibold">Compatibility Result</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-xl font-semibold">Compatibility Result</h2>
+          <ExpertValidationBadge
+            expertValidated={compatibility.expertValidated}
+          />
+        </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div className="rounded-md border bg-muted/30 p-4">

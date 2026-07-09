@@ -41,6 +41,39 @@ STRICT_SPECIES_FIELDS = (
     "plant_safe",
     "invert_safe",
     "compatibility_tags",
+    "flow_preference",
+    "activity_level",
+    "hardness_preference",
+    "temperature_category",
+    "preferred_tank_style",
+    "data_confidence",
+    "temp_source_notes",
+    "recommended_min_temp_f",
+    "recommended_max_temp_f",
+    "tolerated_min_temp_f",
+    "tolerated_max_temp_f",
+    "care_warnings",
+    "territory_zone",
+    "territory_footprint",
+    "fin_nipping_risk",
+    "long_fin_vulnerable",
+    "slow_moving",
+    "surface_predator",
+    "mouth_gape_risk",
+    "armored_body",
+    "deep_bodied",
+    "slender_prey_body",
+    "specialist_setup",
+    "delicate_species",
+    "competitive_feeder",
+    "species_only_preferred",
+    "bonded_pair_suitable",
+    "breeding_aggression",
+    "min_gh_dgh",
+    "max_gh_dgh",
+    "min_kh_dkh",
+    "max_kh_dkh",
+    "ph_stability_required",
     "max_size_inches",
     "image_url",
     "summary",
@@ -51,6 +84,23 @@ IMAGE_URL_PATTERN = re.compile(r"^/species/[a-z0-9]+(?:-[a-z0-9]+)*\.webp$")
 TEMPERAMENT_VALUES = {"Peaceful", "Semi-Aggressive", "Aggressive"}
 DIET_VALUES = {"Carnivore", "Herbivore", "Omnivore"}
 CARE_LEVEL_VALUES = {"Easy", "Intermediate", "Advanced"}
+FLOW_PREFERENCE_VALUES = {"low", "moderate", "high"}
+ACTIVITY_LEVEL_VALUES = {"calm", "moderate", "active", "boisterous"}
+HARDNESS_PREFERENCE_VALUES = {"soft", "neutral", "hard"}
+TEMPERATURE_CATEGORY_VALUES = {"cool", "tropical", "warm"}
+PREFERRED_TANK_STYLE_VALUES = {
+    "blackwater",
+    "community",
+    "goldfish",
+    "planted",
+    "predator",
+    "rockwork",
+    "species_only",
+    "stream",
+}
+DATA_CONFIDENCE_VALUES = {"low", "medium", "high"}
+TERRITORY_ZONE_VALUES = {"none", "top", "mid", "bottom", "cave", "open", "all"}
+TERRITORY_FOOTPRINT_VALUES = {"none", "small", "medium", "large"}
 COMPATIBILITY_TAG_VALUES = {
     "community",
     "nano_tank",
@@ -101,6 +151,39 @@ SPECIES_FIELDS = {
     "plant_safe",
     "invert_safe",
     "compatibility_tags",
+    "flow_preference",
+    "activity_level",
+    "hardness_preference",
+    "temperature_category",
+    "preferred_tank_style",
+    "data_confidence",
+    "temp_source_notes",
+    "recommended_min_temp_f",
+    "recommended_max_temp_f",
+    "tolerated_min_temp_f",
+    "tolerated_max_temp_f",
+    "care_warnings",
+    "territory_zone",
+    "territory_footprint",
+    "fin_nipping_risk",
+    "long_fin_vulnerable",
+    "slow_moving",
+    "surface_predator",
+    "mouth_gape_risk",
+    "armored_body",
+    "deep_bodied",
+    "slender_prey_body",
+    "specialist_setup",
+    "delicate_species",
+    "competitive_feeder",
+    "species_only_preferred",
+    "bonded_pair_suitable",
+    "breeding_aggression",
+    "min_gh_dgh",
+    "max_gh_dgh",
+    "min_kh_dkh",
+    "max_kh_dkh",
+    "ph_stability_required",
     "image_url",
 }
 
@@ -117,6 +200,15 @@ TEXT_FIELDS = {
     "summary",
     "breeding_difficulty",
     "image_url",
+    "flow_preference",
+    "activity_level",
+    "hardness_preference",
+    "temperature_category",
+    "preferred_tank_style",
+    "data_confidence",
+    "temp_source_notes",
+    "territory_zone",
+    "territory_footprint",
 }
 
 NUMBER_FIELDS = {
@@ -125,21 +217,45 @@ NUMBER_FIELDS = {
     "max_size_inches",
     "min_temp_f",
     "max_temp_f",
+    "recommended_min_temp_f",
+    "recommended_max_temp_f",
+    "tolerated_min_temp_f",
+    "tolerated_max_temp_f",
     "min_ph",
     "max_ph",
     "min_group_size",
     "aggression_level",
     "lifespan_years",
+    "min_gh_dgh",
+    "max_gh_dgh",
+    "min_kh_dkh",
+    "max_kh_dkh",
 }
 
 BOOLEAN_FIELDS = {
     "schooling",
     "plant_safe",
     "invert_safe",
+    "fin_nipping_risk",
+    "long_fin_vulnerable",
+    "slow_moving",
+    "surface_predator",
+    "mouth_gape_risk",
+    "armored_body",
+    "deep_bodied",
+    "slender_prey_body",
+    "specialist_setup",
+    "delicate_species",
+    "competitive_feeder",
+    "species_only_preferred",
+    "bonded_pair_suitable",
+    "breeding_aggression",
+    "ph_stability_required",
 }
 
 LIST_FIELDS = {
     "compatibility_tags",
+    "care_warnings",
 }
 
 
@@ -233,7 +349,7 @@ def validate_strict_fields(
             errors.append(f"{label}: missing strict field '{field}'.")
         elif isinstance(value, str) and not value.strip():
             errors.append(f"{label}: strict field '{field}' cannot be empty.")
-        elif isinstance(value, list) and not value:
+        elif isinstance(value, list) and not value and field != "care_warnings":
             errors.append(f"{label}: strict field '{field}' cannot be an empty array.")
 
 
@@ -269,6 +385,62 @@ def validate_species_values(
     validate_allowed_value(item, "temperament", TEMPERAMENT_VALUES, label, errors)
     validate_allowed_value(item, "diet", DIET_VALUES, label, errors)
     validate_allowed_value(item, "care_level", CARE_LEVEL_VALUES, label, errors)
+    validate_allowed_value(
+        item,
+        "flow_preference",
+        FLOW_PREFERENCE_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "activity_level",
+        ACTIVITY_LEVEL_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "hardness_preference",
+        HARDNESS_PREFERENCE_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "temperature_category",
+        TEMPERATURE_CATEGORY_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "preferred_tank_style",
+        PREFERRED_TANK_STYLE_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "data_confidence",
+        DATA_CONFIDENCE_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "territory_zone",
+        TERRITORY_ZONE_VALUES,
+        label,
+        errors,
+    )
+    validate_allowed_value(
+        item,
+        "territory_footprint",
+        TERRITORY_FOOTPRINT_VALUES,
+        label,
+        errors,
+    )
     validate_rating(item, "bioload_rating", label, errors)
     validate_rating(item, "aggression_level", label, errors)
     validate_positive_number(item, "tank_size_gal", label, errors)
@@ -281,6 +453,32 @@ def validate_species_values(
         label,
         errors,
     )
+    validate_ordered_range(
+        item,
+        "recommended_min_temp_f",
+        "recommended_max_temp_f",
+        "recommended temperature",
+        label,
+        errors,
+    )
+    validate_ordered_range(
+        item,
+        "tolerated_min_temp_f",
+        "tolerated_max_temp_f",
+        "tolerated temperature",
+        label,
+        errors,
+    )
+    validate_positive_number(item, "recommended_min_temp_f", label, errors)
+    validate_positive_number(item, "recommended_max_temp_f", label, errors)
+    validate_positive_number(item, "tolerated_min_temp_f", label, errors)
+    validate_positive_number(item, "tolerated_max_temp_f", label, errors)
+    validate_ordered_range(item, "min_gh_dgh", "max_gh_dgh", "GH", label, errors)
+    validate_ordered_range(item, "min_kh_dkh", "max_kh_dkh", "KH", label, errors)
+    validate_nonnegative_number(item, "min_gh_dgh", label, errors)
+    validate_nonnegative_number(item, "max_gh_dgh", label, errors)
+    validate_nonnegative_number(item, "min_kh_dkh", label, errors)
+    validate_nonnegative_number(item, "max_kh_dkh", label, errors)
     validate_ph_bounds(item, label, errors)
 
     slug = item.get("slug")
@@ -301,6 +499,12 @@ def validate_species_values(
                 errors.append(f"{label}: compatibility tags must be strings.")
             elif tag not in COMPATIBILITY_TAG_VALUES:
                 errors.append(f"{label}: unknown compatibility tag '{tag}'.")
+
+    care_warnings = item.get("care_warnings")
+    if care_warnings is not None:
+        for warning in care_warnings:
+            if not isinstance(warning, str) or not warning.strip():
+                errors.append(f"{label}: care warnings must be non-empty strings.")
 
 
 def validate_allowed_value(
@@ -336,6 +540,17 @@ def validate_positive_number(
     value = item.get(field)
     if value is not None and (not is_number(value) or value <= 0):
         errors.append(f"{label}: '{field}' must be a positive number.")
+
+
+def validate_nonnegative_number(
+    item: dict[str, Any],
+    field: str,
+    label: str,
+    errors: list[str],
+) -> None:
+    value = item.get(field)
+    if value is not None and (not is_number(value) or value < 0):
+        errors.append(f"{label}: '{field}' must be zero or a positive number.")
 
 
 def validate_ordered_range(

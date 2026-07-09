@@ -33,6 +33,12 @@ export type AquariumLivestockEntry = {
   notes?: string | null;
 };
 
+export type AquariumPlantEntry = {
+  plantSlug: string;
+  quantity: number;
+  notes?: string | null;
+};
+
 export type AquariumResolvedLivestockEntry = AquariumLivestockEntry & {
   species: AquariumSpecies;
 };
@@ -76,6 +82,7 @@ export type AquariumBuild = {
   id?: string;
   tank: AquariumTankConfiguration;
   livestock: AquariumLivestockEntry[];
+  plants: AquariumPlantEntry[];
   equipment: AquariumEquipmentProduct[];
   notes?: string | null;
   createdAt?: string;

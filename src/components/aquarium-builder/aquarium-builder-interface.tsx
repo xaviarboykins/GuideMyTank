@@ -6,12 +6,20 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type {
+  AquariumBuild,
   AquariumEquipmentProduct,
   AquariumFiltrationLevel,
+  AquariumLivestockEntry,
+  AquariumPlantEntry,
   AquariumPlantedLevel,
   AquariumTankConfiguration,
+  AquariumSpecies,
 } from "@/lib/aquarium-builder/types";
-import type { AquariumBuilderProductCategorySlug } from "@/lib/aquarium-builder/product-categories";
+import {
+  AQUARIUM_BUILDER_STORAGE_KEY,
+  defaultAquariumBuild,
+  parseAquariumBuild,
+} from "@/lib/aquarium-builder/storage";
 
 type TankSizeGallons = AquariumTankConfiguration["sizeGallons"];
 type StatusTone = "success" | "info" | "neutral" | "warning" | "critical";
@@ -31,7 +39,7 @@ type BuilderRow =
       category: SingleSelectionCategory;
       label: string;
       action: string;
-      productCategory: AquariumBuilderProductCategorySlug;
+      href: string;
     }
   | {
       kind: "repeatable";
@@ -39,7 +47,7 @@ type BuilderRow =
       label: string;
       action: string;
       addAnotherAction: string;
-      productCategory: AquariumBuilderProductCategorySlug;
+      href: string;
     };
 
 type BuilderComponentSelection = {
@@ -79,28 +87,28 @@ const builderRows: BuilderRow[] = [
     category: "tank",
     label: "Tank",
     action: "Choose Tank",
-    productCategory: "tanks",
+    href: "/aquarium-builder/products/tanks",
   },
   {
     kind: "single",
     category: "filtration",
     label: "Filtration",
     action: "Choose Filter",
-    productCategory: "filters",
+    href: "/aquarium-builder/products/filters",
   },
   {
     kind: "single",
     category: "heating",
     label: "Heating",
     action: "Choose Heater",
-    productCategory: "heaters",
+    href: "/aquarium-builder/products/heaters",
   },
   {
     kind: "single",
     category: "lighting",
     label: "Lighting",
     action: "Choose Lighting",
-    productCategory: "lights",
+    href: "/aquarium-builder/products/lights",
   },
   {
     kind: "repeatable",
@@ -108,23 +116,23 @@ const builderRows: BuilderRow[] = [
     label: "Substrate",
     action: "Choose Substrate",
     addAnotherAction: "Add Another Substrate",
-    productCategory: "substrates",
+    href: "/aquarium-builder/products/substrates",
   },
   {
     kind: "repeatable",
     category: "plants",
     label: "Plants",
-    action: "Choose Plants",
-    addAnotherAction: "Add Another Plant",
-    productCategory: "plants",
+    action: "Add/Edit Plants",
+    addAnotherAction: "Add/Edit Plants",
+    href: "/aquarium-builder/plants",
   },
   {
     kind: "repeatable",
     category: "livestock",
     label: "Livestock",
-    action: "Add Livestock",
-    addAnotherAction: "Add Another Livestock",
-    productCategory: "livestock",
+    action: "Add/Edit Livestock",
+    addAnotherAction: "Add/Edit Livestock",
+    href: "/aquarium-builder/livestock",
   },
   {
     kind: "repeatable",
@@ -132,7 +140,7 @@ const builderRows: BuilderRow[] = [
     label: "Decor",
     action: "Add Decor",
     addAnotherAction: "Add Another Decor Item",
-    productCategory: "decor",
+    href: "/aquarium-builder/products/decor",
   },
 ];
 
@@ -155,19 +163,56 @@ function estimateFlowGph(
   return sizeGallons * flowMultipliers[filtrationLevel];
 }
 
-export function AquariumBuilderInterface() {
+export function AquariumBuilderInterface({
+  species,
+}: {
+  species: AquariumSpecies[];
+}) {
   const [singleSelections, setSingleSelections] = useState<SingleSelections>(
     {},
   );
   const [repeatableSelections, setRepeatableSelections] =
     useState<RepeatableSelections>({});
+  const [build] = useState<AquariumBuild>(() => {
+    if (typeof window === "undefined") {
+      return defaultAquariumBuild;
+    }
+
+    return parseAquariumBuild(
+      window.localStorage.getItem(AQUARIUM_BUILDER_STORAGE_KEY),
+    );
+  });
 
   const tankSizeGallons = singleSelections.tank?.tank?.sizeGallons ?? null;
   const filtrationLevel =
     singleSelections.filtration?.filtrationLevel ?? null;
   const plantedLevel =
-    repeatableSelections.plants?.find((plant) => plant.plantedLevel)
-      ?.plantedLevel ?? null;
+    build.tank.plantedLevel !== "none" ? build.tank.plantedLevel : null;
+  const plantSpeciesCount = build.plants.length;
+  const plantTotalCount = build.plants.reduce((total, entry) => {
+    return total + entry.quantity;
+  }, 0);
+  const plantSummary =
+    plantSpeciesCount > 0
+      ? `${plantSpeciesCount} ${
+          plantSpeciesCount === 1 ? "plant" : "plants"
+        } - ${plantTotalCount} total`
+      : "No plants selected";
+  const livestockSpeciesBySlug = useMemo(() => {
+    return new Map(species.map((item) => [item.slug, item]));
+  }, [species]);
+  const livestockSpeciesCount = build.livestock.length;
+  const livestockTotalCount = build.livestock.reduce((total, entry) => {
+    return total + entry.quantity;
+  }, 0);
+  const livestockSummary =
+    livestockSpeciesCount > 0
+      ? `${livestockSpeciesCount} ${
+          livestockSpeciesCount === 1 ? "species" : "species"
+        } - ${livestockTotalCount} ${
+          livestockTotalCount === 1 ? "animal" : "animals"
+        }`
+      : "No livestock selected";
 
   const flowEstimateGph = useMemo(
     () => estimateFlowGph(tankSizeGallons, filtrationLevel),
@@ -291,17 +336,39 @@ export function AquariumBuilderInterface() {
                     {row.kind === "single" ? (
                       <SingleSelectionCell
                         action={row.action}
-                        href={`/aquarium-builder/products/${row.productCategory}`}
+                        href={row.href}
                         selection={singleSelections[row.category] ?? null}
                         onClear={() => clearSingleSelection(row.category)}
                       />
                     ) : null}
 
-                    {row.kind === "repeatable" ? (
+                    {row.kind === "repeatable" &&
+                    row.category === "livestock" ? (
+                      <LivestockSelectionCell
+                        action={row.action}
+                        href={row.href}
+                        livestock={build.livestock}
+                        speciesBySlug={livestockSpeciesBySlug}
+                        summary={livestockSummary}
+                      />
+                    ) : null}
+
+                    {row.kind === "repeatable" && row.category === "plants" ? (
+                      <PlantSelectionCell
+                        action={row.action}
+                        href={row.href}
+                        plants={build.plants}
+                        summary={plantSummary}
+                      />
+                    ) : null}
+
+                    {row.kind === "repeatable" &&
+                    row.category !== "livestock" &&
+                    row.category !== "plants" ? (
                       <RepeatableSelectionCell
                         action={row.action}
                         addAnotherAction={row.addAnotherAction}
-                        href={`/aquarium-builder/products/${row.productCategory}`}
+                        href={row.href}
                         selections={repeatableSelections[row.category] ?? []}
                         onClear={(index) =>
                           clearRepeatableSelection(row.category, index)
@@ -315,7 +382,112 @@ export function AquariumBuilderInterface() {
           </table>
         </div>
       </section>
+
+      <section className="mt-6 border border-border bg-card">
+        <div className="border-b border-border p-4">
+          <h2 className="text-lg font-semibold">Tank Breakdown</h2>
+        </div>
+
+        <div className="grid gap-6 p-4 text-sm md:grid-cols-2">
+          <div>
+            <h3 className="font-semibold">Configuration</h3>
+            <dl className="mt-3 space-y-2">
+              <BreakdownRow
+                label="Tank"
+                value={
+                  tankSizeGallons ? `${tankSizeGallons} gal` : "Not selected"
+                }
+              />
+              <BreakdownRow
+                label="Filtration"
+                value={formatLevelLabel(filtrationLevel) ?? "Not selected"}
+              />
+              <BreakdownRow
+                label="Planted Level"
+                value={formatLevelLabel(plantedLevel) ?? "Not selected"}
+              />
+            </dl>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Livestock</h3>
+            <dl className="mt-3 space-y-2">
+              <BreakdownRow
+                label="Species"
+                value={String(livestockSpeciesCount)}
+              />
+              <BreakdownRow
+                label="Total Count"
+                value={String(livestockTotalCount)}
+              />
+            </dl>
+
+            {build.livestock.length > 0 ? (
+              <ul className="mt-4 space-y-2">
+                {build.livestock.map((entry) => {
+                  const item = livestockSpeciesBySlug.get(entry.speciesSlug);
+
+                  return (
+                    <li
+                      key={entry.speciesSlug}
+                      className="border border-border bg-background p-3"
+                    >
+                      <div className="font-medium">
+                        {item?.common_name ?? entry.speciesSlug}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Quantity: {entry.quantity}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No livestock selected yet.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Plants</h3>
+            <dl className="mt-3 space-y-2">
+              <BreakdownRow label="Plant Types" value={String(plantSpeciesCount)} />
+              <BreakdownRow label="Total Count" value={String(plantTotalCount)} />
+            </dl>
+
+            {build.plants.length > 0 ? (
+              <ul className="mt-4 space-y-2">
+                {build.plants.map((entry) => (
+                  <li
+                    key={entry.plantSlug}
+                    className="border border-border bg-background p-3"
+                  >
+                    <div className="font-medium">{entry.plantSlug}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Quantity: {entry.quantity}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No plants selected yet.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
     </>
+  );
+}
+
+function BreakdownRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-border pb-2 last:border-b-0">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right font-medium">{value}</dd>
+    </div>
   );
 }
 
@@ -372,6 +544,88 @@ function SingleSelectionCell({
         {action}
       </Link>
     </Button>
+  );
+}
+
+function PlantSelectionCell({
+  action,
+  href,
+  plants,
+  summary,
+}: {
+  action: string;
+  href: string;
+  plants: AquariumPlantEntry[];
+  summary: string;
+}) {
+  if (plants.length === 0) {
+    return <PlaceholderSelectionCell action={action} href={href} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div className="font-medium">{summary}</div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          {plants
+            .slice(0, 3)
+            .map((entry) => `${entry.plantSlug} x${entry.quantity}`)
+            .join(", ")}
+          {plants.length > 3 ? "..." : ""}
+        </div>
+      </div>
+
+      <Button asChild variant="outline" size="sm">
+        <Link href={href}>
+          <Plus className="size-4" aria-hidden="true" />
+          {action}
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function LivestockSelectionCell({
+  action,
+  href,
+  livestock,
+  speciesBySlug,
+  summary,
+}: {
+  action: string;
+  href: string;
+  livestock: AquariumLivestockEntry[];
+  speciesBySlug: Map<string, AquariumSpecies>;
+  summary: string;
+}) {
+  if (livestock.length === 0) {
+    return <PlaceholderSelectionCell action={action} href={href} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div className="font-medium">{summary}</div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          {livestock
+            .slice(0, 3)
+            .map((entry) => {
+              const item = speciesBySlug.get(entry.speciesSlug);
+
+              return `${item?.common_name ?? entry.speciesSlug} x${entry.quantity}`;
+            })
+            .join(", ")}
+          {livestock.length > 3 ? "..." : ""}
+        </div>
+      </div>
+
+      <Button asChild variant="outline" size="sm">
+        <Link href={href}>
+          <Plus className="size-4" aria-hidden="true" />
+          {action}
+        </Link>
+      </Button>
+    </div>
   );
 }
 

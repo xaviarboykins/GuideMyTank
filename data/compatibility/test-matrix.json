@@ -1,0 +1,135 @@
+{
+  "known_good": [
+    {
+      "species": ["neon-tetra", "corydoras-catfish"],
+      "expected": ["compatible"],
+      "note": "Classic peaceful community pairing when both are kept in proper groups."
+    },
+    {
+      "species": ["honey-gourami", "harlequin-rasbora"],
+      "expected": ["compatible"],
+      "note": "Generally workable, with normal planted community planning."
+    },
+    {
+      "species": ["pygmy-cory", "chili-rasbora"],
+      "expected": ["compatible"],
+      "note": "Small peaceful nano species using different parts of the tank."
+    },
+    {
+      "species": ["ember-tetra", "panda-cory"],
+      "expected": ["compatible"],
+      "note": "Peaceful soft-to-neutral community fish."
+    },
+    {
+      "species": ["guppy", "corydoras-catfish"],
+      "expected": ["compatible"],
+      "note": "Common peaceful community pairing with compatible adult size and behavior."
+    },
+    {
+      "species": ["zebra-danio", "white-cloud-mountain-minnow"],
+      "expected": ["compatible", "caution"],
+      "note": "Active cooler-water schooling fish; usually workable with enough swimming room."
+    },
+    {
+      "species": ["cherry-barb", "pygmy-cory"],
+      "expected": ["compatible"],
+      "note": "Peaceful small community fish using different tank zones."
+    }
+  ],
+  "known_caution": [
+    {
+      "species": ["betta-splendens", "pygmy-cory"],
+      "expected": ["caution"],
+      "note": "Caution due to betta temperament and activity/social mismatch, not predation."
+    },
+    {
+      "species": ["betta-splendens", "neon-tetra"],
+      "expected": ["caution"],
+      "note": "Often attempted, but fin-nipping/activity/territory context matters."
+    },
+    {
+      "species": ["tiger-barb", "betta-splendens"],
+      "expected": ["caution"],
+      "note": "Fin-nipping risk should cap at caution rather than being treated as predation."
+    },
+    {
+      "species": ["pea-puffer", "chili-rasbora"],
+      "expected": ["caution"],
+      "note": "Only a narrow, heavily planted, carefully monitored setup."
+    },
+    {
+      "species": ["discus", "clown-loach"],
+      "expected": ["caution"],
+      "note": "Possible water and tank-size overlap, but not a simple community recommendation."
+    },
+    {
+      "species": ["serpae-tetra", "angelfish"],
+      "expected": ["caution"],
+      "note": "Fin-nipping risk with slow, long-finned angelfish."
+    },
+    {
+      "species": ["rainbow-shark", "corydoras-catfish"],
+      "expected": ["caution"],
+      "note": "Bottom-zone territorial conflict without predation."
+    }
+  ],
+  "known_bad": [
+    {
+      "species": ["pea-puffer", "betta-splendens"],
+      "expected": ["incompatible"],
+      "note": "Pea puffer fin-nipping and species-only tendency make this strongly unsuitable."
+    },
+    {
+      "species": ["oscar", "neon-tetra"],
+      "expected": ["incompatible"],
+      "note": "Predation risk."
+    },
+    {
+      "species": ["angelfish", "neon-tetra"],
+      "expected": ["incompatible"],
+      "note": "Mouth-gape predation risk, especially with small slender tetras."
+    },
+    {
+      "species": ["senegal-bichir", "neon-tetra"],
+      "expected": ["incompatible"],
+      "note": "Predation risk."
+    },
+    {
+      "species": ["golden-wonder-killifish", "zebra-danio"],
+      "expected": ["incompatible"],
+      "note": "Surface predator with small slender fish."
+    },
+    {
+      "species": ["oscar", "guppy"],
+      "expected": ["incompatible"],
+      "note": "Predation risk."
+    },
+    {
+      "species": ["jack-dempsey-cichlid", "neon-tetra"],
+      "expected": ["incompatible"],
+      "note": "Large aggressive cichlid with small slender prey fish."
+    }
+  ],
+  "controversial_context_dependent": [
+    {
+      "species": ["pea-puffer", "otocinclus-catfish"],
+      "expected": ["caution"],
+      "note": "One of the more defensible pea puffer tankmates, but still context dependent."
+    },
+    {
+      "species": ["red-tail-shark", "rainbow-shark"],
+      "expected": ["caution"],
+      "note": "Territory and footprint conflict; not automatic predation."
+    },
+    {
+      "species": ["ranchu-goldfish", "rosy-barb"],
+      "expected": ["caution", "incompatible"],
+      "note": "Temperature/activity/fin vulnerability can make this poor depending on setup."
+    },
+    {
+      "species": ["electric-yellow-cichlid", "shortfin-molly"],
+      "expected": ["caution"],
+      "note": "Hard-water overlap, but mbuna behavior makes it context dependent."
+    }
+  ]
+}

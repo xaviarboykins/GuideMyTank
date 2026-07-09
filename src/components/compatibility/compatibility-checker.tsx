@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
+import { ExpertValidationBadge } from "@/components/compatibility/expert-validation-badge";
 import { Button } from "@/components/ui/button";
 import type {
   CompatibilityResult,
@@ -215,9 +216,14 @@ export function CompatibilityChecker({
                 <p className="text-sm font-medium text-muted-foreground">
                   Compatibility Result
                 </p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight">
-                  {visibleResult.status}
-                </h2>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <h2 className="text-3xl font-bold tracking-tight">
+                    {visibleResult.status}
+                  </h2>
+                  <ExpertValidationBadge
+                    expertValidated={visibleResult.expertValidated}
+                  />
+                </div>
               </div>
 
               <CompatibilityBadge

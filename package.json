@@ -6,10 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "audit:species-data": "node scripts/audit_species_care_data.cjs",
     "lint": "eslint",
-    "validate:species": "python scripts/import_species.py data/import/species.master.json --dry-run --strict",
-    "import:species": "python scripts/import_species.py data/import/species.master.json",
-    "import:species:update": "python scripts/import_species.py data/import/species.master.json --update-existing"
+    "validate:compatibility": "node scripts/check_compatibility_matrix.cjs",
+    "validate:expert-overrides": "node scripts/validate_expert_overrides.cjs",
+    "validate:species": "node scripts/run_species_import.cjs data/import/species.master.json --dry-run --strict",
+    "validate:species-sources": "node scripts/validate_species_sources.cjs",
+    "import:expert-overrides": "node scripts/import_expert_overrides.cjs",
+    "import:species": "node scripts/run_species_import.cjs data/import/species.master.json",
+    "import:species:update": "node scripts/run_species_import.cjs data/import/species.master.json --update-existing",
+    "import:species-sources": "node scripts/import_species_sources.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

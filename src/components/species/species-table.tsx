@@ -7,6 +7,8 @@ import { useState } from "react";
 
 import type { Database } from "@/types/database.types";
 import { getSpeciesImage } from "@/lib/images";
+import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
+import { formatRecommendedTemperature } from "@/lib/species/temperature-label";
 
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
@@ -124,13 +126,11 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
                 </td>
 
                 <td className="p-3">
-                  {item.schooling
-                    ? formatNumber(item.min_group_size)
-                    : "Solo/pair"}
+                  {formatSpeciesGroupLabel(item)}
                 </td>
 
                 <td className="p-3">
-                  {formatRange(item.min_temp_f, item.max_temp_f, " F")}
+                  {formatRecommendedTemperature(item)}
                 </td>
 
                 <td className="p-3">{formatRange(item.min_ph, item.max_ph)}</td>

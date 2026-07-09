@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CompatibilityBadge } from "@/components/compatibility/compatibility-badge";
+import { ExpertValidationBadge } from "@/components/compatibility/expert-validation-badge";
 import {
   Accordion,
   AccordionContent,
@@ -68,6 +69,11 @@ function CompatibilityList({
                 <p className="mt-2 text-sm text-muted-foreground">
                   Score: {rule.score} - {rule.status}
                 </p>
+                <div className="mt-2">
+                  <ExpertValidationBadge
+                    expertValidated={rule.expertValidated}
+                  />
+                </div>
               </div>
 
               <CompatibilityBadge compatibility={rule.compatibility} />

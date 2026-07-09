@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "overrides": [
+    {
+      "species": ["pea-puffer", "betta-splendens"],
+      "compatibility": "incompatible",
+      "confidence": 0.95,
+      "expert_validated": true,
+      "notes": "Pea puffers are territorial fin-nippers and bettas are slow, long-finned, territorial fish. This pairing is strongly discouraged."
+    },
+    {
+      "species": ["pea-puffer", "otocinclus-catfish"],
+      "compatibility": "caution",
+      "confidence": 0.8,
+      "expert_validated": true,
+      "notes": "Otocinclus are one of the more defensible pea puffer tankmates, but only in mature, heavily planted setups with careful monitoring."
+    },
+    {
+      "species": ["angelfish", "neon-tetra"],
+      "compatibility": "incompatible",
+      "confidence": 0.9,
+      "expert_validated": true,
+      "notes": "Adult angelfish can eat small slender tetras such as neons, especially once the angelfish is mature."
+    },
+    {
+      "species": ["tiger-barb", "betta-splendens"],
+      "compatibility": "caution",
+      "confidence": 0.85,
+      "expert_validated": true,
+      "notes": "Tiger barbs are active fin-nippers and bettas are slow long-finned fish. This should be treated as a high-risk caution pairing, not a normal community match."
+    },
+    {
+      "species": ["red-tail-shark", "rainbow-shark"],
+      "compatibility": "caution",
+      "confidence": 0.8,
+      "expert_validated": true,
+      "notes": "Both species defend similar bottom territories. They may coexist only in large, structured aquariums and are a poor fit for most community tanks."
+    },
+    {
+      "species": ["oscar", "neon-tetra"],
+      "compatibility": "incompatible",
+      "confidence": 0.95,
+      "expert_validated": true,
+      "notes": "Oscars are predatory cichlids and neon tetras are small prey-sized fish."
+    },
+    {
+      "species": ["serpae-tetra", "angelfish"],
+      "compatibility": "caution",
+      "confidence": 0.8,
+      "expert_validated": true,
+      "notes": "Serpae tetras can nip fins and angelfish are slow, long-finned cichlids. This is a caution pairing even when water parameters overlap."
+    }
+  ]
+}

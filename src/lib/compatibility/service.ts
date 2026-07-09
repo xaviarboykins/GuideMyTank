@@ -96,7 +96,9 @@ export async function getCompatibility(
 
   const { data: rule, error: ruleError } = await supabase
     .from("compatibility_rules")
-    .select("compatibility, confidence, notes, species_a_id, species_b_id")
+    .select(
+      "compatibility, confidence, expert_validated, notes, species_a_id, species_b_id",
+    )
     .or(
       `and(species_a_id.eq.${speciesA.id},species_b_id.eq.${speciesB.id}),and(species_a_id.eq.${speciesB.id},species_b_id.eq.${speciesA.id})`,
     )
@@ -125,6 +127,7 @@ export async function getCompatibility(
     compatibility,
     confidence: rule.confidence,
     notes: rule.notes,
+    expertValidated: rule.expert_validated ?? true,
     species_a: toCompatibilitySpecies(speciesA),
     species_b: toCompatibilitySpecies(speciesB),
   };
@@ -203,7 +206,9 @@ export async function getCompatibilityRulesForSpecies(
 
   const { data: rules, error: rulesError } = await supabase
     .from("compatibility_rules")
-    .select("compatibility, confidence, notes, species_a_id, species_b_id")
+    .select(
+      "compatibility, confidence, expert_validated, notes, species_a_id, species_b_id",
+    )
     .or(
       `species_a_id.eq.${currentSpecies.id},species_b_id.eq.${currentSpecies.id}`,
     );
@@ -260,6 +265,7 @@ export async function getCompatibilityRulesForSpecies(
             manualRule.compatibility as CompatibilityResult["compatibility"],
           confidence: manualRule.confidence,
           notes: manualRule.notes,
+          expertValidated: manualRule.expert_validated ?? true,
           species_a: toCompatibilitySpecies(currentSpecies),
           species_b: toCompatibilitySpecies(relatedSpecies),
         }

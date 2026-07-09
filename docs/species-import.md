@@ -75,6 +75,28 @@ Supported top-level species fields:
 - `plant_safe`
 - `invert_safe`
 - `compatibility_tags`
+- `flow_preference`
+- `activity_level`
+- `hardness_preference`
+- `temperature_category`
+- `preferred_tank_style`
+- `data_confidence`
+- `temp_source_notes`
+- `recommended_min_temp_f`
+- `recommended_max_temp_f`
+- `tolerated_min_temp_f`
+- `tolerated_max_temp_f`
+- `care_warnings`
+- `fin_nipping_risk`
+- `long_fin_vulnerable`
+- `slow_moving`
+- `surface_predator`
+- `mouth_gape_risk`
+- `specialist_setup`
+- `delicate_species`
+- `competitive_feeder`
+- `species_only_preferred`
+- `bonded_pair_suitable`
 - `max_size_inches`
 - `image_url`
 - `summary`
@@ -102,6 +124,42 @@ Optional related field:
 - `Easy`
 - `Intermediate`
 - `Advanced`
+
+`flow_preference`:
+
+- `low`
+- `moderate`
+- `high`
+
+`activity_level`:
+
+- `calm`
+- `moderate`
+- `active`
+- `boisterous`
+
+`hardness_preference`:
+
+- `soft`
+- `neutral`
+- `hard`
+
+`temperature_category`:
+
+- `cool`
+- `tropical`
+- `warm`
+
+`preferred_tank_style`:
+
+- `blackwater`
+- `community`
+- `goldfish`
+- `planted`
+- `predator`
+- `rockwork`
+- `species_only`
+- `stream`
 
 `compatibility_tags`:
 
@@ -140,6 +198,7 @@ It rejects:
 - unknown fields
 - wrong field types
 - unsupported enum values
+- unsupported compatibility trait values
 - `bioload_rating` or `aggression_level` outside `1` through `10`
 - `tank_size_gal` values that are not positive numbers
 - pH ranges where `min_ph` is greater than `max_ph`
@@ -186,11 +245,12 @@ Do not commit service role keys.
 Always run a dry run first:
 
 ```bash
-python scripts/import_species.py data/import/species.master.json --dry-run
+npm run validate:species
 ```
 
 Dry run validates the local file and prints a summary. It does not contact
-Supabase and does not write data.
+Supabase and does not write data. The npm script uses `scripts/run_species_import.cjs`
+to find `python`, `python3`, Windows `py -3`, or the bundled Codex Python runtime.
 
 For the master dataset, use strict validation:
 
@@ -210,6 +270,75 @@ Strict mode requires every species to include complete v2 product fields:
 - physical size
 - local image path
 - summary
+
+## Care Data Audit
+
+Before importing broad dataset changes, run:
+
+```bash
+npm run audit:species-data
+```
+
+This generates:
+
+```txt
+docs/data-audits/species-care-data-audit.md
+```
+
+The audit flags suspicious values for:
+
+- temperature ranges
+- pH ranges
+- temperature category consistency
+- pH/tag consistency
+- temperament and aggression-level consistency
+- temperament/tag consistency
+- data confidence and temperature source notes
+- care warnings for high-risk or specialist species
+
+Audit flags do not automatically mean a row is wrong. Broad tolerance ranges can be real, especially for hardy cold-water or adaptable species. Treat each flag as a reference-check item before import.
+
+Temperature fields are split by intent:
+
+- `recommended_min_temp_f` / `recommended_max_temp_f`: normal target range used by compatibility scoring.
+- `tolerated_min_temp_f` / `tolerated_max_temp_f`: broader survival or tolerance range when sources support it.
+- `min_temp_f` / `max_temp_f`: legacy profile range retained for compatibility with existing imports and pages.
+- `temp_source_notes`: short note explaining broad ranges or narrowed recommendations.
+
+Use `care_warnings` for short, high-confidence husbandry warnings that should appear on species profiles. Leave it empty when there is no important warning.
+
+The audit expects high-risk profiles such as aggressive fish, predators, fin-nippers, specialist setups, species-only recommendations, predator-style tanks, and goldfish-style tanks to have at least one care warning.
+
+For batch reviews, run:
+
+```bash
+node scripts/audit_species_care_data.cjs --batch cichlids
+```
+
+Current batches are generated from family, tank style, and size, including cichlids, bettas-gouramis, tetras, barbs-danios-rasboras, invertebrates, goldfish, nano-fish, and general-community.
+
+## Source References
+
+Species source references are stored in Supabase in `species_source_references`.
+The import source file is:
+
+```txt
+data/import/species.sources.json
+```
+
+Validate source references with:
+
+```bash
+npm run validate:species-sources
+```
+
+Import source references with:
+
+```bash
+npm run import:species-sources
+```
+
+The source import resolves species by slug and writes source URL, source label, source category, confidence, and notes into the database table.
 
 ## Import New Species
 
@@ -251,6 +380,8 @@ Recommended local checks:
 
 ```bash
 npm run lint
+npm run audit:species-data
+npm run validate:compatibility
 npm run build
 ```
 

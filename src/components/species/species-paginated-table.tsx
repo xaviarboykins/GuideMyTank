@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/types/database.types";
@@ -76,23 +76,26 @@ export function SpeciesPaginatedTable({
   species,
   totalSpeciesCount,
 }: SpeciesPaginatedTableProps) {
-  const [mobilePage, setMobilePage] = useState(1);
-  const [desktopPage, setDesktopPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(desktopPageSize);
 
-  const mobileTotalPages = getTotalPages(species.length, mobilePageSize);
-  const desktopTotalPages = getTotalPages(species.length, desktopPageSize);
-  const currentMobilePage = Math.min(mobilePage, mobileTotalPages);
-  const currentDesktopPage = Math.min(desktopPage, desktopTotalPages);
-  const mobileSpecies = paginate(
-    species,
-    currentMobilePage,
-    mobilePageSize,
-  );
-  const desktopSpecies = paginate(
-    species,
-    currentDesktopPage,
-    desktopPageSize,
-  );
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    function updatePageSize() {
+      setPageSize(mediaQuery.matches ? mobilePageSize : desktopPageSize);
+      setPage(1);
+    }
+
+    updatePageSize();
+    mediaQuery.addEventListener("change", updatePageSize);
+
+    return () => mediaQuery.removeEventListener("change", updatePageSize);
+  }, []);
+
+  const totalPages = getTotalPages(species.length, pageSize);
+  const currentPage = Math.min(page, totalPages);
+  const visibleSpecies = paginate(species, currentPage, pageSize);
 
   const resultSuffix =
     species.length !== totalSpeciesCount
@@ -101,32 +104,17 @@ export function SpeciesPaginatedTable({
 
   return (
     <>
-      <p className="text-sm text-muted-foreground md:hidden">
-        Showing {mobileSpecies.length} of {species.length} matches
-        {resultSuffix}
-      </p>
-      <p className="hidden text-sm text-muted-foreground md:block">
-        Showing {desktopSpecies.length} of {species.length} matches
+      <p className="text-sm text-muted-foreground">
+        Showing {visibleSpecies.length} of {species.length} matches
         {resultSuffix}
       </p>
 
-      <div className="md:hidden">
-        <SpeciesTable species={mobileSpecies} />
-        <PaginationControls
-          currentPage={currentMobilePage}
-          totalPages={mobileTotalPages}
-          onPageChange={setMobilePage}
-        />
-      </div>
-
-      <div className="hidden md:block">
-        <SpeciesTable species={desktopSpecies} />
-        <PaginationControls
-          currentPage={currentDesktopPage}
-          totalPages={desktopTotalPages}
-          onPageChange={setDesktopPage}
-        />
-      </div>
+      <SpeciesTable species={visibleSpecies} />
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </>
   );
 }

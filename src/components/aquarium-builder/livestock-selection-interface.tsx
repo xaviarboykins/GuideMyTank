@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus, Search, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -19,6 +20,7 @@ import {
   serializeAquariumBuild,
 } from "@/lib/aquarium-builder/storage";
 import { calculateCompatibility } from "@/lib/compatibility/engine";
+import { getSpeciesImage } from "@/lib/images";
 
 type LivestockSelectionInterfaceProps = {
   species: AquariumSpecies[];
@@ -175,6 +177,69 @@ function getCompatibilityClass(score: number, hasLivestock: boolean) {
   if (score >= 50) return "text-amber-700";
 
   return "text-destructive";
+}
+
+function SpeciesThumbnail({
+  commonName,
+  slug,
+}: {
+  commonName: string;
+  slug: string;
+}) {
+  const [preview, setPreview] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const imageSrc = getSpeciesImage(slug);
+
+  return (
+    <>
+      <div
+        className="relative size-10 shrink-0 overflow-hidden border border-border bg-muted"
+        onMouseEnter={(event) =>
+          setPreview({
+            x: event.clientX,
+            y: event.clientY,
+          })
+        }
+        onMouseMove={(event) =>
+          setPreview({
+            x: event.clientX,
+            y: event.clientY,
+          })
+        }
+        onMouseLeave={() => setPreview(null)}
+      >
+        <Image
+          src={imageSrc}
+          alt={`${commonName} aquarium species thumbnail`}
+          fill
+          className="object-contain p-1"
+          sizes="40px"
+        />
+      </div>
+
+      {preview ? (
+        <div
+          className="pointer-events-none fixed z-50 hidden border border-border bg-card p-3 shadow-xl md:block"
+          style={{
+            left: preview.x + 16,
+            top: preview.y - 80,
+          }}
+        >
+          <div className="relative size-40">
+            <Image
+              src={imageSrc}
+              alt={`${commonName} aquarium species preview`}
+              fill
+              className="object-contain"
+              sizes="160px"
+            />
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
 }
 
 export function LivestockSelectionInterface({
@@ -424,13 +489,19 @@ export function LivestockSelectionInterface({
                   return (
                     <li key={entry.speciesSlug} className="p-3">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="text-sm font-semibold">{label}</div>
-                          {item?.scientific_name ? (
-                            <div className="text-xs italic text-muted-foreground">
-                              {item.scientific_name}
-                            </div>
-                          ) : null}
+                        <div className="flex items-center gap-3">
+                          <SpeciesThumbnail
+                            commonName={label}
+                            slug={entry.speciesSlug}
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold">{label}</div>
+                            {item?.scientific_name ? (
+                              <div className="text-xs italic text-muted-foreground">
+                                {item.scientific_name}
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
 
                         <Button
@@ -631,14 +702,22 @@ export function LivestockSelectionInterface({
                 {paginatedSpecies.map(({ item, compatibilityScore }) => (
                   <tr key={item.slug} className="border-t border-border">
                     <td className="px-2 py-2">
-                      <Link
-                        href={`/piscidex/${item.slug}`}
-                        className="font-semibold underline-offset-4 hover:underline"
-                      >
-                        {item.common_name}
-                      </Link>
-                      <div className="text-xs italic text-muted-foreground">
-                        {item.scientific_name ?? "Unknown"}
+                      <div className="flex items-center gap-3">
+                        <SpeciesThumbnail
+                          commonName={item.common_name}
+                          slug={item.slug}
+                        />
+                        <div className="min-w-0">
+                          <Link
+                            href={`/piscidex/${item.slug}`}
+                            className="font-semibold underline-offset-4 hover:underline"
+                          >
+                            {item.common_name}
+                          </Link>
+                          <div className="text-xs italic text-muted-foreground">
+                            {item.scientific_name ?? "Unknown"}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-2 py-2">

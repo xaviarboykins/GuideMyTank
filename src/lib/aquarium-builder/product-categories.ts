@@ -15,14 +15,14 @@ export const aquariumBuilderProductCategories = [
     label: "Heaters",
   },
   {
-    slug: "lights",
+    slug: "lighting",
     heading: "Choose Lighting",
     label: "Lighting",
   },
   {
-    slug: "substrates",
+    slug: "substrate",
     heading: "Choose Substrate",
-    label: "Substrates",
+    label: "Substrate",
   },
   {
     slug: "decor",

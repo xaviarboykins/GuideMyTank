@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BuilderProductPickerInterface } from "@/components/products/builder-product-picker-interface";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
-import { Button } from "@/components/ui/button";
 import {
   aquariumBuilderProductCategories,
   getAquariumBuilderProductCategory,
 } from "@/lib/aquarium-builder/product-categories";
+import { getBuilderProducts } from "@/lib/products/service";
+import { isProductCategory } from "@/lib/products/types";
+import type { ProductCategory } from "@/lib/products/types";
 
 type AquariumBuilderProductsPageProps = {
   params: Promise<{
@@ -30,7 +32,7 @@ export async function generateMetadata({
   const { category: categorySlug } = await params;
   const category = getAquariumBuilderProductCategory(categorySlug);
 
-  if (!category) {
+  if (!category || !isProductCategory(categorySlug)) {
     return {
       title: "Aquarium Builder Products Not Found | GuideMyTank",
       robots: {
@@ -42,7 +44,7 @@ export async function generateMetadata({
 
   return {
     title: `${category.heading} | Aquarium Builder | GuideMyTank`,
-    description: `${category.label} browsing for the GuideMyTank Aquarium Builder will be implemented in a future milestone.`,
+    description: `Browse ${category.label.toLowerCase()} for the GuideMyTank Aquarium Builder.`,
   };
 }
 
@@ -52,32 +54,27 @@ export default async function AquariumBuilderProductsPage({
   const { category: categorySlug } = await params;
   const category = getAquariumBuilderProductCategory(categorySlug);
 
-  if (!category) {
+  if (!category || !isProductCategory(categorySlug)) {
     notFound();
   }
+
+  const productCategory: ProductCategory = categorySlug;
+  const products = await getBuilderProducts({
+    category: productCategory,
+  });
 
   return (
     <PageContainer>
       <PageHeader
         eyebrow="Aquarium Builder Products"
         title={category.heading}
-        description={`${category.label} browsing will be implemented in a future milestone. This placeholder route is here so builder navigation can be wired before real product data exists.`}
+        description={`Choose ${category.label.toLowerCase()} from the shared Product Catalog. Selections are saved by product ID for future validation and recommendations.`}
       />
 
-      <section className="mt-6 border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Product browsing coming later</h2>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-          This page will eventually list relevant aquarium products and allow
-          selections to flow back into the builder. For now, no product data,
-          filtering, affiliate links, or saved-build behavior is implemented.
-        </p>
-
-        <div className="mt-5">
-          <Button asChild>
-            <Link href="/aquarium-builder">Back to Aquarium Builder</Link>
-          </Button>
-        </div>
-      </section>
+      <BuilderProductPickerInterface
+        category={productCategory}
+        products={products}
+      />
     </PageContainer>
   );
 }

@@ -84,6 +84,93 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          brand: string
+          category: string
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          dimensions: string | null
+          flow_rate_gph: number | null
+          freshwater: boolean
+          guide_rating: number | null
+          heater_watts: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          light_output: string | null
+          light_type: string | null
+          model: string | null
+          planted_tank: boolean
+          price_estimate: number | null
+          recommended_tank_max_gallons: number | null
+          recommended_tank_min_gallons: number | null
+          saltwater: boolean
+          short_description: string | null
+          slug: string
+          substrate_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brand: string
+          category: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          dimensions?: string | null
+          flow_rate_gph?: number | null
+          freshwater?: boolean
+          guide_rating?: number | null
+          heater_watts?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          light_output?: string | null
+          light_type?: string | null
+          model?: string | null
+          planted_tank?: boolean
+          price_estimate?: number | null
+          recommended_tank_max_gallons?: number | null
+          recommended_tank_min_gallons?: number | null
+          saltwater?: boolean
+          short_description?: string | null
+          slug: string
+          substrate_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          dimensions?: string | null
+          flow_rate_gph?: number | null
+          freshwater?: boolean
+          guide_rating?: number | null
+          heater_watts?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          light_output?: string | null
+          light_type?: string | null
+          model?: string | null
+          planted_tank?: boolean
+          price_estimate?: number | null
+          recommended_tank_max_gallons?: number | null
+          recommended_tank_min_gallons?: number | null
+          saltwater?: boolean
+          short_description?: string | null
+          slug?: string
+          substrate_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       species: {
         Row: {
           aggression_level: number | null

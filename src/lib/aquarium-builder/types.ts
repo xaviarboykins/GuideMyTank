@@ -8,6 +8,7 @@ export type AquariumFiltrationLevel = "low" | "standard" | "high";
 export type AquariumPlantedLevel = "none" | "light" | "moderate" | "heavy";
 
 export type AquariumEquipmentCategory =
+  | "tank"
   | "filter"
   | "heater"
   | "lighting"
@@ -44,12 +45,24 @@ export type AquariumResolvedLivestockEntry = AquariumLivestockEntry & {
 };
 
 export type AquariumEquipmentProduct = {
+  productId?: string;
   name: string;
   category: AquariumEquipmentCategory;
   quantity: number;
   estimatedPrice: number;
+  flowRateGph?: number | null;
+  imageUrl?: string | null;
   productUrl?: string | null;
   notes?: string | null;
+};
+
+export type AquariumEquipmentProductSelections = {
+  tankProductId?: string;
+  filterProductId?: string;
+  heaterProductId?: string;
+  lightingProductId?: string;
+  substrateProductId?: string;
+  decorProductIds?: string[];
 };
 
 export type AquariumEstimatedCost = {
@@ -84,6 +97,7 @@ export type AquariumBuild = {
   livestock: AquariumLivestockEntry[];
   plants: AquariumPlantEntry[];
   equipment: AquariumEquipmentProduct[];
+  equipmentProductIds?: AquariumEquipmentProductSelections;
   notes?: string | null;
   createdAt?: string;
   updatedAt?: string;

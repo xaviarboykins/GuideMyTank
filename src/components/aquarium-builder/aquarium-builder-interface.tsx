@@ -2,8 +2,9 @@
 
 import { CheckCircle2, Droplets, Gauge, Plus, Waves, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import type {
   AquariumBuild,
@@ -17,9 +18,12 @@ import type {
 } from "@/lib/aquarium-builder/types";
 import {
   AQUARIUM_BUILDER_STORAGE_KEY,
+  deriveAquariumEquipmentProductSelections,
   defaultAquariumBuild,
   parseAquariumBuild,
+  serializeAquariumBuild,
 } from "@/lib/aquarium-builder/storage";
+import type { ProductCategory } from "@/lib/products/types";
 
 type TankSizeGallons = AquariumTankConfiguration["sizeGallons"];
 type StatusTone = "success" | "info" | "neutral" | "warning" | "critical";
@@ -55,6 +59,9 @@ type BuilderComponentSelection = {
   summary?: string;
   quantity?: number;
   estimatedPrice?: AquariumEquipmentProduct["estimatedPrice"];
+  flowRateGph?: number | null;
+  imageUrl?: string | null;
+  productCategory?: ProductCategory;
   tank?: Pick<AquariumTankConfiguration, "sizeGallons">;
   filtrationLevel?: AquariumFiltrationLevel;
   plantedLevel?: AquariumPlantedLevel;
@@ -108,7 +115,7 @@ const builderRows: BuilderRow[] = [
     category: "lighting",
     label: "Lighting",
     action: "Choose Lighting",
-    href: "/aquarium-builder/products/lights",
+    href: "/aquarium-builder/products/lighting",
   },
   {
     kind: "repeatable",
@@ -116,7 +123,7 @@ const builderRows: BuilderRow[] = [
     label: "Substrate",
     action: "Choose Substrate",
     addAnotherAction: "Add Another Substrate",
-    href: "/aquarium-builder/products/substrates",
+    href: "/aquarium-builder/products/substrate",
   },
   {
     kind: "repeatable",
@@ -163,27 +170,183 @@ function estimateFlowGph(
   return sizeGallons * flowMultipliers[filtrationLevel];
 }
 
+function parseFlowRateGph(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/(\d+(?:\.\d+)?)\s*GPH/i);
+  const parsedValue = match ? Number(match[1]) : null;
+
+  return parsedValue != null && Number.isFinite(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : null;
+}
+
+function getSavedBuild() {
+  return parseAquariumBuild(
+    window.localStorage.getItem(AQUARIUM_BUILDER_STORAGE_KEY),
+  );
+}
+
+function toBuilderSelection(
+  equipment: AquariumEquipmentProduct,
+  build: AquariumBuild,
+): BuilderComponentSelection {
+  return {
+    name: equipment.name,
+    summary: equipment.notes ?? undefined,
+    quantity: equipment.quantity,
+    estimatedPrice: equipment.estimatedPrice,
+    flowRateGph: equipment.flowRateGph ?? parseFlowRateGph(equipment.notes),
+    imageUrl: equipment.imageUrl,
+    productCategory: getProductCategoryForEquipment(equipment.category),
+    tank:
+      equipment.category === "tank" && build.tank.sizeGallons > 0
+        ? { sizeGallons: build.tank.sizeGallons }
+        : undefined,
+  };
+}
+
+function getProductCategoryForEquipment(
+  category: AquariumEquipmentProduct["category"],
+): ProductCategory | undefined {
+  if (category === "tank") {
+    return "tanks";
+  }
+
+  if (category === "filter") {
+    return "filters";
+  }
+
+  if (category === "heater") {
+    return "heaters";
+  }
+
+  if (category === "lighting") {
+    return "lighting";
+  }
+
+  if (category === "substrate") {
+    return "substrate";
+  }
+
+  if (category === "hardscape") {
+    return "decor";
+  }
+
+  return undefined;
+}
+
+function getEquipmentCategoryForSingleSelection(
+  category: SingleSelectionCategory,
+): AquariumEquipmentProduct["category"] {
+  if (category === "tank") {
+    return "tank";
+  }
+
+  if (category === "filtration") {
+    return "filter";
+  }
+
+  if (category === "heating") {
+    return "heater";
+  }
+
+  return "lighting";
+}
+
+function getEquipmentCategoryForRepeatableSelection(
+  category: RepeatableSelectionCategory,
+): AquariumEquipmentProduct["category"] | null {
+  if (category === "substrate") {
+    return "substrate";
+  }
+
+  if (category === "decor") {
+    return "hardscape";
+  }
+
+  return null;
+}
+
+function getInitialSingleSelections(build: AquariumBuild): SingleSelections {
+  const selections: SingleSelections = {};
+
+  for (const equipment of build.equipment) {
+    if (equipment.category === "tank") {
+      selections.tank = toBuilderSelection(equipment, build);
+    }
+
+    if (equipment.category === "filter") {
+      selections.filtration = toBuilderSelection(equipment, build);
+    }
+
+    if (equipment.category === "heater") {
+      selections.heating = toBuilderSelection(equipment, build);
+    }
+
+    if (equipment.category === "lighting") {
+      selections.lighting = toBuilderSelection(equipment, build);
+    }
+  }
+
+  return selections;
+}
+
+function getInitialRepeatableSelections(build: AquariumBuild): RepeatableSelections {
+  const selections: RepeatableSelections = {};
+
+  for (const equipment of build.equipment) {
+    if (equipment.category === "substrate") {
+      selections.substrate = [
+        ...(selections.substrate ?? []),
+        toBuilderSelection(equipment, build),
+      ];
+    }
+
+    if (equipment.category === "hardscape") {
+      selections.decor = [
+        ...(selections.decor ?? []),
+        toBuilderSelection(equipment, build),
+      ];
+    }
+  }
+
+  return selections;
+}
+
 export function AquariumBuilderInterface({
   species,
 }: {
   species: AquariumSpecies[];
 }) {
+  const [build, setBuild] = useState<AquariumBuild>(defaultAquariumBuild);
   const [singleSelections, setSingleSelections] = useState<SingleSelections>(
-    {},
+    () => getInitialSingleSelections(defaultAquariumBuild),
   );
   const [repeatableSelections, setRepeatableSelections] =
-    useState<RepeatableSelections>({});
-  const [build] = useState<AquariumBuild>(() => {
-    if (typeof window === "undefined") {
-      return defaultAquariumBuild;
-    }
-
-    return parseAquariumBuild(
-      window.localStorage.getItem(AQUARIUM_BUILDER_STORAGE_KEY),
+    useState<RepeatableSelections>(() =>
+      getInitialRepeatableSelections(defaultAquariumBuild),
     );
-  });
 
-  const tankSizeGallons = singleSelections.tank?.tank?.sizeGallons ?? null;
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const savedBuild = getSavedBuild();
+
+      setBuild(savedBuild);
+      setSingleSelections(getInitialSingleSelections(savedBuild));
+      setRepeatableSelections(getInitialRepeatableSelections(savedBuild));
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  const tankSizeGallons =
+    singleSelections.tank?.tank?.sizeGallons ??
+    (build.tank.sizeGallons > 0 ? build.tank.sizeGallons : null);
+  const selectedFlowRateGph =
+    singleSelections.filtration?.flowRateGph ?? null;
   const filtrationLevel =
     singleSelections.filtration?.filtrationLevel ?? null;
   const plantedLevel =
@@ -214,10 +377,11 @@ export function AquariumBuilderInterface({
         }`
       : "No livestock selected";
 
-  const flowEstimateGph = useMemo(
-    () => estimateFlowGph(tankSizeGallons, filtrationLevel),
-    [tankSizeGallons, filtrationLevel],
-  );
+  const flowEstimateGph = useMemo(() => {
+    return (
+      selectedFlowRateGph ?? estimateFlowGph(tankSizeGallons, filtrationLevel)
+    );
+  }, [filtrationLevel, selectedFlowRateGph, tankSizeGallons]);
 
   const builderStatus = [
     {
@@ -257,7 +421,39 @@ export function AquariumBuilderInterface({
     },
   ] as const;
 
+  function updateBuildEquipment(
+    equipment: AquariumEquipmentProduct[],
+    tankOverride?: AquariumBuild["tank"],
+  ) {
+    const nextBuild: AquariumBuild = {
+      ...build,
+      tank: tankOverride ?? build.tank,
+      equipment,
+      equipmentProductIds: deriveAquariumEquipmentProductSelections(equipment),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setBuild(nextBuild);
+    window.localStorage.setItem(
+      AQUARIUM_BUILDER_STORAGE_KEY,
+      serializeAquariumBuild(nextBuild),
+    );
+  }
+
   function clearSingleSelection(category: SingleSelectionCategory) {
+    const equipmentCategory = getEquipmentCategoryForSingleSelection(category);
+    const nextEquipment = build.equipment.filter((equipment) => {
+      return equipment.category !== equipmentCategory;
+    });
+    const nextTank =
+      category === "tank"
+        ? {
+            ...build.tank,
+            sizeGallons: 0,
+          }
+        : build.tank;
+
+    updateBuildEquipment(nextEquipment, nextTank);
     setSingleSelections((currentSelections) => {
       const nextSelections = { ...currentSelections };
       delete nextSelections[category];
@@ -269,6 +465,8 @@ export function AquariumBuilderInterface({
     category: RepeatableSelectionCategory,
     index: number,
   ) {
+    const equipmentCategory = getEquipmentCategoryForRepeatableSelection(category);
+
     setRepeatableSelections((currentSelections) => {
       const currentItems = currentSelections[category] ?? [];
       const nextItems = currentItems.filter((_, itemIndex) => {
@@ -284,6 +482,21 @@ export function AquariumBuilderInterface({
 
       return nextSelections;
     });
+
+    if (equipmentCategory) {
+      let matchingIndex = -1;
+      const nextEquipment = build.equipment.filter((equipment) => {
+        if (equipment.category !== equipmentCategory) {
+          return true;
+        }
+
+        matchingIndex += 1;
+
+        return matchingIndex !== index;
+      });
+
+      updateBuildEquipment(nextEquipment);
+    }
   }
 
   return (
@@ -505,20 +718,24 @@ function SingleSelectionCell({
   if (selection) {
     return (
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="font-medium">{selection.name}</div>
-          {selection.summary ? (
-            <div className="mt-1 text-xs text-muted-foreground">
-              {selection.summary}
-            </div>
-          ) : null}
+        <div className="flex items-center gap-3">
+          <ProductThumbnail
+            alt={selection.name}
+            category={selection.productCategory}
+            imageUrl={selection.imageUrl}
+            size="sm"
+          />
+          <div className="min-w-0">
+            <div className="font-medium">{selection.name}</div>
+            {selection.summary ? (
+              <div className="mt-1 text-xs text-muted-foreground">
+                {selection.summary}
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <Button asChild variant="outline" size="sm">
-            <Link href={href}>Change</Link>
-          </Button>
-
+        <div className="flex items-center">
           <Button
             type="button"
             variant="ghost"
@@ -654,13 +871,21 @@ function RepeatableSelectionCell({
             key={`${selection.name}-${index}`}
             className="flex flex-col gap-2 border border-border bg-background p-3 sm:flex-row sm:items-center sm:justify-between"
           >
-            <div>
-              <div className="font-medium">{selection.name}</div>
-              {selection.summary ? (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {selection.summary}
-                </div>
-              ) : null}
+            <div className="flex items-center gap-3">
+              <ProductThumbnail
+                alt={selection.name}
+                category={selection.productCategory}
+                imageUrl={selection.imageUrl}
+                size="sm"
+              />
+              <div className="min-w-0">
+                <div className="font-medium">{selection.name}</div>
+                {selection.summary ? (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {selection.summary}
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             <Button

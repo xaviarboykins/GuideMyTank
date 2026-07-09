@@ -81,6 +81,28 @@ export function validateAquariumBuild(
     }
   }
 
+  for (const plant of build.plants) {
+    if (!plant.plantSlug.trim()) {
+      warnings.push(
+        createWarning(
+          "missing-plant",
+          "Each plant entry must include a plant slug.",
+          "critical",
+        ),
+      );
+    }
+
+    if (!Number.isInteger(plant.quantity) || plant.quantity <= 0) {
+      warnings.push(
+        createWarning(
+          "invalid-plant-quantity",
+          "Plant quantities must be positive whole numbers.",
+          "critical",
+        ),
+      );
+    }
+  }
+
   for (const equipment of build.equipment) {
     if (!equipment.name.trim()) {
       warnings.push(

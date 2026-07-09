@@ -25,16 +25,6 @@ export const aquariumBuilderProductCategories = [
     label: "Substrates",
   },
   {
-    slug: "plants",
-    heading: "Choose Plants",
-    label: "Plants",
-  },
-  {
-    slug: "livestock",
-    heading: "Add Livestock",
-    label: "Livestock",
-  },
-  {
     slug: "decor",
     heading: "Add Decor",
     label: "Decor",

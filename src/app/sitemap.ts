@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { listPublishedArticles } from "@/lib/articles/service";
+import { listPublishedCareGuides } from "@/lib/care-guides/service";
 import { getSpeciesSlugs } from "@/lib/data/species";
 import {
   generateCanonicalCompatibilityPairs,
@@ -10,7 +12,11 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.guidemytank.com";
-  const species = await getSpeciesSlugs();
+  const [species, careGuides, articles] = await Promise.all([
+    getSpeciesSlugs(),
+    listPublishedCareGuides(),
+    listPublishedArticles(),
+  ]);
   const compatibilityPairs = generateCanonicalCompatibilityPairs(species);
 
   return [
@@ -98,11 +104,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
-    ...species.map((item) => ({
-      url: `${baseUrl}/care-guides/${item.slug}`,
+    ...careGuides.map((guide) => ({
+      url: `${baseUrl}/care-guides/${guide.slug}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.5,
+    })),
+    ...articles.map((article) => ({
+      url: `${baseUrl}/learning-center/${article.slug}`,
+      lastModified: article.published_at ? new Date(article.published_at) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     ...compatibilityPairs.map((pair) => ({
       url: getCompatibilityUrl(pair.speciesA, pair.speciesB),

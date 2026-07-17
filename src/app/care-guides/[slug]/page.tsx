@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
+import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
+import { getPublishedCareGuideBySlug } from "@/lib/care-guides/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 
 type CareGuidePageProps = {
@@ -26,6 +29,15 @@ export async function generateMetadata({
   params,
 }: CareGuidePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+
+  if (publishedGuide) {
+    const title = publishedGuide.guide.seo_title ?? `${publishedGuide.guide.title} | GuideMyTank`;
+    const description = publishedGuide.guide.meta_description ?? publishedGuide.guide.summary ?? undefined;
+    const canonical = publishedGuide.guide.canonical_url ?? `https://www.guidemytank.com/care-guides/${publishedGuide.guide.slug}`;
+    return { title, description, alternates: { canonical }, openGraph: { title, description, url: canonical, type: "article" } };
+  }
+
   const species = await getSpeciesBySlug(slug);
 
   if (!species) {
@@ -46,6 +58,13 @@ export async function generateMetadata({
 
 export default async function CareGuidePage({ params }: CareGuidePageProps) {
   const { slug } = await params;
+  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+
+  if (publishedGuide) {
+    const imageUrls = await createPublishedContentImageSignedUrls(publishedGuide.images.map((image) => image.content_images.storage_path));
+    return <PageContainer><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} /></PageContainer>;
+  }
+
   const species = await getSpeciesBySlug(slug);
 
   if (!species) {

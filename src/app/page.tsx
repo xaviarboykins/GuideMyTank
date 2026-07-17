@@ -10,64 +10,8 @@ import { BetaBadge } from "@/components/site/beta-badge";
 import { DevelopmentBadge } from "@/components/site/development-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const featuredCareGuides: FeaturedCareGuide[] = [
-  {
-    slug: "betta-splendens",
-    name: "Betta Fish",
-    scientificName: "Betta splendens",
-    image: "/species/betta-splendens.webp",
-    careLevel: "Easy",
-    tankSize: "5+ gal",
-    temperament: "Territorial",
-    summary:
-      "Learn how to provide warm, filtered water and a calm setup for this colorful labyrinth fish.",
-  },
-  {
-    slug: "corydoras-catfish",
-    name: "Corydoras Catfish",
-    scientificName: "Corydoras spp.",
-    image: "/species/corydoras-catfish.webp",
-    careLevel: "Easy",
-    tankSize: "20+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Plan a social bottom-dwelling group with soft substrate, clean water, and compatible community fish.",
-  },
-  {
-    slug: "angelfish",
-    name: "Freshwater Angelfish",
-    scientificName: "Pterophyllum scalare",
-    image: "/species/angelfish.webp",
-    careLevel: "Intermediate",
-    tankSize: "29+ gal",
-    temperament: "Semi-aggressive",
-    summary:
-      "Understand tall-tank requirements, mature territorial behavior, feeding, and suitable tank mates.",
-  },
-  {
-    slug: "guppy",
-    name: "Guppy",
-    scientificName: "Poecilia reticulata",
-    image: "/species/guppy.webp",
-    careLevel: "Easy",
-    tankSize: "10+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Build a lively guppy setup with stable water, appropriate group ratios, and manageable breeding.",
-  },
-  {
-    slug: "honey-gourami",
-    name: "Honey Gourami",
-    scientificName: "Trichogaster chuna",
-    image: "/species/honey-gourami.webp",
-    careLevel: "Easy",
-    tankSize: "10+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Create a gentle planted community for this small gourami with quiet tank mates and low flow.",
-  },
-];
+import { listPublishedCareGuides } from "@/lib/care-guides/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 
 const utilities = [
   {
@@ -106,7 +50,27 @@ export const metadata: Metadata = {
     "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.",
 };
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function Home() {
+  const publishedGuides = await listPublishedCareGuides();
+  const primaryImages = publishedGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
+  const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
+  const featuredCareGuides: FeaturedCareGuide[] = publishedGuides.map((guide) => {
+    const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
+    return {
+      slug: guide.slug ?? guide.species.slug,
+      title: guide.title ?? `${guide.species.common_name} Care Guide`,
+      name: guide.species.common_name,
+      scientificName: guide.species.scientific_name,
+      image: image ? imageUrls.get(image.content_images.storage_path) ?? "" : "",
+      imageAlt: image?.content_images.alt_text ?? `${guide.species.common_name} Care Guide`,
+      careLevel: guide.species.care_level ?? "Unknown",
+      tankSize: guide.species.tank_size_gal ? `${guide.species.tank_size_gal}+ gal` : "Unknown",
+      temperament: guide.species.temperament ?? "Unknown",
+      summary: guide.summary ?? guide.species.summary ?? "Freshwater aquarium care requirements and compatibility guidance.",
+    };
+  });
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Main Utility Header */}

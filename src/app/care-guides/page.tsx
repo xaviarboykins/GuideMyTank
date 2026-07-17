@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  getAllSpecies,
-  getFilteredSpecies,
-  parsePisciDexFilters,
-  type PisciDexFilterSearchParams,
-} from "@/lib/data/species";
-import { getSpeciesImage } from "@/lib/images";
+import { listPublishedCareGuides } from "@/lib/care-guides/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { parsePisciDexFilters, type PisciDexFilterSearchParams } from "@/lib/data/species";
 
 type CareGuidesPageProps = {
   searchParams: Promise<PisciDexFilterSearchParams>;
@@ -36,10 +31,20 @@ export default async function CareGuidesPage({
   searchParams,
 }: CareGuidesPageProps) {
   const filters = parsePisciDexFilters(await searchParams);
-  const [species, allSpecies] = await Promise.all([
-    getFilteredSpecies(filters),
-    getAllSpecies(),
-  ]);
+  const allGuides = await listPublishedCareGuides();
+  const allSpecies = allGuides.map((guide) => guide.species);
+  const normalizedQuery = filters.query?.toLowerCase();
+  const guides = allGuides.filter((guide) => {
+    const species = guide.species;
+    if (normalizedQuery && ![guide.title, guide.slug, species.common_name, species.scientific_name, species.family].some((value) => value?.toLowerCase().includes(normalizedQuery))) return false;
+    if (filters.tankSizeGallons && (!species.tank_size_gal || species.tank_size_gal > filters.tankSizeGallons)) return false;
+    if (filters.temperament && species.temperament !== filters.temperament) return false;
+    if (filters.difficulty && species.care_level !== filters.difficulty) return false;
+    if (filters.beginnerFriendly && species.care_level !== "Easy") return false;
+    return true;
+  });
+  const primaryImages = allGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
+  const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
   const temperamentOptions = getUniqueValues(
     allSpecies.map((item) => item.temperament),
   );
@@ -143,40 +148,42 @@ export default async function CareGuidesPage({
                 Fish Care Guide Rolodex
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Showing {species.length} of {allSpecies.length} guides
+                Showing {guides.length} of {allGuides.length} published guides
               </p>
             </div>
           </div>
 
-          {species.length > 0 ? (
+          {guides.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {species.map((item) => (
+              {guides.map((guide) => {
+                const item = guide.species;
+                const primaryImage = guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0];
+                const imageUrl = primaryImage ? imageUrls.get(primaryImage.content_images.storage_path) : undefined;
+                return (
                 <article
-                  key={item.slug}
+                  key={guide.id}
                   className="overflow-hidden rounded-lg border border-border bg-card"
                 >
                   <Link
-                    href={`/care-guides/${item.slug}`}
+                    href={`/care-guides/${guide.slug}`}
                     className="group flex h-full flex-col"
                   >
                     <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                      <Image
-                        src={getSpeciesImage(item.slug)}
-                        alt={`${item.common_name} care guide`}
-                        fill
-                        sizes="(min-width: 1280px) 25vw, (min-width: 640px) 40vw, 100vw"
-                        className="object-contain p-3 transition-transform duration-300 group-hover:scale-[1.03]"
-                      />
+                      {imageUrl ? (
+                        // Signed private-storage URLs are not stable Next Image optimization sources.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageUrl} alt={primaryImage?.content_images.alt_text ?? `${item.common_name} care guide`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                      ) : null}
                     </div>
                     <div className="flex flex-1 flex-col p-4">
                       <h3 className="font-semibold group-hover:underline">
-                        {item.common_name}
+                        {guide.title}
                       </h3>
                       <p className="mt-1 text-xs italic text-muted-foreground">
                         {item.scientific_name}
                       </p>
                       <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
-                        {item.summary ?? "Freshwater aquarium care requirements and compatibility profile."}
+                        {guide.summary ?? item.summary ?? "Freshwater aquarium care requirements and compatibility profile."}
                       </p>
                       <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-4 text-xs">
                         <div>
@@ -203,7 +210,7 @@ export default async function CareGuidesPage({
                     </div>
                   </Link>
                 </article>
-              ))}
+              );})}
             </div>
           ) : (
             <div className="border border-border bg-card p-8 text-center">

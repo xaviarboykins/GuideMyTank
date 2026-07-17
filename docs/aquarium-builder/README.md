@@ -39,11 +39,19 @@ Version 1 supports:
 - compatibility analysis through the existing Compatibility Service
 - a pure stocking-analysis engine using existing species data
 - live stocking status and capacity details in the builder
+- a dashboard summary for compatibility, stocking, bioload, estimated filter
+  flow, and planted level
+- an actionable livestock table with validation status, edit, and remove controls
+- grouped errors, warnings, and recommendations
+- warning count and a future-ready equipment compatibility status in aquarium
+  validation
+- a PCPartPicker-style cost and future affiliate-product footer beneath the
+  configuration table
+- a live estimated equipment subtotal
 - local browser persistence for the in-progress build
 
-This milestone does not add server-side saved-build persistence, a populated
-plant catalog, starter kits, affiliate-link behavior, or live compatibility
-status in the builder summary.
+This milestone does not add server-side saved-build persistence, starter kits,
+affiliate-link behavior, or equipment compatibility rules.
 
 ## Future Roadmap
 
@@ -304,10 +312,9 @@ or exceeded capacity, estimated similarly demanding livestock remaining, and
 incomplete-analysis warnings. Status is communicated with text as well as
 color.
 
-The builder compatibility summary currently says `Not analyzed`. Pairwise
-compatibility is available through the compatibility service, but live builder
-compatibility integration is separate from stocking analysis and must not be
-represented as a successful check until it actually runs.
+The builder compatibility summary is driven by the aquarium validation report.
+It remains pending while the saved build loads, reports unavailable validation
+honestly, and only shows a clean result after validation completes.
 
 ### Limitations and Relationship to M5 Issue 5
 

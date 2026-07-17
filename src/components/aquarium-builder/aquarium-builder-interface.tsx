@@ -3,8 +3,9 @@
 import {
   AlertTriangle,
   CircleHelp,
-  Droplets,
+  DollarSign,
   Gauge,
+  PackageSearch,
   Plus,
   Waves,
   X,
@@ -49,10 +50,10 @@ import {
 } from "@/lib/aquarium-builder/validation-display";
 import type {
   AquariumValidationReport,
+  AquariumValidationIssue,
   ValidationSeverity,
 } from "@/lib/aquarium-validation";
 
-type TankSizeGallons = AquariumTankConfiguration["sizeGallons"];
 type StatusTone = "success" | "info" | "neutral" | "warning" | "critical";
 type SingleSelectionCategory =
   | "tank"
@@ -191,17 +192,6 @@ function formatLevelLabel(level: string | null) {
   }
 
   return level.charAt(0).toUpperCase() + level.slice(1);
-}
-
-function estimateFlowGph(
-  sizeGallons: TankSizeGallons | null,
-  filtrationLevel: AquariumFiltrationLevel | null,
-) {
-  if (!sizeGallons || !filtrationLevel) {
-    return null;
-  }
-
-  return sizeGallons * flowMultipliers[filtrationLevel];
 }
 
 function parseFlowRateGph(value: string | null | undefined) {
@@ -478,25 +468,25 @@ export function AquariumBuilderInterface({
     STOCKING_STATUS_LABELS[stockingAnalysis.stockingStatus];
   const stockingStatusValue =
     stockingAnalysis.baseCapacity <= 0
-      ? "— · Select a tank"
-      : `${Math.round(stockingAnalysis.stockingPercentage)}% · ${stockingStatusLabel}${stockingAnalysis.analysisComplete ? "" : " (incomplete)"}`;
-
-  const flowEstimateGph = useMemo(() => {
-    return (
-      selectedFlowRateGph ?? estimateFlowGph(tankSizeGallons, filtrationLevel)
-    );
-  }, [filtrationLevel, selectedFlowRateGph, tankSizeGallons]);
+      ? "Select a tank"
+      : stockingStatusLabel;
+  const flowEstimateGph =
+    selectedFlowRateGph ?? estimateFlowGph(tankSizeGallons, filtrationLevel);
+  const estimatedEquipmentCost = build.equipment.reduce(
+    (total, item) => total + item.estimatedPrice * item.quantity,
+    0,
+  );
 
   const builderStatus = [
     {
-      label: "Compatibility",
+      label: "Compatibility Status",
       value: compatibilityDisplay.label,
       tone: compatibilityDisplay.tone,
       icon: CircleHelp,
       className: "lg:flex-[2]",
     },
     {
-      label: "Stocking",
+      label: "Stocking Level",
       value: stockingStatusValue,
       tone:
         stockingAnalysis.baseCapacity > 0
@@ -506,10 +496,16 @@ export function AquariumBuilderInterface({
       className: "flex-1",
     },
     {
-      label: "Water Volume",
-      value: tankSizeGallons ? `${tankSizeGallons} gal` : "Not selected",
-      tone: tankSizeGallons ? "info" : "neutral",
-      icon: Droplets,
+      label: "Bioload Usage",
+      value:
+        stockingAnalysis.baseCapacity > 0
+          ? `${Math.round(stockingAnalysis.stockingPercentage)}%`
+          : "Select a tank",
+      tone:
+        stockingAnalysis.baseCapacity > 0
+          ? stockingStatusTones[stockingAnalysis.stockingStatus]
+          : "neutral",
+      icon: Gauge,
       className: "flex-1",
     },
     {
@@ -517,14 +513,12 @@ export function AquariumBuilderInterface({
       value: flowEstimateGph ? `${flowEstimateGph} GPH` : "Not selected",
       tone: flowEstimateGph ? "info" : "neutral",
       icon: Waves,
-      className: "flex-1",
     },
     {
       label: "Planted Level",
       value: formatLevelLabel(plantedLevel) ?? "Not selected",
       tone: plantedLevel ? "info" : "neutral",
       icon: Waves,
-      className: "flex-1",
     },
   ] as const;
 
@@ -606,19 +600,34 @@ export function AquariumBuilderInterface({
     }
   }
 
+  function removeLivestock(speciesSlug: string) {
+    const nextBuild: AquariumBuild = {
+      ...build,
+      livestock: build.livestock.filter(
+        (entry) => entry.speciesSlug !== speciesSlug,
+      ),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setBuild(nextBuild);
+    window.localStorage.setItem(
+      AQUARIUM_BUILDER_STORAGE_KEY,
+      serializeAquariumBuild(nextBuild),
+    );
+  }
+
   return (
     <>
       <section className="mt-6 overflow-hidden border border-border bg-card">
         <h2 className="sr-only">Builder Status</h2>
 
-        <dl className="flex overflow-x-auto divide-x divide-background/25">
+        <dl className="flex flex-wrap gap-px bg-background/25">
           {builderStatus.map((item) => (
             <div
               key={item.label}
               className={[
-                "flex min-h-8 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs",
+                "flex min-h-8 flex-auto items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs",
                 statusToneClasses[item.tone],
-                item.className,
               ].join(" ")}
             >
               <item.icon className="size-3.5 shrink-0" aria-hidden="true" />
@@ -629,16 +638,14 @@ export function AquariumBuilderInterface({
         </dl>
       </section>
 
-      <StockingAnalysisPanel analysis={stockingAnalysis} />
-
       <section className="mt-6 border border-border bg-card">
         <div className="border-b border-border p-4">
           <h2 className="text-lg font-semibold">Tank Configuration</h2>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-sm">
-            <thead className="bg-muted/50 text-left">
+        <div className="sm:overflow-x-auto">
+          <table className="block w-full border-collapse text-sm sm:table sm:min-w-[640px]">
+            <thead className="hidden bg-muted/50 text-left sm:table-header-group">
               <tr>
                 <th scope="col" className="w-40 px-4 py-3 font-semibold">
                   Category
@@ -648,13 +655,19 @@ export function AquariumBuilderInterface({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="block sm:table-row-group">
               {builderRows.map((row) => (
-                <tr key={row.category} className="border-t border-border">
-                  <th scope="row" className="px-4 py-3 text-left font-medium">
+                <tr
+                  key={row.category}
+                  className="block border-t border-border sm:table-row"
+                >
+                  <th
+                    scope="row"
+                    className="block bg-muted/40 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:table-cell sm:bg-transparent sm:px-4 sm:py-3 sm:text-sm sm:normal-case sm:tracking-normal sm:text-foreground"
+                  >
                     {row.label}
                   </th>
-                  <td className="px-4 py-3">
+                  <td className="block px-3 py-3 sm:table-cell sm:px-4">
                     {row.kind === "single" ? (
                       <SingleSelectionCell
                         action={row.action}
@@ -670,8 +683,10 @@ export function AquariumBuilderInterface({
                         action={row.action}
                         href={row.href}
                         livestock={build.livestock}
+                        report={validationReport}
                         speciesBySlug={livestockSpeciesBySlug}
                         summary={livestockSummary}
+                        onRemove={removeLivestock}
                       />
                     ) : null}
 
@@ -703,6 +718,43 @@ export function AquariumBuilderInterface({
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="flex flex-col gap-4 border-t border-border bg-muted/20 p-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-md">
+            <div className="flex items-center gap-2 font-semibold">
+              <PackageSearch className="size-4" aria-hidden="true" />
+              Affiliate Products
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Retailer links and one-click product matching will be added in a
+              later milestone.
+            </p>
+            <Button className="mt-3" size="sm" variant="outline" disabled>
+              Buy selected products — coming later
+            </Button>
+          </div>
+
+          <dl className="min-w-64 space-y-2 text-sm sm:text-right">
+            <div className="flex items-center justify-between gap-8">
+              <dt className="text-muted-foreground">Equipment subtotal</dt>
+              <dd className="font-semibold tabular-nums">
+                ${estimatedEquipmentCost.toFixed(2)}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-8 border-t border-border pt-2 text-base">
+              <dt className="flex items-center gap-2 font-semibold sm:ml-auto">
+                <DollarSign className="size-4" aria-hidden="true" />
+                Estimated total
+              </dt>
+              <dd className="text-xl font-bold tabular-nums">
+                ${estimatedEquipmentCost.toFixed(2)}
+              </dd>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Before tax and shipping.
+            </div>
+          </dl>
         </div>
       </section>
 
@@ -827,6 +879,17 @@ export function AquariumBuilderInterface({
   );
 }
 
+function estimateFlowGph(
+  sizeGallons: number | null,
+  filtrationLevel: AquariumFiltrationLevel | null,
+) {
+  if (!sizeGallons || !filtrationLevel) {
+    return null;
+  }
+
+  return sizeGallons * flowMultipliers[filtrationLevel];
+}
+
 function formatAnalysisUnits(value: number) {
   return `${value.toFixed(1)} units`;
 }
@@ -877,10 +940,21 @@ function AquariumValidationPanel({
           </span>
         </div>
 
-        <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-sm sm:max-w-md">
+        <dl className="mt-4 grid grid-cols-2 gap-2 text-center text-sm lg:max-w-2xl lg:grid-cols-4">
           <ValidationCount label="Errors" value={report?.summary.errorCount ?? 0} />
           <ValidationCount label="Warnings" value={report?.summary.warningCount ?? 0} />
-          <ValidationCount label="Info" value={report?.summary.infoCount ?? 0} />
+          <ValidationCount
+            label="Recommendations"
+            value={
+              report?.issues.filter(
+                (issue) => issue.severity === "info" || issue.recommendation,
+              ).length ?? 0
+            }
+          />
+          <ValidationCount
+            label="Equipment Compatibility"
+            value="Coming later"
+          />
         </dl>
       </div>
 
@@ -891,49 +965,30 @@ function AquariumValidationPanel({
         </p>
       ) : isLoading && !report ? (
         <p className="p-4 text-sm text-muted-foreground">Checking this build...</p>
-      ) : report?.issues.length ? (
-        <ul className="space-y-3 p-4">
-          {report.issues.map((issue) => {
-            const affectedSpecies = issue.affectedSpeciesIds.map(
-              (id) => speciesById.get(id)?.common_name ?? id,
-            );
-
-            return (
-              <li
-                key={issue.id}
-                className={`border p-3 text-sm ${validationSeverityClasses[issue.severity]}`}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{issue.title}</span>
-                  <span className="text-xs font-bold uppercase tracking-wide">
-                    {issue.severity}
-                  </span>
-                </div>
-                <p className="mt-1">{issue.message}</p>
-                {affectedSpecies.length > 0 ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                      Affected species:
-                    </span>{" "}
-                    {affectedSpecies.join(", ")}
-                  </p>
-                ) : null}
-                {issue.recommendation ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                      Recommendation:
-                    </span>{" "}
-                    {issue.recommendation}
-                  </p>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
       ) : report ? (
-        <p className="p-4 text-sm">
-          No validation findings for the current build.
-        </p>
+        <div className="grid gap-4 p-4 lg:grid-cols-3">
+          <ValidationGroup
+            title="Errors"
+            emptyMessage="No errors."
+            issues={report.issues.filter((issue) => issue.severity === "error")}
+            speciesById={speciesById}
+          />
+          <ValidationGroup
+            title="Warnings"
+            emptyMessage="No warnings."
+            issues={report.issues.filter((issue) => issue.severity === "warning")}
+            speciesById={speciesById}
+          />
+          <ValidationGroup
+            title="Recommendations"
+            emptyMessage="No recommendations."
+            issues={report.issues.filter(
+              (issue) => issue.severity === "info" || issue.recommendation,
+            )}
+            recommendationsOnly
+            speciesById={speciesById}
+          />
+        </div>
       ) : (
         <p className="p-4 text-sm text-muted-foreground">
           Validation will run after the saved build loads.
@@ -943,7 +998,64 @@ function AquariumValidationPanel({
   );
 }
 
-function ValidationCount({ label, value }: { label: string; value: number }) {
+function ValidationGroup({
+  title,
+  emptyMessage,
+  issues,
+  recommendationsOnly = false,
+  speciesById,
+}: {
+  title: string;
+  emptyMessage: string;
+  issues: AquariumValidationIssue[];
+  recommendationsOnly?: boolean;
+  speciesById: Map<string, AquariumSpecies>;
+}) {
+  return (
+    <div>
+      <h3 className="font-semibold">{title}</h3>
+      {issues.length ? (
+        <ul className="mt-2 space-y-2">
+          {issues.map((issue) => {
+            const affectedSpecies = issue.affectedSpeciesIds.map(
+              (id) => speciesById.get(id)?.common_name ?? id,
+            );
+            return (
+              <li
+                key={`${title}-${issue.id}`}
+                className={`border p-3 text-sm ${validationSeverityClasses[issue.severity]}`}
+              >
+                <div className="font-semibold">{issue.title}</div>
+                <p className="mt-1">
+                  {recommendationsOnly
+                    ? issue.recommendation ?? issue.message
+                    : issue.message}
+                </p>
+                {affectedSpecies.length ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Affects: {affectedSpecies.join(", ")}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="mt-2 border border-border bg-background p-3 text-sm text-muted-foreground">
+          {emptyMessage}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ValidationCount({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string;
+}) {
   return (
     <div className="border border-border bg-background px-2 py-2">
       <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -1169,42 +1281,91 @@ function LivestockSelectionCell({
   action,
   href,
   livestock,
+  report,
   speciesBySlug,
   summary,
+  onRemove,
 }: {
   action: string;
   href: string;
   livestock: AquariumLivestockEntry[];
+  report: AquariumValidationReport | null;
   speciesBySlug: Map<string, AquariumSpecies>;
   summary: string;
+  onRemove: (speciesSlug: string) => void;
 }) {
   if (livestock.length === 0) {
     return <PlaceholderSelectionCell action={action} href={href} />;
   }
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="font-medium">{summary}</div>
-        <div className="mt-1 text-xs text-muted-foreground">
-          {livestock
-            .slice(0, 3)
-            .map((entry) => {
-              const item = speciesBySlug.get(entry.speciesSlug);
-
-              return `${item?.common_name ?? entry.speciesSlug} x${entry.quantity}`;
-            })
-            .join(", ")}
-          {livestock.length > 3 ? "..." : ""}
-        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link href={href}>
+            <Plus className="size-4" aria-hidden="true" />
+            {action}
+          </Link>
+        </Button>
       </div>
 
-      <Button asChild variant="outline" size="sm">
-        <Link href={href}>
-          <Plus className="size-4" aria-hidden="true" />
-          {action}
-        </Link>
-      </Button>
+      <div className="overflow-hidden border border-border bg-background">
+        <div className="hidden grid-cols-[minmax(12rem,1fr)_5rem_7rem_9rem] bg-muted/50 px-3 py-2 text-xs font-semibold text-muted-foreground sm:grid">
+          <div>Species</div>
+          <div>Quantity</div>
+          <div>Status</div>
+          <div className="text-right">Actions</div>
+        </div>
+        <ul className="divide-y divide-border">
+          {livestock.map((entry) => {
+            const item = speciesBySlug.get(entry.speciesSlug);
+            const issues = report?.issues.filter((issue) =>
+              item ? issue.affectedSpeciesIds.includes(item.id) : false,
+            );
+            const status = !report
+              ? "Pending"
+              : issues?.some((issue) => issue.severity === "error")
+                ? "Error"
+                : issues?.some((issue) => issue.severity === "warning")
+                  ? "Warning"
+                  : "OK";
+
+            return (
+              <li
+                key={entry.speciesSlug}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 p-3 sm:grid-cols-[minmax(12rem,1fr)_5rem_7rem_9rem] sm:px-3 sm:py-2"
+              >
+                <div className="min-w-0 font-medium">
+                  {item?.common_name ?? entry.speciesSlug}
+                </div>
+                <div className="text-right tabular-nums sm:text-left">
+                  <span className="sm:hidden">Qty: </span>
+                  {entry.quantity}
+                </div>
+                <div className="text-xs font-medium text-muted-foreground sm:text-sm sm:text-foreground">
+                  <span className="sm:hidden">Status: </span>
+                  {status}
+                </div>
+                <div className="flex justify-end gap-1">
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href={href}>Edit</Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Remove ${item?.common_name ?? entry.speciesSlug}`}
+                    onClick={() => onRemove(entry.speciesSlug)}
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

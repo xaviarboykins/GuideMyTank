@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { CompatibilitySummary } from "@/components/compatibility/compatibility-summary";
 import { PageContainer } from "@/components/site/page-container";
@@ -84,7 +84,7 @@ export default async function CompatibilityDetailPage({
   const { speciesA, speciesB } = await params;
 
   if (!isCanonicalCompatibilityPair(speciesA, speciesB)) {
-    redirect(getCompatibilityPath(speciesA, speciesB));
+    permanentRedirect(getCompatibilityPath(speciesA, speciesB));
   }
 
   const compatibility = await getCompatibilityRule(speciesA, speciesB);

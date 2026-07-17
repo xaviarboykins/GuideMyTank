@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
     "audit:species-data": "node scripts/audit_species_care_data.cjs",
     "lint": "eslint",
     "validate:compatibility": "node scripts/check_compatibility_matrix.cjs",
@@ -42,6 +43,7 @@
     "eslint-config-next": "16.2.6",
     "supabase": "^2.100.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

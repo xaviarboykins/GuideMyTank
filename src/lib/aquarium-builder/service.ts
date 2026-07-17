@@ -8,6 +8,11 @@ import type {
   AquariumLivestockEntry,
   AquariumResolvedLivestockEntry,
 } from "@/lib/aquarium-builder/types";
+import {
+  analyzeStocking,
+  normalizeStockingAnalysisInput,
+  type StockingAnalysisResult,
+} from "@/lib/aquarium-builder/stocking-analysis";
 import { getCompatibility } from "@/lib/compatibility/service";
 import type { CompatibilityResult } from "@/lib/compatibility/types";
 import { getSpeciesBySlug } from "@/lib/data/species";
@@ -256,9 +261,6 @@ export function analyzeStockingGuidance(
 } {
   const warnings: AquariumBuilderWarning[] = [];
   const recommendations: AquariumBuilderRecommendation[] = [];
-  const totalBioload = livestock.reduce((total, entry) => {
-    return total + (entry.species.bioload_rating ?? 0) * entry.quantity;
-  }, 0);
 
   for (const entry of livestock) {
     const minimumTankGallons = entry.species.tank_size_gal;
@@ -288,20 +290,22 @@ export function analyzeStockingGuidance(
     }
   }
 
-  if (totalBioload > build.tank.sizeGallons) {
-    recommendations.push(
-      createRecommendation(
-        "high-estimated-bioload",
-        "Estimated livestock bioload is high for the configured tank size. Consider stronger filtration, fewer livestock, or a larger tank.",
-        "warning",
-      ),
-    );
-  }
-
   return {
     warnings,
     recommendations,
   };
+}
+
+export function analyzeAquariumStocking(
+  build: AquariumBuild,
+  resolvedLivestock: AquariumResolvedLivestockEntry[],
+): StockingAnalysisResult {
+  return analyzeStocking(
+    normalizeStockingAnalysisInput(
+      build,
+      resolvedLivestock.map((entry) => entry.species),
+    ),
+  );
 }
 
 export async function analyzeAquariumBuild(
@@ -317,6 +321,7 @@ export async function analyzeAquariumBuild(
     warnings: stockingWarnings,
     recommendations: stockingRecommendations,
   } = analyzeStockingGuidance(build, resolvedLivestock);
+  const stocking = analyzeAquariumStocking(build, resolvedLivestock);
 
   return {
     build,
@@ -324,6 +329,7 @@ export async function analyzeAquariumBuild(
     estimatedCost,
     analysis: {
       compatibility,
+      stocking,
       warnings: [
         ...validationWarnings,
         ...livestockWarnings,

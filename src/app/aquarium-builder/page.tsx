@@ -5,6 +5,7 @@ import { DevelopmentBadge } from "@/components/site/development-badge";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { getAllSpecies } from "@/lib/data/species";
+import { getPlants } from "@/lib/plants/service";
 
 export const metadata: Metadata = {
   title: "Aquarium Builder | Tank Planning Tool | GuideMyTank",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AquariumBuilderPage() {
-  const species = await getAllSpecies();
+  const [species, plants] = await Promise.all([getAllSpecies(), getPlants()]);
 
   return (
     <PageContainer>
@@ -24,7 +25,7 @@ export default async function AquariumBuilderPage() {
         badge={<DevelopmentBadge />}
       />
 
-      <AquariumBuilderInterface species={species} />
+      <AquariumBuilderInterface plantCatalog={plants} species={species} />
     </PageContainer>
   );
 }

@@ -94,7 +94,7 @@ export function normalizeAquariumPlants(plants: unknown): AquariumPlantEntry[] {
     return [];
   }
 
-  const entriesBySlug = new Map<string, AquariumPlantEntry>();
+  const entriesById = new Map<string, AquariumPlantEntry>();
 
   for (const entry of plants) {
     if (!entry || typeof entry !== "object") {
@@ -102,25 +102,25 @@ export function normalizeAquariumPlants(plants: unknown): AquariumPlantEntry[] {
     }
 
     const rawEntry = entry as Partial<AquariumPlantEntry>;
-    const plantSlug =
-      typeof rawEntry.plantSlug === "string" ? rawEntry.plantSlug.trim() : "";
+    const plantId =
+      typeof rawEntry.plantId === "string" ? rawEntry.plantId.trim() : "";
     const quantity = Number(rawEntry.quantity);
 
-    if (!plantSlug || !Number.isFinite(quantity)) {
+    if (!plantId || !Number.isFinite(quantity)) {
       continue;
     }
 
     const safeQuantity = Math.max(1, Math.floor(quantity));
-    const currentEntry = entriesBySlug.get(plantSlug);
+    const currentEntry = entriesById.get(plantId);
 
-    entriesBySlug.set(plantSlug, {
-      plantSlug,
+    entriesById.set(plantId, {
+      plantId,
       quantity: (currentEntry?.quantity ?? 0) + safeQuantity,
       notes: typeof rawEntry.notes === "string" ? rawEntry.notes : null,
     });
   }
 
-  return Array.from(entriesBySlug.values());
+  return Array.from(entriesById.values());
 }
 
 export function normalizeAquariumEquipment(

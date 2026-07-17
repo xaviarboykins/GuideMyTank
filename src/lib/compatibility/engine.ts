@@ -8,7 +8,7 @@ import type {
 import {
   evaluateSpeciesSpecialRules,
   hasSpeciesSpecialRule,
-} from "@/lib/compatibility/special-rules";
+} from "./special-rules";
 
 const invertebrateFamilies = new Set([
   "Atyidae",

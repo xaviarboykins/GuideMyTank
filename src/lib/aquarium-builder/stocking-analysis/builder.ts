@@ -4,6 +4,7 @@ import type {
   AquariumPlantedLevel,
   AquariumSpecies,
 } from "@/lib/aquarium-builder/types";
+import { calculatePlantedLevel } from "../plants";
 
 import type { StockingAnalysisInput } from "./types";
 
@@ -12,10 +13,7 @@ export const FILTRATION_TURNOVER_THRESHOLDS = {
   highMinimum: 8,
 } as const;
 
-export const PLANTED_DENSITY_THRESHOLDS = {
-  moderateMinimumPlantsPerGallon: 0.25,
-  heavyMinimumPlantsPerGallon: 0.5,
-} as const;
+export { PLANTED_DENSITY_THRESHOLDS } from "../plants";
 
 export function deriveAquariumFiltrationLevel(
   build: AquariumBuild,
@@ -52,41 +50,11 @@ export function deriveAquariumFiltrationLevel(
 export function deriveAquariumPlantedLevel(
   build: AquariumBuild,
 ): AquariumPlantedLevel {
-  if (build.tank.plantedLevel !== "none") {
-    return build.tank.plantedLevel;
-  }
-
-  const totalPlants = build.plants.reduce((total, entry) => {
-    return Number.isFinite(entry.quantity) && entry.quantity > 0
-      ? total + entry.quantity
-      : total;
-  }, 0);
-
-  if (totalPlants === 0) {
-    return "none";
-  }
-
-  if (!Number.isFinite(build.tank.sizeGallons) || build.tank.sizeGallons <= 0) {
-    return "light";
-  }
-
-  const plantsPerGallon = totalPlants / build.tank.sizeGallons;
-
-  if (
-    plantsPerGallon >=
-    PLANTED_DENSITY_THRESHOLDS.heavyMinimumPlantsPerGallon
-  ) {
-    return "heavy";
-  }
-
-  if (
-    plantsPerGallon >=
-    PLANTED_DENSITY_THRESHOLDS.moderateMinimumPlantsPerGallon
-  ) {
-    return "moderate";
-  }
-
-  return "light";
+  return calculatePlantedLevel(
+    build.plants,
+    build.tank.sizeGallons,
+    build.tank.plantedLevel,
+  );
 }
 
 /**

@@ -76,7 +76,7 @@ describe("builder stocking normalization", () => {
     it("derives light planting below 0.25 plants per gallon", () => {
       expect(
         deriveAquariumPlantedLevel(
-          build({ plants: [{ plantSlug: "anubias", quantity: 4 }] }),
+          build({ plants: [{ plantId: "plant-anubias", quantity: 4 }] }),
         ),
       ).toBe("light");
     });
@@ -84,7 +84,7 @@ describe("builder stocking normalization", () => {
     it("derives moderate planting from 0.25 plants per gallon", () => {
       expect(
         deriveAquariumPlantedLevel(
-          build({ plants: [{ plantSlug: "anubias", quantity: 5 }] }),
+          build({ plants: [{ plantId: "plant-anubias", quantity: 5 }] }),
         ),
       ).toBe("moderate");
     });
@@ -92,7 +92,7 @@ describe("builder stocking normalization", () => {
     it("derives heavy planting from 0.5 plants per gallon", () => {
       expect(
         deriveAquariumPlantedLevel(
-          build({ plants: [{ plantSlug: "anubias", quantity: 10 }] }),
+          build({ plants: [{ plantId: "plant-anubias", quantity: 10 }] }),
         ),
       ).toBe("heavy");
     });
@@ -106,7 +106,7 @@ describe("builder stocking normalization", () => {
               filtrationLevel: "standard",
               plantedLevel: "heavy",
             },
-            plants: [{ plantSlug: "anubias", quantity: 1 }],
+            plants: [{ plantId: "plant-anubias", quantity: 1 }],
           }),
         ),
       ).toBe("heavy");
@@ -117,7 +117,7 @@ describe("builder stocking normalization", () => {
     const normalized = normalizeStockingAnalysisInput(
       build({
         equipment: buildWithFilter(160).equipment,
-        plants: [{ plantSlug: "anubias", quantity: 5 }],
+        plants: [{ plantId: "plant-anubias", quantity: 5 }],
       }),
       [],
     );

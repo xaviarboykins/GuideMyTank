@@ -177,6 +177,78 @@ export type Database = {
         }
         Relationships: []
       }
+      plants: {
+        Row: {
+          care_level: string
+          co2_required: boolean
+          common_name: string
+          created_at: string
+          description: string | null
+          growth_rate: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          maximum_height_inches: number | null
+          maximum_light_level: string | null
+          maximum_ph: number | null
+          maximum_temperature_f: number | null
+          minimum_light_level: string | null
+          minimum_ph: number | null
+          minimum_tank_gallons: number | null
+          minimum_temperature_f: number | null
+          placement: string | null
+          scientific_name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          care_level: string
+          co2_required?: boolean
+          common_name: string
+          created_at?: string
+          description?: string | null
+          growth_rate?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          maximum_height_inches?: number | null
+          maximum_light_level?: string | null
+          maximum_ph?: number | null
+          maximum_temperature_f?: number | null
+          minimum_light_level?: string | null
+          minimum_ph?: number | null
+          minimum_tank_gallons?: number | null
+          minimum_temperature_f?: number | null
+          placement?: string | null
+          scientific_name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          care_level?: string
+          co2_required?: boolean
+          common_name?: string
+          created_at?: string
+          description?: string | null
+          growth_rate?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          maximum_height_inches?: number | null
+          maximum_light_level?: string | null
+          maximum_ph?: number | null
+          maximum_temperature_f?: number | null
+          minimum_light_level?: string | null
+          minimum_ph?: number | null
+          minimum_tank_gallons?: number | null
+          minimum_temperature_f?: number | null
+          placement?: string | null
+          scientific_name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       species: {
         Row: {
           aggression_level: number | null

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { PlantsSelectionInterface } from "@/components/aquarium-builder/plants-selection-interface";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { getPlants } from "@/lib/plants/service";
 
 export const metadata: Metadata = {
   title: "Plants | Aquarium Builder | GuideMyTank",
@@ -10,16 +11,18 @@ export const metadata: Metadata = {
     "Manage aquatic plant selections for the GuideMyTank Aquarium Builder.",
 };
 
-export default function AquariumBuilderPlantsPage() {
+export default async function AquariumBuilderPlantsPage() {
+  const plants = await getPlants();
+
   return (
     <PageContainer>
       <PageHeader
         eyebrow="Aquarium Builder"
         title="Plants"
-        description="Browse and manage aquatic plants for this aquarium. Plant database support is not connected yet."
+        description="Search the freshwater plant catalog and manage plants selected for this aquarium."
       />
 
-      <PlantsSelectionInterface />
+      <PlantsSelectionInterface plants={plants} />
     </PageContainer>
   );
 }

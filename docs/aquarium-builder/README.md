@@ -23,7 +23,8 @@ Users should eventually be able to choose a tank, add livestock, add equipment, 
 
 ## Current M5 Scope
 
-Milestone 5 establishes the reusable backend domain model and service layer.
+Milestone 5 establishes the reusable domain model, service layer, and working
+builder interface.
 
 Version 1 supports:
 
@@ -36,9 +37,13 @@ Version 1 supports:
 - build-level notes
 - validation warnings
 - compatibility analysis through the existing Compatibility Service
-- lightweight stocking guidance from existing species data
+- a pure stocking-analysis engine using existing species data
+- live stocking status and capacity details in the builder
+- local browser persistence for the in-progress build
 
-This milestone does not add UI, routes, saved-build persistence, plants, starter kits, or affiliate-link behavior.
+This milestone does not add server-side saved-build persistence, a populated
+plant catalog, starter kits, affiliate-link behavior, or live compatibility
+status in the builder summary.
 
 ## Future Roadmap
 
@@ -48,7 +53,7 @@ The model is designed so future features can be added without redesigning the bu
 - saved builds
 - starter kits
 - affiliate links
-- richer stocking analysis
+- richer biological stocking models
 - equipment compatibility checks
 - build sharing
 - build templates
@@ -61,7 +66,17 @@ Builder code lives in:
 
 ```text
 src/lib/aquarium-builder/
+  stocking-analysis/
+    builder.ts
+    constants.ts
+    engine.ts
+    helpers.ts
+    index.ts
+    types.ts
+    builder.test.ts
+    engine.test.ts
   types.ts
+  storage.ts
   service.ts
 ```
 
@@ -108,7 +123,9 @@ Current responsibilities:
 - aggregate estimated equipment cost
 - resolve livestock species from existing species data
 - coordinate pairwise livestock compatibility through the Compatibility Service
-- provide lightweight stocking guidance using existing species fields
+- normalize builder state into stocking-analysis input
+- call the pure stocking engine and return its structured result
+- provide separate minimum-tank and minimum-group guidance
 - return a unified `AquariumBuilderResult`
 
 The service should remain usable from future server components, route handlers, server actions, scripts, or tests.
@@ -126,21 +143,186 @@ The Aquarium Builder reuses:
 
 The builder should not directly call `calculateCompatibility()` from the engine. Calling the service preserves existing manual-rule handling and water-parameter overlay behavior.
 
-## UI Derivation Direction
+## UI Derivation
 
-The builder UI should stay component-driven like PCPartPicker. Tank size should be derived from a selected tank, flow estimate from the selected filtration setup, and planted level from selected plants. These derived values should not be entered through separate manual configuration controls.
+The builder UI stays component-driven like PCPartPicker. Tank size is derived
+only from a selected product with an exact gallon capacity. A product range is
+not treated as an exact volume.
 
-## Stocking Guidance
+Filtration level is derived from hourly turnover when both exact tank gallons
+and filter flow are available:
 
-Dedicated `stocking_profiles` data is not currently available in the generated database types, and a migration dropped the legacy table.
+```text
+turnoverPerHour = filterFlowRateGph / tankGallons
 
-For M5, stocking guidance is intentionally limited to existing species fields:
+below 5x: Low
+5x through below 8x: Standard
+8x or above: High
+```
 
-- warn when tank gallons are below a species minimum tank size
-- recommend meeting minimum group size
-- recommend caution when simple estimated bioload exceeds tank gallons
+Missing or unusable filter/tank data is treated conservatively as low
+filtration.
 
-This is not a full stocking engine. A richer stocking model should be introduced later only when the data model supports it cleanly.
+An explicitly stored planted level takes precedence. Otherwise, selected plant
+quantity derives an estimated density:
+
+```text
+no plants: None
+below 0.25 plants per gallon: Light
+0.25 through below 0.5 plants per gallon: Moderate
+0.5 plants per gallon or above: Heavy
+```
+
+When plants exist but exact gallons are unavailable, the derived level is only
+light. Plant quantity is a rough proxy until the project has species-level
+plant size and coverage data.
+
+## Stocking Analysis Engine
+
+The pure engine lives under `src/lib/aquarium-builder/stocking-analysis`. It
+does not query Supabase, read browser state, render UI, perform compatibility
+checks, or validate husbandry.
+
+The public entry point is:
+
+```ts
+analyzeStocking(input: StockingAnalysisInput): StockingAnalysisResult
+```
+
+`StockingAnalysisInput` contains exact tank gallons, normalized filtration and
+planted levels, and livestock entries with species identity, quantity, and a
+nullable bioload score. `StockingAnalysisResult` contains capacities, bioload,
+utilization, status, completeness, estimated remaining livestock, applied
+multipliers, and structured warnings.
+
+### Data Source
+
+Dedicated `stocking_profiles` data is not currently available in the generated
+database types; a migration dropped the legacy table. The engine therefore uses
+the nullable `species.bioload_rating` field. The active database constraint and
+engine both accept scores from 1 through 10.
+
+The service resolves selected species once through the existing species data
+layer. The shared builder adapter maps those records into engine input. An
+unresolved species or null/invalid rating remains uncalculated and makes the
+analysis incomplete; it is never silently assigned zero bioload.
+
+### Formulas
+
+```text
+baseCapacity = tankGallons
+
+effectiveCapacity =
+  baseCapacity * filtrationMultiplier * plantedMultiplier
+
+totalBioload =
+  sum(valid bioloadScore * valid quantity)
+
+stockingPercentage =
+  effectiveCapacity > 0
+    ? totalBioload / effectiveCapacity * 100
+    : 0
+
+remainingCapacity = max(effectiveCapacity - totalBioload, 0)
+capacityExceededBy = max(totalBioload - effectiveCapacity, 0)
+```
+
+The engine preserves the unrounded percentage. Display layers decide how to
+round it.
+
+### Status Thresholds
+
+```text
+0% through below 40%: Lightly Stocked
+40% through below 70%: Moderately Stocked
+70% through 100%: Fully Stocked
+Above 100%: Overstocked
+```
+
+Exactly 100% is fully stocked. Overstocked results include a critical warning.
+
+### Capacity Multipliers
+
+Filtration:
+
+```text
+Low: 0.85
+Standard: 1.0
+High: 1.1
+```
+
+Planting:
+
+```text
+None: 1.0
+Light: 1.03
+Moderate: 1.07
+Heavy: 1.1
+```
+
+Filtration and plants only modestly adjust effective capacity. They do not
+change the intrinsic bioload produced by the livestock.
+
+### Estimated Capacity Remaining
+
+The engine calculates average bioload using only animals with valid scores and
+quantities. Estimated remaining livestock is:
+
+```text
+floor(remainingCapacity / averageCurrentBioloadPerAnimal)
+```
+
+This estimates how many similarly demanding animals might fit. It is not an
+exact number of safe additional fish and must not be presented as a guarantee.
+
+### Incomplete Analysis and Warnings
+
+The engine handles invalid input without throwing. Missing or invalid required
+data sets `analysisComplete` to false and returns structured warnings. Current
+warning categories cover:
+
+- missing or invalid tank capacity
+- unknown filtration or planted levels
+- invalid livestock quantity
+- missing stocking data
+- invalid bioload score
+- overstocking
+
+Invalid quantities and missing/invalid scores do not contribute to calculated
+bioload. `uncalculatedLivestockCount` exposes the affected amount.
+
+### Service and UI Integration
+
+`analyzeAquariumBuild()` resolves livestock, normalizes builder state, calls the
+pure engine, and returns the result as `analysis.stocking`. The client builder
+uses the same pure adapter and engine against its local in-progress state so the
+display updates when tank, filter, plant, livestock, or quantity selections
+change without client-side database access.
+
+The UI shows utilization, status, total bioload, effective capacity, remaining
+or exceeded capacity, estimated similarly demanding livestock remaining, and
+incomplete-analysis warnings. Status is communicated with text as well as
+color.
+
+The builder compatibility summary currently says `Not analyzed`. Pairwise
+compatibility is available through the compatibility service, but live builder
+compatibility integration is separate from stocking analysis and must not be
+represented as a successful check until it actually runs.
+
+### Limitations and Relationship to M5 Issue 5
+
+Stocking percentage is an estimate built from a coarse per-animal 1–10 score.
+It is not a biological measurement, water-quality guarantee, or replacement
+for aquarium-specific judgment. Plant counts do not yet represent plant mass,
+growth rate, or nutrient uptake. Filter turnover does not capture media volume,
+maintenance, head pressure, or actual biological filtration performance.
+
+Compatibility and husbandry validation are handled separately. Temperature,
+pH, hardness, minimum school size, aggression, territory, tank dimensions, and
+swimming-zone congestion are not part of this engine. M5 Issue 5 can consume
+this structured stocking result as one input to broader aquarium validation
+without duplicating stocking calculations.
+
 
 ## Saved-Build Persistence Strategy
 

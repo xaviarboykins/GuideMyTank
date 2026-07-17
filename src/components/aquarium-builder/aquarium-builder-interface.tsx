@@ -1,6 +1,14 @@
 "use client";
 
-import { CheckCircle2, Droplets, Gauge, Plus, Waves, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CircleHelp,
+  Droplets,
+  Gauge,
+  Plus,
+  Waves,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -24,6 +32,15 @@ import {
   serializeAquariumBuild,
 } from "@/lib/aquarium-builder/storage";
 import type { ProductCategory } from "@/lib/products/types";
+import {
+  analyzeStocking,
+  deriveAquariumFiltrationLevel,
+  deriveAquariumPlantedLevel,
+  normalizeStockingAnalysisInput,
+  STOCKING_STATUS_LABELS,
+  type StockingAnalysisResult,
+  type StockingStatus,
+} from "@/lib/aquarium-builder/stocking-analysis";
 
 type TankSizeGallons = AquariumTankConfiguration["sizeGallons"];
 type StatusTone = "success" | "info" | "neutral" | "warning" | "critical";
@@ -80,6 +97,13 @@ const statusToneClasses: Record<StatusTone, string> = {
   neutral: "bg-muted text-foreground",
   warning: "bg-amber-500 text-amber-950",
   critical: "bg-destructive text-destructive-foreground",
+};
+
+const stockingStatusTones: Record<StockingStatus, StatusTone> = {
+  "lightly-stocked": "success",
+  "moderately-stocked": "info",
+  "fully-stocked": "warning",
+  overstocked: "critical",
 };
 
 const flowMultipliers: Record<AquariumFiltrationLevel, number> = {
@@ -347,10 +371,12 @@ export function AquariumBuilderInterface({
     (build.tank.sizeGallons > 0 ? build.tank.sizeGallons : null);
   const selectedFlowRateGph =
     singleSelections.filtration?.flowRateGph ?? null;
-  const filtrationLevel =
-    singleSelections.filtration?.filtrationLevel ?? null;
+  const filtrationLevel = singleSelections.filtration
+    ? deriveAquariumFiltrationLevel(build)
+    : null;
+  const derivedPlantedLevel = deriveAquariumPlantedLevel(build);
   const plantedLevel =
-    build.tank.plantedLevel !== "none" ? build.tank.plantedLevel : null;
+    derivedPlantedLevel !== "none" ? derivedPlantedLevel : null;
   const plantSpeciesCount = build.plants.length;
   const plantTotalCount = build.plants.reduce((total, entry) => {
     return total + entry.quantity;
@@ -377,6 +403,16 @@ export function AquariumBuilderInterface({
         }`
       : "No livestock selected";
 
+  const stockingAnalysis = useMemo(() => {
+    return analyzeStocking(normalizeStockingAnalysisInput(build, species));
+  }, [build, species]);
+  const stockingStatusLabel =
+    STOCKING_STATUS_LABELS[stockingAnalysis.stockingStatus];
+  const stockingStatusValue =
+    stockingAnalysis.baseCapacity <= 0
+      ? "— · Select a tank"
+      : `${Math.round(stockingAnalysis.stockingPercentage)}% · ${stockingStatusLabel}${stockingAnalysis.analysisComplete ? "" : " (incomplete)"}`;
+
   const flowEstimateGph = useMemo(() => {
     return (
       selectedFlowRateGph ?? estimateFlowGph(tankSizeGallons, filtrationLevel)
@@ -386,15 +422,18 @@ export function AquariumBuilderInterface({
   const builderStatus = [
     {
       label: "Compatibility",
-      value: "No issues found",
-      tone: "success",
-      icon: CheckCircle2,
+      value: "Not analyzed",
+      tone: "neutral",
+      icon: CircleHelp,
       className: "lg:flex-[2]",
     },
     {
-      label: "Estimated Stocking",
-      value: "0%",
-      tone: "success",
+      label: "Stocking",
+      value: stockingStatusValue,
+      tone:
+        stockingAnalysis.baseCapacity > 0
+          ? stockingStatusTones[stockingAnalysis.stockingStatus]
+          : "neutral",
       icon: Gauge,
       className: "flex-1",
     },
@@ -521,6 +560,8 @@ export function AquariumBuilderInterface({
           ))}
         </dl>
       </section>
+
+      <StockingAnalysisPanel analysis={stockingAnalysis} />
 
       <section className="mt-6 border border-border bg-card">
         <div className="border-b border-border p-4">
@@ -692,6 +733,111 @@ export function AquariumBuilderInterface({
         </div>
       </section>
     </>
+  );
+}
+
+function formatAnalysisUnits(value: number) {
+  return `${value.toFixed(1)} units`;
+}
+
+function StockingAnalysisPanel({
+  analysis,
+}: {
+  analysis: StockingAnalysisResult;
+}) {
+  const hasTank = analysis.baseCapacity > 0;
+  const statusLabel = STOCKING_STATUS_LABELS[analysis.stockingStatus];
+  const estimatedRemaining =
+    analysis.estimatedLivestockRemaining == null
+      ? "Not enough calculated livestock data"
+      : `About ${analysis.estimatedLivestockRemaining} similar ${analysis.estimatedLivestockRemaining === 1 ? "animal" : "animals"}`;
+
+  return (
+    <section
+      className="mt-6 border border-border bg-card"
+      aria-labelledby="stocking-analysis-heading"
+      aria-live="polite"
+    >
+      <div className="border-b border-border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="stocking-analysis-heading" className="text-lg font-semibold">
+            Stocking Analysis
+          </h2>
+          <span className="text-sm font-semibold">
+            {hasTank
+              ? `${Math.round(analysis.stockingPercentage)}% · ${statusLabel}`
+              : "Select a tank"}
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Estimated capacity based on tank volume, filtration, planting, and
+          available species bioload scores.
+        </p>
+      </div>
+
+      {hasTank ? (
+        <div className="grid gap-6 p-4 text-sm md:grid-cols-2">
+          <dl className="space-y-2">
+            <BreakdownRow
+              label="Total bioload"
+              value={formatAnalysisUnits(analysis.totalBioload)}
+            />
+            <BreakdownRow
+              label="Effective capacity"
+              value={formatAnalysisUnits(analysis.effectiveCapacity)}
+            />
+            <BreakdownRow
+              label="Stocking utilization"
+              value={`${Math.round(analysis.stockingPercentage)}%`}
+            />
+            <BreakdownRow
+              label="Remaining capacity"
+              value={formatAnalysisUnits(analysis.remainingCapacity)}
+            />
+            {analysis.capacityExceededBy > 0 ? (
+              <BreakdownRow
+                label="Capacity exceeded by"
+                value={formatAnalysisUnits(analysis.capacityExceededBy)}
+              />
+            ) : null}
+          </dl>
+
+          <div>
+            <h3 className="font-semibold">Estimated capacity remaining</h3>
+            <p className="mt-2">{estimatedRemaining}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              This estimate uses the average bioload of calculated livestock.
+              It is not an exact safe additional-fish count.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <p className="p-4 text-sm text-muted-foreground">
+          Select a tank with an exact gallon capacity to calculate stocking.
+        </p>
+      )}
+
+      {analysis.warnings.length > 0 ? (
+        <div className="border-t border-border p-4">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertTriangle className="size-4" aria-hidden="true" />
+            {analysis.analysisComplete
+              ? "Stocking warnings"
+              : "Stocking analysis incomplete"}
+          </div>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+            {analysis.warnings.map((warning) => (
+              <li key={warning.code}>
+                <span className="font-medium capitalize">
+                  {warning.severity}:
+                </span>{" "}
+                {warning.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

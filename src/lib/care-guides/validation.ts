@@ -6,12 +6,21 @@ import type { Json } from "../../types/database.types";
 export const REQUIRED_CARE_GUIDE_SECTIONS = [
   "overview",
   "natural_habitat",
+  "adult_size_and_lifespan",
   "aquarium_requirements",
   "water_parameters",
+  "filtration_and_flow",
+  "heating_requirements",
+  "lighting",
+  "substrate",
+  "plants_and_decor",
   "behavior_and_temperament",
+  "social_requirements",
   "tank_mates",
+  "species_to_avoid",
   "diet_and_feeding",
   "common_health_concerns",
+  "breeding",
   "beginner_guidance",
 ] as const;
 

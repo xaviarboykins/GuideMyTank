@@ -35,19 +35,23 @@ export async function getPublishedArticleBySlug(slug: string) {
     .maybeSingle();
   throwContentDatabaseError(error, "load the published article");
   if (!article) return null;
-  const [sections, images, sources, categories, tags] = await Promise.all([
+  const [sections, images, sources, categories, tags, relatedArticles, relatedCareGuides] = await Promise.all([
     supabase.from("article_sections").select("*").eq("article_id", article.id).order("display_order"),
     supabase.from("article_images").select("*,content_images(*)").eq("article_id", article.id).order("display_order"),
     supabase.from("article_sources").select("*,sources(*)").eq("article_id", article.id).order("display_order"),
     supabase.from("article_category_assignments").select("*,article_categories(*)").eq("article_id", article.id),
     supabase.from("article_tag_assignments").select("*,article_tags(*)").eq("article_id", article.id),
+    supabase.from("article_related_articles").select("*,related_article:articles!article_related_articles_related_article_id_fkey(id,slug,title,summary,status)").eq("article_id", article.id).order("display_order"),
+    supabase.from("article_related_care_guides").select("*,care_guide:care_guides(id,slug,title,summary,status)").eq("article_id", article.id).order("display_order"),
   ]);
   throwContentDatabaseError(sections.error, "load published article sections");
   throwContentDatabaseError(images.error, "load published article images");
   throwContentDatabaseError(sources.error, "load published article sources");
   throwContentDatabaseError(categories.error, "load published article categories");
   throwContentDatabaseError(tags.error, "load published article tags");
-  return { article, sections: sections.data ?? [], images: images.data ?? [], sources: sources.data ?? [], categories: categories.data ?? [], tags: tags.data ?? [] };
+  throwContentDatabaseError(relatedArticles.error, "load related articles");
+  throwContentDatabaseError(relatedCareGuides.error, "load related Care Guides");
+  return { article, sections: sections.data ?? [], images: images.data ?? [], sources: sources.data ?? [], categories: categories.data ?? [], tags: tags.data ?? [], relatedArticles: relatedArticles.data ?? [], relatedCareGuides: relatedCareGuides.data ?? [] };
 }
 
 export async function createArticleDraft(title = "Untitled Article") {

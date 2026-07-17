@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
+import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, JsonLd, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
 import { PageContainer } from "@/components/site/page-container";
 import { getPublishedArticleBySlug } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const result = await getPublishedArticleBySlug(slug);
   if (!result) return {};
   return {
-    title: `${result.article.title} | GuideMyTank`,
+    title: result.article.seo_title ?? `${result.article.title} | GuideMyTank`,
     description: result.article.meta_description ?? result.article.summary ?? undefined,
-    alternates: { canonical: `https://www.guidemytank.com/learning-center/${result.article.slug}` },
-    openGraph: { title: result.article.title ?? undefined, description: result.article.summary ?? undefined, type: "article", publishedTime: result.article.published_at ?? undefined },
+    alternates: { canonical: result.article.canonical_url ?? `https://www.guidemytank.com/learning-center/${result.article.slug}` },
+    openGraph: { title: result.article.seo_title ?? result.article.title ?? undefined, description: result.article.meta_description ?? result.article.summary ?? undefined, type: "article", publishedTime: result.article.published_at ?? undefined, modifiedTime: result.article.updated_at },
   };
 }
 
@@ -43,18 +43,27 @@ export default async function PublishedArticlePage({ params }: Props) {
   const { slug } = await params;
   const result = await getPublishedArticleBySlug(slug);
   if (!result) notFound();
-  const { article, sections, images, sources, categories, tags } = result;
+  const { article, sections, images, sources, categories, tags, relatedArticles, relatedCareGuides } = result;
   const signed = await createPublishedContentImageSignedUrls(images.map((item) => item.content_images.storage_path));
   const imageUrls = new Map(images.map((item) => [item.image_id, signed.get(item.content_images.storage_path) ?? ""]));
-  const galleryImages = images.map((item) => ({ id: item.image_id, url: imageUrls.get(item.image_id) ?? "", alt: item.content_images.alt_text ?? "Article image", caption: item.content_images.caption }));
+  const galleryImages = images.map((item) => ({ id: item.image_id, url: imageUrls.get(item.image_id) ?? "", alt: item.content_images.alt_text ?? "Article image", caption: item.content_images.caption, attribution: item.content_images.attribution, sourceUrl: item.content_images.source_url, licenseName: item.content_images.license_name, licenseUrl: item.content_images.license_url }));
   const [introduction, ...remainingSections] = sections;
+  const canonical = article.canonical_url ?? `https://www.guidemytank.com/learning-center/${article.slug}`;
+  const faqItems = sections.flatMap((section) => { const value = isJsonRecord(section.content) ? section.content.items : null; return section.block_type === "faq_group" && Array.isArray(value) ? value.filter(isJsonRecord).map((item) => ({ "@type": "Question", name: typeof item.question === "string" ? item.question : "", acceptedAnswer: { "@type": "Answer", text: typeof item.answer === "string" ? item.answer : "" } })) : []; });
+  const structuredData: Array<Record<string, unknown>> = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.summary, datePublished: article.published_at, dateModified: article.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: canonical }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://www.guidemytank.com" }, { "@type": "ListItem", position: 2, name: "Learning Center", item: "https://www.guidemytank.com/learning-center" }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
+  if (faqItems.length) structuredData.push({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems });
 
   return <PageContainer><article className="mx-auto max-w-4xl">
-    <Link href="/learning-center" className="text-sm text-muted-foreground underline">Back to Learning Center</Link>
-    <header className="mt-6"><div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{categories.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div><h1 className="mt-2 text-4xl font-bold tracking-tight">{article.title}</h1>{article.summary ? <p className="mt-4 text-lg leading-8 text-muted-foreground">{article.summary}</p> : null}<div className="mt-3 flex flex-wrap gap-2">{tags.map((item) => <span key={item.tag_id} className="border border-border px-2 py-1 text-xs">{item.article_tags.name}</span>)}</div></header>
+    <JsonLd data={structuredData} />
+    <ContentBreadcrumbs items={[{ label: "Home", href: "/" }, { label: "Learning Center", href: "/learning-center" }, { label: article.title ?? "Article" }]} />
+    <header><div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{categories.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div><h1 className="mt-2 text-4xl font-bold tracking-tight">{article.title}</h1>{article.summary ? <p className="mt-4 text-lg leading-8 text-muted-foreground">{article.summary}</p> : null}<ContentByline publishedAt={article.published_at} updatedAt={article.updated_at} /><div className="mt-3 flex flex-wrap gap-2">{tags.map((item) => <span key={item.tag_id} className="border border-border px-2 py-1 text-xs">{item.article_tags.name}</span>)}</div></header>
     {introduction ? <div className="mt-10"><Block type={introduction.block_type} content={introduction.content} imageUrls={imageUrls} /></div> : null}
     {galleryImages.length ? <div className="mb-16 mt-8"><ArticleImageFlipbook images={galleryImages} /></div> : null}
-    <div className="space-y-8">{remainingSections.map((section) => <Block key={section.id} type={section.block_type} content={section.content} imageUrls={imageUrls} />)}</div>
-    {sources.length ? <section className="mt-12 border-t border-border pt-6"><h2 className="text-xl font-semibold">Sources</h2><ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">{sources.map((item) => <li key={item.source_id}>{item.sources.url ? <a href={item.sources.url} target="_blank" rel="noreferrer" className="underline">{item.sources.title}</a> : item.sources.title}</li>)}</ol></section> : null}
+    <AdvertisementSlot name="content-top" />
+    <div className="space-y-8">{remainingSections.map((section) => <section id={`section-${section.id}`} key={section.id} className="scroll-mt-24"><Block type={section.block_type} content={section.content} imageUrls={imageUrls} /></section>)}</div>
+    <SourcesList sources={sources} />
+    <RelatedLinks title="Related Care Guides" items={relatedCareGuides.filter((item) => item.care_guide?.status === "published").map((item) => ({ href: `/care-guides/${item.care_guide!.slug}`, title: item.care_guide!.title ?? "Care Guide", description: item.care_guide!.summary }))} />
+    <RelatedLinks title="Related articles" items={relatedArticles.filter((item) => item.related_article?.status === "published").map((item) => ({ href: `/learning-center/${item.related_article!.slug}`, title: item.related_article!.title ?? "Article", description: item.related_article!.summary }))} />
+    <ShareLinks title={article.title ?? "GuideMyTank article"} url={canonical} />
   </article></PageContainer>;
 }

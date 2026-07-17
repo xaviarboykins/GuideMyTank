@@ -14,7 +14,7 @@ export default async function CareGuidePreviewPage({ params }: { params: Promise
   const { id } = await params;
   const editor = await getCareGuideEditorData(id);
   if (!editor) notFound();
-  const { guide, sections, images, sources } = editor;
+  const { guide, sections, images, sources, relatedSpecies } = editor;
   const imageUrls = await createContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
 
   return (
@@ -23,7 +23,7 @@ export default async function CareGuidePreviewPage({ params }: { params: Promise
         <strong>Protected draft preview</strong>
         <Button asChild size="sm" variant="outline"><Link href={`/admin/care-guides/${id}`}>Back to editor</Link></Button>
       </div>
-      <CareGuideArticle guide={guide} sections={sections} images={images} sources={sources} imageUrls={imageUrls} />
+      <CareGuideArticle guide={guide} sections={sections} images={images} sources={sources} relatedSpecies={relatedSpecies} imageUrls={imageUrls} />
     </div>
   );
 }

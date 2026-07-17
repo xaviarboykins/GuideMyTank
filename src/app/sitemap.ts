@@ -106,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...careGuides.map((guide) => ({
       url: `${baseUrl}/care-guides/${guide.slug}`,
-      lastModified: new Date(),
+      lastModified: guide.updated_at ? new Date(guide.updated_at) : new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),

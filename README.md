@@ -16,7 +16,7 @@ The platform focuses on:
 
 - aquarium compatibility
 - freshwater tank planning
-- stocking calculators
+- aquarium stocking analysis
 - searchable species databases
 - evergreen SEO traffic
 - passive income through ads and affiliate links
@@ -269,17 +269,20 @@ Current functionality:
 - compatibility notes
 - cross-linked species pages
 
-## Stocking Planner
+## Aquarium Builder Stocking Analysis
 
-Utility for estimating aquarium stocking levels and identifying overcrowding risks.
+The Aquarium Builder estimates aquarium stocking levels and identifies
+overcrowding risks as part of the complete planning workflow.
 
-Planned functionality:
+Current functionality includes:
 
-- gallon-based stocking calculations
-- filtration recommendations
-- beginner warnings
-- bioload estimation
-- species grouping logic
+- gallon-based capacity calculations
+- filtration and planted-tank modifiers
+- bioload estimates
+- stocking status and remaining-capacity guidance
+- warnings for incomplete data and overstocking
+
+The former `/stocking` route permanently redirects to `/aquarium-builder`.
 
 ---
 
@@ -360,7 +363,11 @@ Avoid:
  /piscidex/[slug]
  /compatibility
  /compatibility/[speciesA]/[speciesB]
- /stocking
+ /aquarium-builder
+ /care-guides
+ /care-guides/[slug]
+ /learning-center
+ /products
 ```
 
 ---

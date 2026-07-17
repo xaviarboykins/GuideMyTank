@@ -71,31 +71,31 @@ const featuredCareGuides: FeaturedCareGuide[] = [
 
 const utilities = [
   {
-    title: "Compatibility Database",
-    description:
-      "Compare aquarium species using temperament, aggression level, water parameters, schooling behavior, and tank size.",
-    href: "/compatibility",
-    status: "beta",
-  },
-  {
-    title: "Tank Stocking Calculator",
-    description:
-      "Estimate safe stocking levels and identify overcrowding risks for common freshwater setups.",
-    href: "/stocking",
-    status: null,
-  },
-  {
     title: "Aquarium Builder",
     description:
-      "Build a complete setup with a tank, equipment, plants, livestock, and decor.",
+      "Build your freshwater aquarium and receive stocking, compatibility, equipment, temperature, and setup guidance in one place.",
     href: "/aquarium-builder",
     status: "beta",
   },
   {
-    title: "PisciDex Species Database",
+    title: "Compatibility Checker",
     description:
-      "Browse fish species data including temperament, tank size, lifespan, diet, and care requirements.",
-    href: "/piscidex",
+      "Quickly compare species using temperament, aggression, water parameters, schooling behavior, and tank requirements.",
+    href: "/compatibility",
+    status: "beta",
+  },
+  {
+    title: "Care Guides",
+    description:
+      "Browse practical species profiles covering care, behavior, habitat, feeding, water needs, and aquarium requirements.",
+    href: "/care-guides",
+    status: null,
+  },
+  {
+    title: "Products",
+    description:
+      "Explore a structured catalog of tanks, filters, heaters, lighting, substrate, decor, and other aquarium equipment.",
+    href: "/products",
     status: null,
   },
 ];
@@ -152,11 +152,15 @@ export default function Home() {
           </Button>
 
           <Button variant="outline" size="sm" asChild>
-            <Link href="/stocking">Stocking Planner</Link>
+            <Link href="/care-guides">Care Guides</Link>
           </Button>
 
           <Button variant="outline" size="sm" asChild>
             <Link href="/aquarium-builder">Aquarium Builder</Link>
+          </Button>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/products">Products</Link>
           </Button>
         </div>
       </section>
@@ -175,9 +179,10 @@ export default function Home() {
               Build your aquarium before you buy.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-sky-100/80">
-              Choose a tank, filter, heater, lighting, substrate, plants, and
-              livestock in one practical workspace. Your build is saved in your
-              browser as you plan.
+              Build your freshwater aquarium and receive stocking,
+              compatibility, equipment, temperature, and setup guidance in one
+              practical workspace. Your build is saved in your browser as you
+              plan.
             </p>
 
             <Button asChild className="mt-6 bg-sky-500 text-white hover:bg-sky-400">

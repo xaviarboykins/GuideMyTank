@@ -13,8 +13,8 @@ const navLinks = [
     label: "Compatibility",
   },
   {
-    href: "/stocking",
-    label: "Stocking",
+    href: "/learning-center",
+    label: "Learning Center",
   },
   {
     href: "/products",
@@ -23,6 +23,7 @@ const navLinks = [
   {
     href: "/aquarium-builder",
     label: "Aquarium Builder",
+    primary: true,
   },
 ];
 
@@ -38,7 +39,11 @@ export function Navbar() {
         {/* Desktop Nav */}
         <nav className="ml-auto hidden items-center gap-2 md:flex">
           {navLinks.map((link) => (
-            <Button key={link.href} variant="ghost" asChild>
+            <Button
+              key={link.href}
+              variant={link.primary ? "default" : "ghost"}
+              asChild
+            >
               <Link href={link.href}>{link.label}</Link>
             </Button>
           ))}

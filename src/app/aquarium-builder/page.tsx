@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AquariumBuilderInterface } from "@/components/aquarium-builder/aquarium-builder-interface";
+import { DevelopmentBadge } from "@/components/site/development-badge";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { getAllSpecies } from "@/lib/data/species";
@@ -19,7 +20,8 @@ export default async function AquariumBuilderPage() {
       <PageHeader
         eyebrow="Tank Planning"
         title="Aquarium Builder"
-        description="Plan a freshwater aquarium by choosing a tank, equipment, plants, livestock, and decor. This first version is a layout foundation for the builder workflow."
+        description="Plan a freshwater aquarium by choosing a tank, equipment, plants, livestock, and decor."
+        badge={<DevelopmentBadge />}
       />
 
       <AquariumBuilderInterface species={species} />

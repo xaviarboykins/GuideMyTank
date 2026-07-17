@@ -1,25 +1,121 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowRight, CheckCircle2, Fish, Wrench } from "lucide-react";
 
+import {
+  CareGuideCarousel,
+  type FeaturedCareGuide,
+} from "@/components/home/care-guide-carousel";
+import { DevelopmentBadge } from "@/components/site/development-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const popularSpecies = [
-  "Betta Fish",
-  "Neon Tetra",
-  "Corydoras",
-  "Guppy",
-  "Angelfish",
-  "Cherry Shrimp",
+const featuredCareGuides: FeaturedCareGuide[] = [
+  {
+    slug: "betta-splendens",
+    name: "Betta Fish",
+    scientificName: "Betta splendens",
+    image: "/species/betta-splendens.webp",
+    careLevel: "Easy",
+    tankSize: "5+ gal",
+    temperament: "Territorial",
+    summary:
+      "Learn how to provide warm, filtered water and a calm setup for this colorful labyrinth fish.",
+  },
+  {
+    slug: "corydoras-catfish",
+    name: "Corydoras Catfish",
+    scientificName: "Corydoras spp.",
+    image: "/species/corydoras-catfish.webp",
+    careLevel: "Easy",
+    tankSize: "20+ gal",
+    temperament: "Peaceful",
+    summary:
+      "Plan a social bottom-dwelling group with soft substrate, clean water, and compatible community fish.",
+  },
+  {
+    slug: "angelfish",
+    name: "Freshwater Angelfish",
+    scientificName: "Pterophyllum scalare",
+    image: "/species/angelfish.webp",
+    careLevel: "Intermediate",
+    tankSize: "29+ gal",
+    temperament: "Semi-aggressive",
+    summary:
+      "Understand tall-tank requirements, mature territorial behavior, feeding, and suitable tank mates.",
+  },
+  {
+    slug: "guppy",
+    name: "Guppy",
+    scientificName: "Poecilia reticulata",
+    image: "/species/guppy.webp",
+    careLevel: "Easy",
+    tankSize: "10+ gal",
+    temperament: "Peaceful",
+    summary:
+      "Build a lively guppy setup with stable water, appropriate group ratios, and manageable breeding.",
+  },
+  {
+    slug: "honey-gourami",
+    name: "Honey Gourami",
+    scientificName: "Trichogaster chuna",
+    image: "/species/honey-gourami.webp",
+    careLevel: "Easy",
+    tankSize: "10+ gal",
+    temperament: "Peaceful",
+    summary:
+      "Create a gentle planted community for this small gourami with quiet tank mates and low flow.",
+  },
 ];
+
+const utilities = [
+  {
+    title: "Compatibility Database",
+    description:
+      "Compare aquarium species using temperament, aggression level, water parameters, schooling behavior, and tank size.",
+    href: "/compatibility",
+    inDevelopment: true,
+  },
+  {
+    title: "Tank Stocking Calculator",
+    description:
+      "Estimate safe stocking levels and identify overcrowding risks for common freshwater setups.",
+    href: "/stocking",
+    inDevelopment: false,
+  },
+  {
+    title: "Aquarium Builder",
+    description:
+      "Build a complete setup with a tank, equipment, plants, livestock, and decor.",
+    href: "/aquarium-builder",
+    inDevelopment: true,
+  },
+  {
+    title: "PisciDex Species Database",
+    description:
+      "Browse fish species data including temperament, tank size, lifespan, diet, and care requirements.",
+    href: "/piscidex",
+    inDevelopment: false,
+  },
+];
+
+export const metadata: Metadata = {
+  title: "GuideMyTank | Aquarium Compatibility and Tank Planning Tools",
+  description:
+    "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.",
+};
 
 export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Main Utility Header */}
       <section className="border border-border bg-card p-6">
-        <p className="text-sm font-medium text-muted-foreground">
-          Freshwater Aquarium Utility Platform
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm font-medium text-muted-foreground">
+            Freshwater Aquarium Utility Platform
+          </p>
+          <DevelopmentBadge />
+        </div>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight">
           Aquarium compatibility and tank planning tools.
@@ -57,86 +153,115 @@ export default function Home() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/stocking">Stocking Planner</Link>
           </Button>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/aquarium-builder">Aquarium Builder</Link>
+          </Button>
         </div>
       </section>
 
-      {/* Utility Grid */}
-      <section className="mt-6 grid gap-4 md:grid-cols-3">
-        <div className="border border-border bg-card p-4">
-          <h2 className="font-semibold">Compatibility Database</h2>
+      {/* Builder Feature */}
+      <section className="mt-6 overflow-hidden rounded-lg border border-sky-200 bg-sky-950 text-white dark:border-sky-900">
+        <div className="grid items-center gap-8 p-6 md:grid-cols-[1fr_1.2fr] md:p-10">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
+                Featured Planning Tool
+              </p>
+              <DevelopmentBadge />
+            </div>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight">
+              Build your aquarium before you buy.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-sky-100/80">
+              Choose a tank, filter, heater, lighting, substrate, plants, and
+              livestock in one practical workspace. Your build is saved in your
+              browser as you plan.
+            </p>
 
-          <p className="mt-2 text-sm text-muted-foreground">
-            Compare aquarium species using temperament, aggression level, water
-            parameters, schooling behavior, and tank size.
-          </p>
-        </div>
+            <Button asChild className="mt-6 bg-sky-500 text-white hover:bg-sky-400">
+              <Link href="/aquarium-builder">
+                <Wrench className="size-4" aria-hidden="true" />
+                Start Your Tank Build
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
 
-        <div className="border border-border bg-card p-4">
-          <h2 className="font-semibold">Tank Stocking Calculator</h2>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            Estimate safe stocking levels and identify overcrowding risks for
-            common freshwater setups.
-          </p>
-        </div>
-
-        <div className="border border-border bg-card p-4">
-          <h2 className="font-semibold">PisciDex Species Database</h2>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            Browse fish species data including temperament, tank size, lifespan,
-            diet, and care requirements.
-          </p>
+          <div className="rounded-lg border border-white/15 bg-white/10 p-5">
+            <h3 className="font-semibold">One build, every essential</h3>
+            <ul className="mt-4 grid gap-3 text-sm text-sky-50 sm:grid-cols-2">
+              {[
+                "Tank and equipment selection",
+                "Live stocking overview",
+                "Filtration and heating status",
+                "Plants, substrate, and decor",
+              ].map((feature) => (
+                <li key={feature} className="flex items-start gap-2">
+                  <CheckCircle2
+                    className="mt-0.5 size-4 shrink-0 text-emerald-400"
+                    aria-hidden="true"
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
-      {/* Popular Species */}
-      <section className="mt-6 border border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Popular Aquarium Species</h2>
+      {/* Featured Care Guides */}
+      <section className="mt-6 rounded-lg border border-border bg-muted/40 p-6 md:p-8">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Fish className="size-4" aria-hidden="true" />
+              Species Care Guides
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight">
+              Plan around the fish, not just the tank.
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+              Quick, practical care profiles covering tank size, temperament,
+              water needs, diet, and compatible tank mates.
+            </p>
+          </div>
 
-          <Button variant="ghost" size="sm">
-            View All
+          <Button variant="outline" asChild>
+            <Link href="/care-guides">
+              View All Care Guides
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </Button>
         </div>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-          {popularSpecies.map((species) => (
-            <div
-              key={species}
-              className="border border-border bg-background p-3 text-sm"
-            >
-              {species}
+        <CareGuideCarousel guides={featuredCareGuides} />
+      </section>
+
+      {/* Utility Grid */}
+      <section aria-label="Aquarium tools" className="mt-6 grid gap-4 md:grid-cols-2">
+        {utilities.map((utility) => (
+          <Link
+            key={utility.href}
+            href={utility.href}
+            className="group border border-border bg-card p-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-semibold group-hover:underline">
+                {utility.title}
+              </h2>
+              {utility.inDevelopment ? <DevelopmentBadge /> : null}
             </div>
-          ))}
-        </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {utility.description}
+            </p>
+            <span className="mt-4 inline-block text-sm font-medium">
+              Open tool →
+            </span>
+          </Link>
+        ))}
       </section>
 
-      {/* Info Section */}
-      <section className="mt-6 border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Beginner Aquarium Planning</h2>
-
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div>
-            <h3 className="font-medium">Community Tank Compatibility</h3>
-
-            <p className="mt-2 text-sm text-muted-foreground">
-              Learn which freshwater fish species can safely coexist based on
-              temperament, activity level, schooling requirements, and water
-              conditions.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Tank Size and Stocking</h3>
-
-            <p className="mt-2 text-sm text-muted-foreground">
-              Use practical stocking estimates and planning tools to avoid
-              overcrowding and reduce stress within aquarium ecosystems.
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

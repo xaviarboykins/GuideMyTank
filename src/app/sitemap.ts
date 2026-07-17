@@ -27,6 +27,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/care-guides`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/compatibility`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -79,6 +85,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.7,
+    })),
+    ...species.map((item) => ({
+      url: `${baseUrl}/care-guides/${item.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     })),
     ...compatibilityPairs.map((pair) => ({
       url: getCompatibilityUrl(pair.speciesA, pair.speciesB),

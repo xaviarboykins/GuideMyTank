@@ -11,5 +11,5 @@ export default async function LegacySpeciesPage({
 }: LegacySpeciesPageProps) {
   const { slug } = await params;
 
-  redirect(`/species/${slug}`);
+  redirect(`/care-guides/${slug}`);
 }

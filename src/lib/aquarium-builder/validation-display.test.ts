@@ -6,6 +6,8 @@ import type {
 } from "@/lib/aquarium-validation";
 
 import {
+  getBuildHealthDisplayState,
+  getBuildHealthStatusLabel,
   getCompatibilityDisplayState,
   getValidationDisplayState,
 } from "./validation-display";
@@ -83,5 +85,58 @@ describe("aquarium builder validation display", () => {
   it("represents loading and unavailable states without a report", () => {
     expect(getValidationDisplayState(null, true, false).label).toBe("Checking...");
     expect(getValidationDisplayState(null, false, true).label).toBe("Unavailable");
+  });
+
+  it("maps Build Health to compact status tones", () => {
+    expect(
+      getBuildHealthDisplayState(
+        { status: "excellent", label: "Excellent", reasons: [] },
+        false,
+        false,
+      ),
+    ).toMatchObject({ label: "Excellent", tone: "success" });
+    expect(
+      getBuildHealthDisplayState(
+        { status: "needs-attention", label: "Needs Attention", reasons: [] },
+        false,
+        false,
+      ),
+    ).toMatchObject({ tone: "warning" });
+    expect(
+      getBuildHealthDisplayState(
+        { status: "high-risk", label: "High Risk", reasons: [] },
+        false,
+        false,
+      ),
+    ).toMatchObject({ tone: "critical" });
+  });
+
+  it("names the validation finding responsible for Build Health", () => {
+    const validationReport = report([
+      {
+        ...baseIssue,
+        code: "WATER_PH_NARROW_OVERLAP",
+        title: "Shared pH range is narrow",
+        category: "water_parameters",
+        severity: "warning",
+      },
+    ]);
+
+    expect(
+      getBuildHealthStatusLabel(
+        {
+          status: "healthy",
+          label: "Healthy",
+          reasons: [
+            {
+              code: "VALIDATION_WARNING",
+              message: "Review one warning.",
+              validationIssueCodes: ["WATER_PH_NARROW_OVERLAP"],
+            },
+          ],
+        },
+        validationReport,
+      ),
+    ).toBe("Healthy — Shared pH range is narrow");
   });
 });

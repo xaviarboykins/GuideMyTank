@@ -2,6 +2,7 @@ import type {
   AquariumValidationReport,
   ValidationCategory,
 } from "@/lib/aquarium-validation";
+import type { AquariumBuildHealth } from "@/lib/aquarium-analysis/build-health";
 
 export type ValidationDisplayTone =
   | "success"
@@ -13,6 +14,54 @@ export interface ValidationDisplayState {
   label: string;
   overallLabel: string;
   tone: ValidationDisplayTone;
+}
+
+export function getBuildHealthDisplayState(
+  health: AquariumBuildHealth | null,
+  isLoading: boolean,
+  isUnavailable: boolean,
+): ValidationDisplayState {
+  if (isLoading && !health) {
+    return { label: "Checking...", overallLabel: "Checking build", tone: "neutral" };
+  }
+
+  if (isUnavailable) {
+    return { label: "Unavailable", overallLabel: "Analysis unavailable", tone: "warning" };
+  }
+
+  if (!health) {
+    return { label: "Pending", overallLabel: "Waiting to analyze", tone: "neutral" };
+  }
+
+  if (health.status === "invalid" || health.status === "high-risk") {
+    return { label: health.label, overallLabel: health.label, tone: "critical" };
+  }
+
+  if (health.status === "needs-attention") {
+    return { label: health.label, overallLabel: health.label, tone: "warning" };
+  }
+
+  return { label: health.label, overallLabel: health.label, tone: "success" };
+}
+
+export function getBuildHealthStatusLabel(
+  health: AquariumBuildHealth | null,
+  report: AquariumValidationReport | null,
+) {
+  if (!health) {
+    return null;
+  }
+
+  const contributingCodes = new Set(
+    health.reasons.flatMap((reason) => reason.validationIssueCodes ?? []),
+  );
+  const contributingIssue = report?.issues.find((issue) =>
+    contributingCodes.has(issue.code),
+  );
+
+  return contributingIssue
+    ? `${health.label} — ${contributingIssue.title}`
+    : health.label;
 }
 
 const compatibilityCategories = new Set<ValidationCategory>([

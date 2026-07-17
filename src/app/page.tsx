@@ -6,6 +6,7 @@ import {
   CareGuideCarousel,
   type FeaturedCareGuide,
 } from "@/components/home/care-guide-carousel";
+import { BetaBadge } from "@/components/site/beta-badge";
 import { DevelopmentBadge } from "@/components/site/development-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,28 +75,28 @@ const utilities = [
     description:
       "Compare aquarium species using temperament, aggression level, water parameters, schooling behavior, and tank size.",
     href: "/compatibility",
-    inDevelopment: true,
+    status: "beta",
   },
   {
     title: "Tank Stocking Calculator",
     description:
       "Estimate safe stocking levels and identify overcrowding risks for common freshwater setups.",
     href: "/stocking",
-    inDevelopment: false,
+    status: null,
   },
   {
     title: "Aquarium Builder",
     description:
       "Build a complete setup with a tank, equipment, plants, livestock, and decor.",
     href: "/aquarium-builder",
-    inDevelopment: true,
+    status: "beta",
   },
   {
     title: "PisciDex Species Database",
     description:
       "Browse fish species data including temperament, tank size, lifespan, diet, and care requirements.",
     href: "/piscidex",
-    inDevelopment: false,
+    status: null,
   },
 ];
 
@@ -168,7 +169,7 @@ export default function Home() {
               <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
                 Featured Planning Tool
               </p>
-              <DevelopmentBadge />
+              <BetaBadge />
             </div>
             <h2 className="mt-3 text-3xl font-bold tracking-tight">
               Build your aquarium before you buy.
@@ -250,7 +251,7 @@ export default function Home() {
               <h2 className="font-semibold group-hover:underline">
                 {utility.title}
               </h2>
-              {utility.inDevelopment ? <DevelopmentBadge /> : null}
+              {utility.status === "beta" ? <BetaBadge /> : null}
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
               {utility.description}

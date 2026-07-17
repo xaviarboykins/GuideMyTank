@@ -68,7 +68,7 @@ export default async function AquariumBuilderProductsPage({
       <PageHeader
         eyebrow="Aquarium Builder Products"
         title={category.heading}
-        description={`Choose ${category.label.toLowerCase()} from the shared Product Catalog. Selections are saved by product ID for future validation and recommendations.`}
+        description={`Choose ${category.label.toLowerCase()} from the shared Product Catalog. Selections are saved by product ID for the current aquarium build and validation.`}
       />
 
       <BuilderProductPickerInterface

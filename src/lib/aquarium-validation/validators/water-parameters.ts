@@ -7,21 +7,12 @@ import type {
   AquariumValidator,
   AquariumValidatorContext,
 } from "../types";
+import { analyzeSharedRange, toNumericRange } from "../ranges";
 
 export const WATER_PARAMETER_NARROW_OVERLAP_THRESHOLDS = {
   temperatureFahrenheit: 4,
   ph: 0.5,
 } as const;
-
-interface SupportedRange {
-  minimum: number;
-  maximum: number;
-}
-
-interface RangeEntry {
-  species: AquariumSpecies;
-  range: SupportedRange;
-}
 
 interface ParameterConfiguration {
   key: "temperature" | "ph" | "gh" | "kh";
@@ -30,24 +21,7 @@ interface ParameterConfiguration {
   noOverlapCode: string;
   narrowOverlapCode?: string;
   narrowThreshold?: number;
-  getRange(species: AquariumSpecies): SupportedRange | null;
-}
-
-function toRange(
-  minimum: number | null,
-  maximum: number | null,
-): SupportedRange | null {
-  if (
-    minimum == null ||
-    maximum == null ||
-    !Number.isFinite(minimum) ||
-    !Number.isFinite(maximum) ||
-    minimum > maximum
-  ) {
-    return null;
-  }
-
-  return { minimum, maximum };
+  getRange(species: AquariumSpecies): ReturnType<typeof toNumericRange>;
 }
 
 const parameterConfigurations: readonly ParameterConfiguration[] = [
@@ -61,7 +35,7 @@ const parameterConfigurations: readonly ParameterConfiguration[] = [
     narrowThreshold:
       WATER_PARAMETER_NARROW_OVERLAP_THRESHOLDS.temperatureFahrenheit,
     getRange: (species) =>
-      toRange(species.min_temp_f, species.max_temp_f),
+      toNumericRange(species.min_temp_f, species.max_temp_f),
   },
   {
     key: "ph",
@@ -70,7 +44,7 @@ const parameterConfigurations: readonly ParameterConfiguration[] = [
     noOverlapCode: AQUARIUM_VALIDATION_CODES.waterPhNoOverlap,
     narrowOverlapCode: AQUARIUM_VALIDATION_CODES.waterPhNarrowOverlap,
     narrowThreshold: WATER_PARAMETER_NARROW_OVERLAP_THRESHOLDS.ph,
-    getRange: (species) => toRange(species.min_ph, species.max_ph),
+    getRange: (species) => toNumericRange(species.min_ph, species.max_ph),
   },
   {
     key: "gh",
@@ -78,7 +52,7 @@ const parameterConfigurations: readonly ParameterConfiguration[] = [
     unit: " dGH",
     noOverlapCode: AQUARIUM_VALIDATION_CODES.waterGhNoOverlap,
     getRange: (species) =>
-      toRange(species.min_gh_dgh, species.max_gh_dgh),
+      toNumericRange(species.min_gh_dgh, species.max_gh_dgh),
   },
   {
     key: "kh",
@@ -86,7 +60,7 @@ const parameterConfigurations: readonly ParameterConfiguration[] = [
     unit: " dKH",
     noOverlapCode: AQUARIUM_VALIDATION_CODES.waterKhNoOverlap,
     getRange: (species) =>
-      toRange(species.min_kh_dkh, species.max_kh_dkh),
+      toNumericRange(species.min_kh_dkh, species.max_kh_dkh),
   },
 ];
 
@@ -102,35 +76,26 @@ function evaluateParameter(
   species: AquariumSpecies[],
   configuration: ParameterConfiguration,
 ) {
-  const completeEntries: RangeEntry[] = species.flatMap((item) => {
-    const range = configuration.getRange(item);
-    return range ? [{ species: item, range }] : [];
-  });
-  const missingSpeciesIds = species
-    .filter((item) => configuration.getRange(item) == null)
-    .map((item) => item.id);
+  const analysis = analyzeSharedRange(species, configuration.getRange);
+  const missingSpeciesIds = analysis.missingItems.map((item) => item.id);
   const issues: AquariumValidationIssue[] = [];
 
-  if (completeEntries.length < 2) {
+  if (analysis.completeItems.length < 2) {
     return { issues, missingSpeciesIds };
   }
 
-  const sharedMinimum = Math.max(
-    ...completeEntries.map((entry) => entry.range.minimum),
-  );
-  const sharedMaximum = Math.min(
-    ...completeEntries.map((entry) => entry.range.maximum),
-  );
-  const affectedSpeciesIds = completeEntries.map((entry) => entry.species.id);
+  const sharedMinimum = analysis.sharedMinimum as number;
+  const sharedMaximum = analysis.sharedMaximum as number;
+  const affectedSpeciesIds = analysis.completeItems.map((item) => item.id);
   const metadata = {
     parameter: configuration.key,
     sharedMinimum,
     sharedMaximum,
-    completeSpeciesCount: completeEntries.length,
+    completeSpeciesCount: analysis.completeItems.length,
     selectedSpeciesCount: species.length,
   };
 
-  if (sharedMinimum > sharedMaximum) {
+  if (!analysis.hasOverlap) {
     issues.push(
       createValidationIssue({
         code: configuration.noOverlapCode,

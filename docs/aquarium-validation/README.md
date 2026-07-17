@@ -36,10 +36,11 @@ registry runs:
 1. tank size
 2. school size
 3. water parameters
-4. compatibility
-5. predation
-6. territorial behavior
-7. stocking
+4. heating
+5. compatibility
+6. predation
+7. territorial behavior
+8. stocking
 
 The orchestrator generates each unordered species pair once and resolves its
 Compatibility Service result once. It catches individual compatibility and
@@ -66,6 +67,12 @@ competing source of biological truth.
 - Tank: `TANK_NOT_SELECTED`, `TANK_BELOW_SPECIES_MINIMUM`, `TANK_AT_MINIMUM`
 - Stocking: `STOCKING_LIGHT`, `STOCKING_NEAR_CAPACITY`, `STOCKING_FULL`,
   `STOCKING_OVER_CAPACITY`, `STOCKING_ANALYSIS_UNAVAILABLE`
+- Heating: `HEATING_REQUIREMENT_UNAVAILABLE`,
+  `HEATING_TEMPERATURE_CONFLICT`, `HEATER_REQUIRED_MISSING`,
+  `HEATER_RECOMMENDED_MISSING`, `HEATER_UNDERSIZED`,
+  `HEATER_OUTSIDE_SUPPORTED_RANGE`, `HEATER_SPECIFICATION_MISSING`,
+  `HEATER_INACTIVE`, `HEATER_MAY_BE_UNNECESSARY`,
+  `MULTIPLE_HEATERS_UNSUPPORTED`
 
 Tank and school rules use existing species guideline fields. Water validation
 intersects all complete species ranges and treats missing optional data as
@@ -73,6 +80,19 @@ unknown rather than incompatible. Compatibility, predation, and cross-species
 territorial rules reuse Compatibility Service output. Stocking rules map the
 existing Stocking Analysis Engine statuses without repeating capacity or
 bioload calculations.
+
+Heating prefers the selected species' recommended temperature ranges and falls
+back to the canonical species temperature range when legacy database rows have
+not populated the newer recommended fields. A shared
+minimum of 72°F or warmer requires a heater; 68–71°F with a shared maximum
+above 72°F recommends one; ranges ending at 72°F or below normally do not
+require one; and broader ranges spanning those thresholds leave heating
+optional. Missing recommended temperature data produces an incomplete-data
+finding, while non-overlapping recommended ranges produce an error.
+
+Exactly one heater is supported. The validator uses current catalog active
+status and documented minimum/maximum tank volume. It does not infer heater
+performance from watts, ambient temperature, or a watts-per-gallon formula.
 
 ## Deduplication and Sorting
 

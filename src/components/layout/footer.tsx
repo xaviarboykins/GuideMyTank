@@ -7,6 +7,7 @@ const footerLinks = [
   { href: "/terms", label: "Terms" },
   { href: "/affiliate-disclosure", label: "Affiliate Disclosure" },
   { href: "/disclaimer", label: "Disclaimer" },
+  { href: "/admin", label: "Admin Portal" },
 ];
 
 export function Footer() {
@@ -20,7 +21,11 @@ export function Footer() {
             <Link
               key={link.href}
               href={link.href}
-              className="hover:text-foreground"
+              className={
+                link.href === "/admin"
+                  ? "rounded-md bg-black px-3 py-1 text-xs font-medium text-white hover:bg-black/80"
+                  : "hover:text-foreground"
+              }
             >
               {link.label}
             </Link>

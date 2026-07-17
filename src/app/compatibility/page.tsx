@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     "Compatibility Checker | Tank Mate Compatibility Checker | GuideMyTank",
   description:
     "Compare aquarium species by temperament, size, water parameters, and care requirements.",
+  alternates: {
+    canonical: "https://www.guidemytank.com/compatibility",
+  },
+  openGraph: {
+    url: "https://www.guidemytank.com/compatibility",
+  },
 };
 
 export const revalidate = 86400;

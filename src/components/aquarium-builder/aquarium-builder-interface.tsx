@@ -629,6 +629,8 @@ export function AquariumBuilderInterface({
         </dl>
       </section>
 
+      <StockingAnalysisPanel analysis={stockingAnalysis} />
+
       <section className="mt-6 border border-border bg-card">
         <div className="border-b border-border p-4">
           <h2 className="text-lg font-semibold">Tank Configuration</h2>

@@ -7,15 +7,33 @@ import type {
   AquariumEstimatedCost,
   AquariumLivestockEntry,
   AquariumResolvedLivestockEntry,
-} from "@/lib/aquarium-builder/types";
+} from "./types";
 import {
   analyzeStocking,
   normalizeStockingAnalysisInput,
   type StockingAnalysisResult,
-} from "@/lib/aquarium-builder/stocking-analysis";
-import { getCompatibility } from "@/lib/compatibility/service";
-import type { CompatibilityResult } from "@/lib/compatibility/types";
-import { getSpeciesBySlug } from "@/lib/data/species";
+} from "./stocking-analysis/index";
+import { getCompatibility } from "../compatibility/service";
+import type { CompatibilityResult } from "../compatibility/types";
+import { getSpeciesBySlug } from "../data/species";
+import { getProductById } from "../products/service";
+import type { Product } from "../products/types";
+import { deriveAquariumBuildHealth } from "../aquarium-analysis/build-health";
+import {
+  generateUniqueSpeciesPairs,
+  validateAquarium,
+  type AquariumCompatibilityResolver,
+  type AquariumValidationOptions,
+  type ResolvedCompatibilityResult,
+} from "../aquarium-validation/index";
+
+export interface AquariumAnalysisDependencies {
+  compatibilityResolver?: AquariumCompatibilityResolver;
+  speciesResolver?: typeof getSpeciesBySlug;
+  heaterProductResolver?: typeof getProductById;
+  stockingAnalysis?: StockingAnalysisResult;
+  now?: AquariumValidationOptions["now"];
+}
 
 const DEFAULT_CURRENCY: AquariumEstimatedCost["currency"] = "USD";
 
@@ -170,6 +188,7 @@ export function calculateEstimatedCost(
 
 export async function resolveAquariumLivestock(
   livestock: AquariumLivestockEntry[],
+  speciesResolver: typeof getSpeciesBySlug = getSpeciesBySlug,
 ): Promise<{
   resolvedLivestock: AquariumResolvedLivestockEntry[];
   warnings: AquariumBuilderWarning[];
@@ -180,7 +199,7 @@ export async function resolveAquariumLivestock(
     livestock
       .filter((entry) => entry.speciesSlug.trim())
       .map(async (entry) => {
-        const species = await getSpeciesBySlug(entry.speciesSlug);
+        const species = await speciesResolver(entry.speciesSlug);
 
         if (!species) {
           warnings.push(
@@ -211,11 +230,14 @@ export async function resolveAquariumLivestock(
 
 export async function analyzeLivestockCompatibility(
   livestock: AquariumResolvedLivestockEntry[],
+  compatibilityResolver: AquariumCompatibilityResolver = getCompatibility,
 ): Promise<{
   compatibility: CompatibilityResult[];
+  compatibilityResults: ResolvedCompatibilityResult[];
   warnings: AquariumBuilderWarning[];
 }> {
   const compatibility: CompatibilityResult[] = [];
+  const compatibilityResults: ResolvedCompatibilityResult[] = [];
   const warnings: AquariumBuilderWarning[] = [];
   const uniqueSpeciesSlugs = Array.from(
     new Set(livestock.map((entry) => entry.species.slug)),
@@ -229,7 +251,21 @@ export async function analyzeLivestockCompatibility(
     ) {
       const speciesASlug = uniqueSpeciesSlugs[index];
       const speciesBSlug = uniqueSpeciesSlugs[relatedIndex];
-      const result = await getCompatibility(speciesASlug, speciesBSlug);
+      const result = await compatibilityResolver(speciesASlug, speciesBSlug);
+      const speciesA = livestock.find(
+        (entry) => entry.species.slug === speciesASlug,
+      );
+      const speciesB = livestock.find(
+        (entry) => entry.species.slug === speciesBSlug,
+      );
+
+      if (speciesA && speciesB) {
+        compatibilityResults.push({
+          speciesAId: speciesA.species.id,
+          speciesBId: speciesB.species.id,
+          result,
+        });
+      }
 
       if (!result) {
         warnings.push(
@@ -248,6 +284,7 @@ export async function analyzeLivestockCompatibility(
 
   return {
     compatibility,
+    compatibilityResults,
     warnings,
   };
 }
@@ -310,18 +347,64 @@ export function analyzeAquariumStocking(
 
 export async function analyzeAquariumBuild(
   build: AquariumBuild,
+  dependencies: AquariumAnalysisDependencies = {},
 ): Promise<AquariumBuilderResult> {
   const validationWarnings = validateAquariumBuild(build);
   const estimatedCost = calculateEstimatedCost(build);
   const { resolvedLivestock, warnings: livestockWarnings } =
-    await resolveAquariumLivestock(build.livestock);
-  const { compatibility, warnings: compatibilityWarnings } =
-    await analyzeLivestockCompatibility(resolvedLivestock);
+    await resolveAquariumLivestock(
+      build.livestock,
+      dependencies.speciesResolver,
+    );
+  const {
+    compatibility,
+    compatibilityResults,
+    warnings: compatibilityWarnings,
+  } = await analyzeLivestockCompatibility(
+    resolvedLivestock,
+    dependencies.compatibilityResolver,
+  );
   const {
     warnings: stockingWarnings,
     recommendations: stockingRecommendations,
   } = analyzeStockingGuidance(build, resolvedLivestock);
-  const stocking = analyzeAquariumStocking(build, resolvedLivestock);
+  const stocking =
+    dependencies.stockingAnalysis ??
+    analyzeAquariumStocking(build, resolvedLivestock);
+  const selectedHeaterProductId =
+    build.equipmentProductIds?.heaterProductId ??
+    build.equipment.find((item) => item.category === "heater")?.productId;
+  let heaterProduct: Product | null | undefined;
+  let heaterProductWarning: AquariumBuilderWarning | null = null;
+
+  if (selectedHeaterProductId) {
+    try {
+      heaterProduct = await (
+        dependencies.heaterProductResolver ?? getProductById
+      )(selectedHeaterProductId);
+    } catch {
+      heaterProduct = null;
+      heaterProductWarning = createWarning(
+        "heater-product-resolution-failed",
+        "The selected heater could not be loaded from the product catalog.",
+      );
+    }
+  }
+  const validation = await validateAquarium(build, {
+    context: {
+      species: resolvedLivestock,
+      speciesPairs: generateUniqueSpeciesPairs(resolvedLivestock),
+      compatibilityResults,
+      heaterProduct,
+      stockingAnalysis: stocking,
+    },
+    now: dependencies.now,
+  });
+  const buildHealth = deriveAquariumBuildHealth({
+    build,
+    stocking,
+    validation,
+  });
 
   return {
     build,
@@ -330,11 +413,14 @@ export async function analyzeAquariumBuild(
     analysis: {
       compatibility,
       stocking,
+      validation,
+      buildHealth,
       warnings: [
         ...validationWarnings,
         ...livestockWarnings,
         ...compatibilityWarnings,
         ...stockingWarnings,
+        ...(heaterProductWarning ? [heaterProductWarning] : []),
       ],
       recommendations: stockingRecommendations,
     },

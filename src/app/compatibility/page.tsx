@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CompatibilityChecker } from "@/components/compatibility/compatibility-checker";
+import { BetaBadge } from "@/components/site/beta-badge";
 import { PageContainer } from "@/components/site/page-container";
-import { DevelopmentBadge } from "@/components/site/development-badge";
 import { PageHeader } from "@/components/site/page-header";
 import { getAllSpecies } from "@/lib/data/species";
 
@@ -46,7 +46,7 @@ export default async function CompatibilityPage({
         eyebrow="Fish Compatibility"
         title="Compatibility Checker"
         description="Compare aquarium species by temperament, size, water parameters, and care requirements."
-        badge={<DevelopmentBadge />}
+        badge={<BetaBadge />}
       />
 
       <CompatibilityChecker

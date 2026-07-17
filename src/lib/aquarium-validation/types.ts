@@ -4,6 +4,7 @@ import type {
 } from "@/lib/aquarium-builder/types";
 import type { StockingAnalysisResult } from "@/lib/aquarium-builder/stocking-analysis/types";
 import type { CompatibilityResult } from "@/lib/compatibility/types";
+import type { Product } from "@/lib/products/types";
 
 export type AquariumValidationInput = AquariumBuild;
 
@@ -15,6 +16,7 @@ export type ValidationCategory =
   | "territorial"
   | "school_size"
   | "water_parameters"
+  | "heating"
   | "tank_size"
   | "stocking";
 
@@ -66,6 +68,7 @@ export interface AquariumValidatorContext {
   species: AquariumResolvedLivestockEntry[];
   speciesPairs: AquariumSpeciesPair[];
   compatibilityResults: ResolvedCompatibilityResult[];
+  heaterProduct?: Product | null;
   stockingAnalysis?: StockingAnalysisResult | null;
 }
 

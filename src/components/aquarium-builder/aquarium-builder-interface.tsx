@@ -13,7 +13,7 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { runAquariumBuilderValidation } from "@/app/aquarium-builder/actions";
+import { runAquariumBuilderAnalysis } from "@/app/aquarium-builder/actions";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import type {
@@ -45,9 +45,13 @@ import {
   type StockingStatus,
 } from "@/lib/aquarium-builder/stocking-analysis";
 import {
+  getBuildHealthDisplayState,
+  getBuildHealthStatusLabel,
   getCompatibilityDisplayState,
   getValidationDisplayState,
 } from "@/lib/aquarium-builder/validation-display";
+import type { AquariumBuildHealth } from "@/lib/aquarium-analysis/build-health";
+import { analyzeHeaterRequirement } from "@/lib/aquarium-validation/validators/heating";
 import type {
   AquariumValidationReport,
   AquariumValidationIssue,
@@ -192,6 +196,19 @@ function formatLevelLabel(level: string | null) {
   }
 
   return level.charAt(0).toUpperCase() + level.slice(1);
+}
+
+function formatHeaterRequirement(requirement: ReturnType<typeof analyzeHeaterRequirement>["requirement"]) {
+  const labels = {
+    required: "Heater required",
+    recommended: "Heater recommended",
+    optional: "Heater optional",
+    "not-normally-required": "Not normally required",
+    "temperature-conflict": "Temperature conflict",
+    "insufficient-data": "Insufficient data",
+  } as const;
+
+  return labels[requirement];
 }
 
 function parseFlowRateGph(value: string | null | undefined) {
@@ -358,6 +375,8 @@ export function AquariumBuilderInterface({
   const [builderLoaded, setBuilderLoaded] = useState(false);
   const [validationReport, setValidationReport] =
     useState<AquariumValidationReport | null>(null);
+  const [buildHealth, setBuildHealth] =
+    useState<AquariumBuildHealth | null>(null);
   const [validationLoading, setValidationLoading] = useState(false);
   const [validationUnavailable, setValidationUnavailable] = useState(false);
   const validationRequestId = useRef(0);
@@ -421,6 +440,14 @@ export function AquariumBuilderInterface({
   const stockingAnalysis = useMemo(() => {
     return analyzeStocking(normalizeStockingAnalysisInput(build, species));
   }, [build, species]);
+  const heatingAnalysis = useMemo(() => {
+    const selectedSpecies = build.livestock.flatMap((entry) => {
+      const item = livestockSpeciesBySlug.get(entry.speciesSlug);
+      return item ? [item] : [];
+    });
+
+    return analyzeHeaterRequirement(selectedSpecies);
+  }, [build.livestock, livestockSpeciesBySlug]);
   useEffect(() => {
     if (!builderLoaded) {
       return;
@@ -432,13 +459,14 @@ export function AquariumBuilderInterface({
     const timeoutId = window.setTimeout(() => {
       setValidationLoading(true);
       setValidationUnavailable(false);
-      void runAquariumBuilderValidation(build, stockingAnalysis)
-        .then((report) => {
+      void runAquariumBuilderAnalysis(build, stockingAnalysis)
+        .then((analysis) => {
           if (validationRequestId.current !== requestId) {
             return;
           }
 
-          setValidationReport(report);
+          setValidationReport(analysis.validation);
+          setBuildHealth(analysis.buildHealth);
           setValidationLoading(false);
         })
         .catch(() => {
@@ -464,6 +492,14 @@ export function AquariumBuilderInterface({
     validationLoading,
     validationUnavailable,
   );
+  const buildHealthDisplay = getBuildHealthDisplayState(
+    buildHealth,
+    validationLoading,
+    validationUnavailable,
+  );
+  const buildHealthStatusLabel =
+    getBuildHealthStatusLabel(buildHealth, validationReport) ??
+    buildHealthDisplay.label;
   const stockingStatusLabel =
     STOCKING_STATUS_LABELS[stockingAnalysis.stockingStatus];
   const stockingStatusValue =
@@ -476,6 +512,14 @@ export function AquariumBuilderInterface({
     (total, item) => total + item.estimatedPrice * item.quantity,
     0,
   );
+  const selectedHeater = singleSelections.heating ?? null;
+  const sharedTemperatureRange =
+    heatingAnalysis.range.sharedMinimum != null &&
+    heatingAnalysis.range.sharedMaximum != null
+      ? `${heatingAnalysis.range.sharedMinimum}–${heatingAnalysis.range.sharedMaximum}°F`
+      : heatingAnalysis.requirement === "temperature-conflict"
+        ? "No shared range"
+        : "Insufficient data";
 
   const builderStatus = [
     {
@@ -519,6 +563,13 @@ export function AquariumBuilderInterface({
       value: formatLevelLabel(plantedLevel) ?? "Not selected",
       tone: plantedLevel ? "info" : "neutral",
       icon: Waves,
+    },
+    {
+      label: "Build Health",
+      value: buildHealthStatusLabel,
+      tone: buildHealthDisplay.tone,
+      icon: CircleHelp,
+      className: "lg:flex-[2]",
     },
   ] as const;
 
@@ -720,22 +771,8 @@ export function AquariumBuilderInterface({
           </table>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-border bg-muted/20 p-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-md">
-            <div className="flex items-center gap-2 font-semibold">
-              <PackageSearch className="size-4" aria-hidden="true" />
-              Affiliate Products
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Retailer links and one-click product matching will be added in a
-              later milestone.
-            </p>
-            <Button className="mt-3" size="sm" variant="outline" disabled>
-              Buy selected products — coming later
-            </Button>
-          </div>
-
-          <dl className="min-w-64 space-y-2 text-sm sm:text-right">
+        <div className="flex justify-end border-t border-border bg-muted/20 p-4">
+          <dl className="w-full max-w-sm space-y-2 text-sm sm:text-right">
             <div className="flex items-center justify-between gap-8">
               <dt className="text-muted-foreground">Equipment subtotal</dt>
               <dd className="font-semibold tabular-nums">
@@ -745,7 +782,7 @@ export function AquariumBuilderInterface({
             <div className="flex items-center justify-between gap-8 border-t border-border pt-2 text-base">
               <dt className="flex items-center gap-2 font-semibold sm:ml-auto">
                 <DollarSign className="size-4" aria-hidden="true" />
-                Estimated total
+                Estimated equipment total
               </dt>
               <dd className="text-xl font-bold tabular-nums">
                 ${estimatedEquipmentCost.toFixed(2)}
@@ -791,6 +828,49 @@ export function AquariumBuilderInterface({
               <BreakdownRow
                 label="Planted Level"
                 value={formatLevelLabel(plantedLevel) ?? "Not selected"}
+              />
+              <BreakdownRow
+                label="Build Health"
+                value={buildHealthStatusLabel}
+              />
+              <BreakdownRow
+                label="Shared Temperature"
+                value={sharedTemperatureRange}
+              />
+              <BreakdownRow
+                label="Heating Requirement"
+                value={formatHeaterRequirement(heatingAnalysis.requirement)}
+              />
+            </dl>
+            {buildHealth?.reasons[0] ? (
+              <p className="mt-3 border border-border bg-background p-3 text-xs text-muted-foreground">
+                {buildHealth.reasons[0].message}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Equipment</h3>
+            <dl className="mt-3 space-y-2">
+              <BreakdownRow
+                label="Filter"
+                value={singleSelections.filtration?.name ?? "Not selected"}
+              />
+              <BreakdownRow
+                label="Heater"
+                value={selectedHeater?.name ?? "Not selected"}
+              />
+              <BreakdownRow
+                label="Lighting"
+                value={singleSelections.lighting?.name ?? "Not selected"}
+              />
+              <BreakdownRow
+                label="Selected Products"
+                value={String(build.equipment.length)}
+              />
+              <BreakdownRow
+                label="Estimated Equipment Cost"
+                value={`$${estimatedEquipmentCost.toFixed(2)}`}
               />
             </dl>
           </div>
@@ -952,8 +1032,11 @@ function AquariumValidationPanel({
             }
           />
           <ValidationCount
-            label="Equipment Compatibility"
-            value="Coming later"
+            label="Heating Findings"
+            value={
+              report?.issues.filter((issue) => issue.category === "heating")
+                .length ?? 0
+            }
           />
         </dl>
       </div>

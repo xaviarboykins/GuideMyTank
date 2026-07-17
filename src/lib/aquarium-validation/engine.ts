@@ -101,6 +101,7 @@ export async function validateAquarium(
     species,
     speciesPairs,
     compatibilityResults,
+    heaterProduct: options.context?.heaterProduct,
     stockingAnalysis,
   };
   const issues: AquariumValidationIssue[] = [];

@@ -42,6 +42,27 @@ export async function getProductBySlug(slug: string) {
   return data as Product;
 }
 
+export async function getProductById(id: string) {
+  const supabase = createStaticClient();
+  const trimmedId = id.trim();
+
+  if (!trimmedId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCTS_SELECT)
+    .eq("id", trimmedId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch product: ${error.message}`);
+  }
+
+  return (data as Product | null) ?? null;
+}
+
 export async function getProductsByCategory(category: ProductCategory) {
   return searchProducts({ category });
 }

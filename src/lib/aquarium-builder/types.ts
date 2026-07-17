@@ -1,5 +1,7 @@
 import type { CompatibilityResult } from "@/lib/compatibility/types";
 import type { StockingAnalysisResult } from "@/lib/aquarium-builder/stocking-analysis/types";
+import type { AquariumValidationReport } from "@/lib/aquarium-validation/types";
+import type { AquariumBuildHealth } from "@/lib/aquarium-analysis/build-health";
 import type { Database } from "@/types/database.types";
 
 export type AquariumSpecies = Database["public"]["Tables"]["species"]["Row"];
@@ -89,6 +91,8 @@ export type AquariumBuilderRecommendation = {
 export type AquariumAnalysis = {
   compatibility: CompatibilityResult[];
   stocking: StockingAnalysisResult;
+  validation: AquariumValidationReport;
+  buildHealth: AquariumBuildHealth;
   warnings: AquariumBuilderWarning[];
   recommendations: AquariumBuilderRecommendation[];
 };

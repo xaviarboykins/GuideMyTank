@@ -43,15 +43,15 @@ Version 1 supports:
   flow, and planted level
 - an actionable livestock table with validation status, edit, and remove controls
 - grouped errors, warnings, and recommendations
-- warning count and a future-ready equipment compatibility status in aquarium
-  validation
-- a PCPartPicker-style cost and future affiliate-product footer beneath the
-  configuration table
+- deterministic heater and recommended-temperature validation
+- five-level Build Health derived from existing validation findings
+- expanded equipment, livestock, plant, heating, and temperature summaries
 - a live estimated equipment subtotal
 - local browser persistence for the in-progress build
 
 This milestone does not add server-side saved-build persistence, starter kits,
-affiliate-link behavior, or equipment compatibility rules.
+affiliate-link behavior, Care Difficulty, livestock or plant prices, or product
+recommendations.
 
 ## Future Roadmap
 
@@ -60,9 +60,8 @@ The model is designed so future features can be added without redesigning the bu
 - live plants
 - saved builds
 - starter kits
-- affiliate links
 - richer biological stocking models
-- equipment compatibility checks
+- category-specific product recommendations (deferred to Milestone 10)
 - build sharing
 - build templates
 
@@ -135,6 +134,37 @@ Current responsibilities:
 - call the pure stocking engine and return its structured result
 - provide separate minimum-tank and minimum-group guidance
 - return a unified `AquariumBuilderResult`
+
+The unified result also includes the existing `AquariumValidationReport` at
+`analysis.validation`. Callers may supply an already calculated stocking result
+and injectable species, compatibility, and clock dependencies. The service
+resolves livestock once, resolves each unique compatibility pair once, and
+passes those shared results into Aquarium Validation rather than repeating
+database reads or domain calculations.
+
+When a heater is selected, the orchestration service also resolves that single
+catalog product once by ID and supplies its current tank range and active status
+to Aquarium Validation. The persisted Builder snapshot remains lightweight and
+does not become a second source of product specifications.
+
+## Build Health
+
+The unified analysis derives a five-level Build Health result after Aquarium
+Validation completes:
+
+- `Invalid`: at least one validation error
+- `High Risk`: three or more warnings
+- `Needs Attention`: two ordinary warnings, incomplete supporting data, or an
+  incomplete core analysis
+- `Healthy`: complete core analysis with at most one warning; informational
+  guidance may remain and the advisory is still exposed to the user
+- `Excellent`: a tank, livestock, and filter are selected and the report has no
+  errors, warnings, or informational findings
+
+Heating affects health only through existing validation findings. Build Health
+does not recalculate heater suitability, compatibility, stocking, or any other
+domain result. Reason codes and messages are deterministic and are defined in
+`src/lib/aquarium-analysis/build-health.ts`.
 
 The service should remain usable from future server components, route handlers, server actions, scripts, or tests.
 

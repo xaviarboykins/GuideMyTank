@@ -5,6 +5,7 @@ import {
   CircleHelp,
   DollarSign,
   Gauge,
+  PackageSearch,
   Plus,
   Waves,
   X,

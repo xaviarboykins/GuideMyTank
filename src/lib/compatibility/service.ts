@@ -3,13 +3,13 @@ import {
   determineStatus,
   legacyCompatibilityToScore,
   toCompatibilitySpecies,
-} from "@/lib/compatibility/engine";
+} from "./engine";
 import type {
   CompatibilityResult,
   SpeciesCompatibilityGroup,
   SpeciesRow,
 } from "@/lib/compatibility/types";
-import { createStaticClient } from "@/lib/supabase/static";
+import { createStaticClient } from "../supabase/static";
 
 type WaterParametersRow = {
   species_id: string;

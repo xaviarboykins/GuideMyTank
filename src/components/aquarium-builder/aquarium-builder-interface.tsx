@@ -10,8 +10,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { runAquariumBuilderValidation } from "@/app/aquarium-builder/actions";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { Button } from "@/components/ui/button";
 import type {
@@ -32,6 +33,7 @@ import {
   serializeAquariumBuild,
 } from "@/lib/aquarium-builder/storage";
 import type { ProductCategory } from "@/lib/products/types";
+import type { Plant } from "@/lib/plants/types";
 import {
   analyzeStocking,
   deriveAquariumFiltrationLevel,
@@ -41,6 +43,14 @@ import {
   type StockingAnalysisResult,
   type StockingStatus,
 } from "@/lib/aquarium-builder/stocking-analysis";
+import {
+  getCompatibilityDisplayState,
+  getValidationDisplayState,
+} from "@/lib/aquarium-builder/validation-display";
+import type {
+  AquariumValidationReport,
+  ValidationSeverity,
+} from "@/lib/aquarium-validation";
 
 type TankSizeGallons = AquariumTankConfiguration["sizeGallons"];
 type StatusTone = "success" | "info" | "neutral" | "warning" | "critical";
@@ -341,8 +351,10 @@ function getInitialRepeatableSelections(build: AquariumBuild): RepeatableSelecti
 }
 
 export function AquariumBuilderInterface({
+  plantCatalog,
   species,
 }: {
+  plantCatalog: Plant[];
   species: AquariumSpecies[];
 }) {
   const [build, setBuild] = useState<AquariumBuild>(defaultAquariumBuild);
@@ -353,6 +365,12 @@ export function AquariumBuilderInterface({
     useState<RepeatableSelections>(() =>
       getInitialRepeatableSelections(defaultAquariumBuild),
     );
+  const [builderLoaded, setBuilderLoaded] = useState(false);
+  const [validationReport, setValidationReport] =
+    useState<AquariumValidationReport | null>(null);
+  const [validationLoading, setValidationLoading] = useState(false);
+  const [validationUnavailable, setValidationUnavailable] = useState(false);
+  const validationRequestId = useRef(0);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -361,6 +379,7 @@ export function AquariumBuilderInterface({
       setBuild(savedBuild);
       setSingleSelections(getInitialSingleSelections(savedBuild));
       setRepeatableSelections(getInitialRepeatableSelections(savedBuild));
+      setBuilderLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -387,8 +406,14 @@ export function AquariumBuilderInterface({
           plantSpeciesCount === 1 ? "plant" : "plants"
         } - ${plantTotalCount} total`
       : "No plants selected";
+  const plantsById = useMemo(() => {
+    return new Map(plantCatalog.map((plant) => [plant.id, plant]));
+  }, [plantCatalog]);
   const livestockSpeciesBySlug = useMemo(() => {
     return new Map(species.map((item) => [item.slug, item]));
+  }, [species]);
+  const livestockSpeciesById = useMemo(() => {
+    return new Map(species.map((item) => [item.id, item]));
   }, [species]);
   const livestockSpeciesCount = build.livestock.length;
   const livestockTotalCount = build.livestock.reduce((total, entry) => {
@@ -406,6 +431,49 @@ export function AquariumBuilderInterface({
   const stockingAnalysis = useMemo(() => {
     return analyzeStocking(normalizeStockingAnalysisInput(build, species));
   }, [build, species]);
+  useEffect(() => {
+    if (!builderLoaded) {
+      return;
+    }
+
+    const requestId = validationRequestId.current + 1;
+    validationRequestId.current = requestId;
+
+    const timeoutId = window.setTimeout(() => {
+      setValidationLoading(true);
+      setValidationUnavailable(false);
+      void runAquariumBuilderValidation(build, stockingAnalysis)
+        .then((report) => {
+          if (validationRequestId.current !== requestId) {
+            return;
+          }
+
+          setValidationReport(report);
+          setValidationLoading(false);
+        })
+        .catch(() => {
+          if (validationRequestId.current !== requestId) {
+            return;
+          }
+
+          setValidationUnavailable(true);
+          setValidationLoading(false);
+        });
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [build, builderLoaded, stockingAnalysis]);
+
+  const validationDisplay = getValidationDisplayState(
+    validationReport,
+    validationLoading,
+    validationUnavailable,
+  );
+  const compatibilityDisplay = getCompatibilityDisplayState(
+    validationReport,
+    validationLoading,
+    validationUnavailable,
+  );
   const stockingStatusLabel =
     STOCKING_STATUS_LABELS[stockingAnalysis.stockingStatus];
   const stockingStatusValue =
@@ -422,8 +490,8 @@ export function AquariumBuilderInterface({
   const builderStatus = [
     {
       label: "Compatibility",
-      value: "Not analyzed",
-      tone: "neutral",
+      value: compatibilityDisplay.label,
+      tone: compatibilityDisplay.tone,
       icon: CircleHelp,
       className: "lg:flex-[2]",
     },
@@ -612,6 +680,7 @@ export function AquariumBuilderInterface({
                         action={row.action}
                         href={row.href}
                         plants={build.plants}
+                        plantsById={plantsById}
                         summary={plantSummary}
                       />
                     ) : null}
@@ -636,6 +705,17 @@ export function AquariumBuilderInterface({
           </table>
         </div>
       </section>
+
+      <StockingAnalysisPanel analysis={stockingAnalysis} />
+
+      <AquariumValidationPanel
+        report={validationReport}
+        isLoading={validationLoading}
+        isUnavailable={validationUnavailable}
+        overallLabel={validationDisplay.overallLabel}
+        overallTone={validationDisplay.tone}
+        speciesById={livestockSpeciesById}
+      />
 
       <section className="mt-6 border border-border bg-card">
         <div className="border-b border-border p-4">
@@ -712,17 +792,28 @@ export function AquariumBuilderInterface({
 
             {build.plants.length > 0 ? (
               <ul className="mt-4 space-y-2">
-                {build.plants.map((entry) => (
+                {build.plants.map((entry) => {
+                  const plant = plantsById.get(entry.plantId);
+
+                  return (
                   <li
-                    key={entry.plantSlug}
+                    key={entry.plantId}
                     className="border border-border bg-background p-3"
                   >
-                    <div className="font-medium">{entry.plantSlug}</div>
+                    <div className="font-medium">
+                      {plant?.commonName ?? "Unavailable plant"}
+                    </div>
+                    {plant ? (
+                      <div className="mt-1 text-xs italic text-muted-foreground">
+                        {plant.scientificName}
+                      </div>
+                    ) : null}
                     <div className="mt-1 text-xs text-muted-foreground">
                       Quantity: {entry.quantity}
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -738,6 +829,127 @@ export function AquariumBuilderInterface({
 
 function formatAnalysisUnits(value: number) {
   return `${value.toFixed(1)} units`;
+}
+
+const validationSeverityClasses: Record<ValidationSeverity, string> = {
+  error: "border-destructive/50 bg-destructive/5",
+  warning: "border-amber-500/50 bg-amber-500/5",
+  info: "border-sky-500/50 bg-sky-500/5",
+};
+
+function AquariumValidationPanel({
+  report,
+  isLoading,
+  isUnavailable,
+  overallLabel,
+  overallTone,
+  speciesById,
+}: {
+  report: AquariumValidationReport | null;
+  isLoading: boolean;
+  isUnavailable: boolean;
+  overallLabel: string;
+  overallTone: StatusTone;
+  speciesById: Map<string, AquariumSpecies>;
+}) {
+  return (
+    <section
+      className="mt-6 border border-border bg-card"
+      aria-labelledby="aquarium-validation-heading"
+      aria-live="polite"
+      aria-busy={isLoading}
+    >
+      <div className="border-b border-border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 id="aquarium-validation-heading" className="text-lg font-semibold">
+              Aquarium Validation
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Checks the complete livestock group, tank, water requirements,
+              behavior, and stocking level.
+            </p>
+          </div>
+          <span
+            className={`px-2.5 py-1 text-sm font-semibold ${statusToneClasses[overallTone]}`}
+          >
+            {overallLabel}
+          </span>
+        </div>
+
+        <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-sm sm:max-w-md">
+          <ValidationCount label="Errors" value={report?.summary.errorCount ?? 0} />
+          <ValidationCount label="Warnings" value={report?.summary.warningCount ?? 0} />
+          <ValidationCount label="Info" value={report?.summary.infoCount ?? 0} />
+        </dl>
+      </div>
+
+      {isUnavailable ? (
+        <p className="p-4 text-sm text-muted-foreground">
+          Validation is temporarily unavailable. Your builder selections are
+          still saved; change a selection to retry.
+        </p>
+      ) : isLoading && !report ? (
+        <p className="p-4 text-sm text-muted-foreground">Checking this build...</p>
+      ) : report?.issues.length ? (
+        <ul className="space-y-3 p-4">
+          {report.issues.map((issue) => {
+            const affectedSpecies = issue.affectedSpeciesIds.map(
+              (id) => speciesById.get(id)?.common_name ?? id,
+            );
+
+            return (
+              <li
+                key={issue.id}
+                className={`border p-3 text-sm ${validationSeverityClasses[issue.severity]}`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">{issue.title}</span>
+                  <span className="text-xs font-bold uppercase tracking-wide">
+                    {issue.severity}
+                  </span>
+                </div>
+                <p className="mt-1">{issue.message}</p>
+                {affectedSpecies.length > 0 ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      Affected species:
+                    </span>{" "}
+                    {affectedSpecies.join(", ")}
+                  </p>
+                ) : null}
+                {issue.recommendation ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      Recommendation:
+                    </span>{" "}
+                    {issue.recommendation}
+                  </p>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : report ? (
+        <p className="p-4 text-sm">
+          No validation findings for the current build.
+        </p>
+      ) : (
+        <p className="p-4 text-sm text-muted-foreground">
+          Validation will run after the saved build loads.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function ValidationCount({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border border-border bg-background px-2 py-2">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="font-semibold tabular-nums">{value}</dd>
+    </div>
+  );
 }
 
 function StockingAnalysisPanel({
@@ -914,11 +1126,13 @@ function PlantSelectionCell({
   action,
   href,
   plants,
+  plantsById,
   summary,
 }: {
   action: string;
   href: string;
   plants: AquariumPlantEntry[];
+  plantsById: Map<string, Plant>;
   summary: string;
 }) {
   if (plants.length === 0) {
@@ -932,7 +1146,10 @@ function PlantSelectionCell({
         <div className="mt-1 text-xs text-muted-foreground">
           {plants
             .slice(0, 3)
-            .map((entry) => `${entry.plantSlug} x${entry.quantity}`)
+            .map((entry) => {
+              const plant = plantsById.get(entry.plantId);
+              return `${plant?.commonName ?? "Unavailable plant"} x${entry.quantity}`;
+            })
             .join(", ")}
           {plants.length > 3 ? "..." : ""}
         </div>

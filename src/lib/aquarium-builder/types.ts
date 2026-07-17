@@ -36,7 +36,7 @@ export type AquariumLivestockEntry = {
 };
 
 export type AquariumPlantEntry = {
-  plantSlug: string;
+  plantId: string;
   quantity: number;
   notes?: string | null;
 };

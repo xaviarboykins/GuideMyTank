@@ -87,11 +87,11 @@ export function validateAquariumBuild(
   }
 
   for (const plant of build.plants) {
-    if (!plant.plantSlug.trim()) {
+    if (!plant.plantId.trim()) {
       warnings.push(
         createWarning(
           "missing-plant",
-          "Each plant entry must include a plant slug.",
+          "Each plant entry must include a plant ID.",
           "critical",
         ),
       );

@@ -39,13 +39,14 @@ function GuideImage({ assignment, url, className }: { assignment?: ImageAssignme
   );
 }
 
-export function CareGuideArticle({ guide, sections, images, sources, imageUrls, relatedSpecies = [] }: {
+export function CareGuideArticle({ guide, sections, images, sources, imageUrls, relatedSpecies = [], relatedArticles = [] }: {
   guide: { title: string | null; slug: string | null; summary: string | null; quick_facts: Json; published_at: string | null; updated_at: string; species: { common_name: string; scientific_name: string } };
   sections: Section[];
   images: ImageAssignment[];
   sources: SourceAssignment[];
   imageUrls: Map<string, string>;
   relatedSpecies: Array<{ species_id: string; relationship_label: string | null; species: { slug: string; common_name: string; scientific_name: string } }>;
+  relatedArticles?: Array<{ article_id: string; article: { slug: string | null; title: string | null; summary: string | null; status: string } }>;
 }) {
   const quickFacts = record(guide.quick_facts);
   const primary = images.find((image) => image.is_primary) ?? images[0];
@@ -113,6 +114,7 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
       <div className="mx-5 sm:mx-8 lg:mx-10">
         <SourcesList sources={sources} />
         <RelatedLinks title="Related species" items={relatedSpecies.map((item) => ({ href: `/species/${item.species.slug}`, title: item.species.common_name, description: item.relationship_label ?? item.species.scientific_name }))} />
+        <RelatedLinks title="Related articles" items={relatedArticles.flatMap((item) => item.article.status === "published" && item.article.slug ? [{ href: `/learning-center/${item.article.slug}`, title: item.article.title ?? "Article", description: item.article.summary }] : [])} />
         <ShareLinks title={guide.title ?? `${guide.species.common_name} Care Guide`} url={canonical} />
       </div>
     </article>

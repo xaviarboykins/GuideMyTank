@@ -63,6 +63,16 @@ Care Guide publication requires:
 Article publication requires a title, unique slug, summary, and at least one
 valid ordered section. Images are optional.
 
+## Care Guide PDFs
+
+Every published Care Guide has a dynamic download at
+`/care-guides/[slug]/pdf`. The PDF contains GuideMyTank branding, the species
+and scientific names, the primary Care Guide image, quick facts, all ordered
+care sections, sources, the public Guide URL, and the current update date.
+Downloads are generated without browser or CDN caching so edits and primary
+image changes are reflected immediately. General Articles do not generate PDFs
+during Milestone 6.
+
 The TypeScript validators provide actionable admin errors. PostgreSQL triggers
 enforce the same security-critical rules even when a write bypasses the UI.
 
@@ -141,3 +151,25 @@ Published Care Guides appear under `/care-guides`, and published Articles appear
 under `/learning-center`. Both content types have public detail routes and
 sitemap entries. RLS prevents draft and archived records from appearing in
 these queries even if a public URL is requested directly.
+
+The homepage features published Care Guides. Species profiles link to their
+published Care Guide when one exists. Article pages can show related Care Guides
+and Articles, while Care Guides can show related species and Articles. The Care
+Guide index supports species-oriented search and filters; the Learning Center
+supports title/summary search and category filtering through URL query
+parameters.
+
+### Public release checks
+
+- Open a published species profile and follow its complete Care Guide link.
+- Confirm related Care Guides appear on configured Articles and that related
+  species and Articles appear on configured Care Guides.
+- Filter `/learning-center` by a category, search by title or summary, clear the
+  filters, and verify the URL remains shareable.
+- Download a published Care Guide PDF and confirm its primary image, Guide URL,
+  update date, required care sections, sources, page numbers, and branding.
+- Request draft and archived public slugs while signed out and confirm their
+  content is unavailable and absent from the sitemap.
+- Check public templates at narrow mobile and desktop widths, keyboard through
+  links and controls, and confirm visible focus, labels, landmarks, headings,
+  image alt text, and readable contrast.

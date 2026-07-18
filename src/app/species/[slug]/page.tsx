@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SpeciesCompatibilitySections } from "@/components/species/species-compatibility-sections";
 import { SpeciesStatCard } from "@/components/species/species-stat-card";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { Button } from "@/components/ui/button";
 
 import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
+import { getPublishedCareGuideForSpecies } from "@/lib/care-guides/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
 import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
@@ -197,11 +200,15 @@ export async function generateMetadata({
 export default async function SpeciesPage({ params }: SpeciesPageProps) {
   const { slug } = await params;
   const species = await getSpeciesBySlug(slug);
-  const compatibility = await getCompatibilityRulesForSpecies(slug);
 
   if (!species) {
     notFound();
   }
+
+  const [compatibility, publishedCareGuide] = await Promise.all([
+    getCompatibilityRulesForSpecies(slug),
+    getPublishedCareGuideForSpecies(species.id),
+  ]);
 
   const jsonLd = getSpeciesJsonLd(species);
   const compatibilityTags = species.compatibility_tags ?? [];
@@ -224,6 +231,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
             species.summary ??
             "Freshwater aquarium species profile with care requirements and tank planning data."
           }
+          action={publishedCareGuide ? <Button asChild><Link href={`/care-guides/${publishedCareGuide.slug}`}>View complete Care Guide</Link></Button> : null}
         />
 
         <section className="mt-6">

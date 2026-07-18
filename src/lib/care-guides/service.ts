@@ -25,6 +25,18 @@ export async function listPublishedCareGuides() {
   return data ?? [];
 }
 
+export async function getPublishedCareGuideForSpecies(speciesId: string) {
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("care_guides")
+    .select("id,slug,title")
+    .eq("species_id", speciesId)
+    .eq("status", "published")
+    .maybeSingle();
+  throwContentDatabaseError(error, "load the species Care Guide");
+  return data;
+}
+
 export async function getPublishedCareGuideBySlug(slug: string) {
   const supabase = await createClient();
   const { data: guide, error } = await supabase
@@ -35,17 +47,19 @@ export async function getPublishedCareGuideBySlug(slug: string) {
     .maybeSingle();
   throwContentDatabaseError(error, "load the published Care Guide");
   if (!guide) return null;
-  const [sections, images, sources, relatedSpecies] = await Promise.all([
+  const [sections, images, sources, relatedSpecies, relatedArticles] = await Promise.all([
     supabase.from("care_guide_sections").select("*").eq("care_guide_id", guide.id).order("display_order"),
     supabase.from("care_guide_images").select("*,content_images(*)").eq("care_guide_id", guide.id).order("display_order"),
     supabase.from("care_guide_sources").select("*,sources(*)").eq("care_guide_id", guide.id).order("display_order"),
     supabase.from("care_guide_related_species").select("*,species(id,slug,common_name,scientific_name)").eq("care_guide_id", guide.id).order("display_order"),
+    supabase.from("article_related_care_guides").select("*,article:articles(id,slug,title,summary,status)").eq("care_guide_id", guide.id).order("display_order"),
   ]);
   throwContentDatabaseError(sections.error, "load published Care Guide sections");
   throwContentDatabaseError(images.error, "load published Care Guide images");
   throwContentDatabaseError(sources.error, "load published Care Guide sources");
   throwContentDatabaseError(relatedSpecies.error, "load published Care Guide related species");
-  return { guide, sections: sections.data ?? [], images: images.data ?? [], sources: sources.data ?? [], relatedSpecies: relatedSpecies.data ?? [] };
+  throwContentDatabaseError(relatedArticles.error, "load published Care Guide related articles");
+  return { guide, sections: sections.data ?? [], images: images.data ?? [], sources: sources.data ?? [], relatedSpecies: relatedSpecies.data ?? [], relatedArticles: relatedArticles.data ?? [] };
 }
 
 export async function createCareGuideDraft(speciesId: string) {

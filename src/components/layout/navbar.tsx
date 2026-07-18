@@ -5,6 +5,10 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 
 const navLinks = [
   {
+    href: "/piscidex",
+    label: "PisciDex",
+  },
+  {
     href: "/care-guides",
     label: "Care Guides",
   },

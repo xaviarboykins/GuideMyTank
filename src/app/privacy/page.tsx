@@ -6,6 +6,7 @@ export const metadata = {
   title: "Privacy Policy | GuideMyTank",
   description:
     "Learn how GuideMyTank collects, uses, and protects information related to analytics, cookies, advertising, affiliate links, and external links.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

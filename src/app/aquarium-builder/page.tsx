@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteUrl } from "@/lib/seo/site-url";
 
 import { AquariumBuilderInterface } from "@/components/aquarium-builder/aquarium-builder-interface";
 import { BetaBadge } from "@/components/site/beta-badge";
@@ -12,10 +13,10 @@ export const metadata: Metadata = {
   description:
     "Plan a freshwater aquarium with equipment, plants, livestock, stocking, compatibility, heating, and build-health analysis.",
   alternates: {
-    canonical: "https://www.guidemytank.com/aquarium-builder",
+    canonical: getSiteUrl("/aquarium-builder"),
   },
   openGraph: {
-    url: "https://www.guidemytank.com/aquarium-builder",
+    url: getSiteUrl("/aquarium-builder"),
   },
 };
 

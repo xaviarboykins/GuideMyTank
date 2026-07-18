@@ -105,7 +105,7 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
                     </div>
 
                     <Link
-                      href={`/piscidex/${item.slug}`}
+                      href={`/species/${item.slug}`}
                       className="font-medium underline-offset-4 hover:underline"
                     >
                       {item.common_name}

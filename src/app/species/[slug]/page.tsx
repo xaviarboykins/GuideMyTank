@@ -8,19 +8,21 @@ import { SpeciesStatCard } from "@/components/species/species-stat-card";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
 
 import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
 import { getPublishedCareGuideForSpecies } from "@/lib/care-guides/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
 import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
+import { getSiteOrigin, getSiteUrl } from "@/lib/seo/site-url";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import {
   formatRecommendedTemperature,
   formatToleratedTemperature,
   hasDifferentToleratedTemperature,
 } from "@/lib/species/temperature-label";
-
-const SITE_URL = "https://www.guidemytank.com";
 
 type SpeciesPageProps = {
   params: Promise<{
@@ -35,7 +37,7 @@ type SpeciesProperty = {
 };
 
 function getSpeciesPageUrl(slug: string) {
-  return `${SITE_URL}/species/${slug}`;
+  return getSiteUrl(`/species/${slug}`);
 }
 
 function getSpeciesDescription(species: Species) {
@@ -134,7 +136,7 @@ function getSpeciesJsonLd(species: Species) {
     isPartOf: {
       "@type": "WebSite",
       name: "GuideMyTank",
-      url: SITE_URL,
+      url: getSiteOrigin(),
     },
     mainEntity: {
       "@type": "Thing",
@@ -167,34 +169,19 @@ export async function generateMetadata({
   const species = await getSpeciesBySlug(slug);
 
   if (!species) {
-    return {
-      title: "Species Not Found | GuideMyTank",
-    };
+    return buildPageMetadata({
+      title: "Species Not Found",
+      description: "The requested aquarium species profile could not be found.",
+      path: `/species/${slug}`,
+      robots: NOINDEX_NOFOLLOW,
+    });
   }
 
-  const title = `${species.common_name} Care Guide | GuideMyTank`;
+  const title = `${species.common_name} Species Profile and Care Data`;
   const description = getSpeciesDescription(species);
   const url = getSpeciesPageUrl(species.slug);
 
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "GuideMyTank",
-      type: "website",
-    },
-    twitter: {
-      card: "summary",
-      title,
-      description,
-    },
-  };
+  return buildPageMetadata({ title, description, path: new URL(url).pathname });
 }
 
 export default async function SpeciesPage({ params }: SpeciesPageProps) {
@@ -224,6 +211,13 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
         }}
       />
       <PageContainer>
+        <ContentBreadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Species", href: "/species" },
+            { label: species.common_name },
+          ]}
+        />
         <PageHeader
           eyebrow="PisciDex Species Profile"
           title={species.common_name}

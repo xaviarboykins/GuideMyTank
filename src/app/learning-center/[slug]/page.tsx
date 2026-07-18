@@ -8,6 +8,9 @@ import { PageContainer } from "@/components/site/page-container";
 import { getPublishedArticleBySlug } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { isJsonRecord } from "@/lib/content/structured-data";
+import { getSiteUrl } from "@/lib/seo/site-url";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import type { Json } from "@/types/database.types";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -28,13 +31,15 @@ function Block({ type, content, imageUrls }: { type: string; content: Json; imag
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const result = await getPublishedArticleBySlug(slug);
-  if (!result) return {};
-  return {
-    title: result.article.seo_title ?? `${result.article.title} | GuideMyTank`,
-    description: result.article.meta_description ?? result.article.summary ?? undefined,
-    alternates: { canonical: result.article.canonical_url ?? `https://www.guidemytank.com/learning-center/${result.article.slug}` },
-    openGraph: { title: result.article.seo_title ?? result.article.title ?? undefined, description: result.article.meta_description ?? result.article.summary ?? undefined, type: "article", publishedTime: result.article.published_at ?? undefined, modifiedTime: result.article.updated_at },
-  };
+  if (!result) return buildPageMetadata({ title: "Article Not Found", description: "The requested aquarium article could not be found.", path: `/learning-center/${slug}`, robots: NOINDEX_NOFOLLOW });
+  return buildPageMetadata({
+    title: result.article.seo_title ?? result.article.title ?? "Aquarium Article",
+    description: result.article.meta_description ?? result.article.summary ?? "Practical freshwater aquarium education from GuideMyTank.",
+    path: `/learning-center/${result.article.slug}`,
+    type: "article",
+    publishedTime: result.article.published_at,
+    modifiedTime: result.article.updated_at,
+  });
 }
 
 export const revalidate = 3600;
@@ -48,9 +53,9 @@ export default async function PublishedArticlePage({ params }: Props) {
   const imageUrls = new Map(images.map((item) => [item.image_id, signed.get(item.content_images.storage_path) ?? ""]));
   const galleryImages = images.map((item) => ({ id: item.image_id, url: imageUrls.get(item.image_id) ?? "", alt: item.content_images.alt_text ?? "Article image", caption: item.content_images.caption, attribution: item.content_images.attribution, sourceUrl: item.content_images.source_url, licenseName: item.content_images.license_name, licenseUrl: item.content_images.license_url }));
   const [introduction, ...remainingSections] = sections;
-  const canonical = article.canonical_url ?? `https://www.guidemytank.com/learning-center/${article.slug}`;
+  const canonical = getSiteUrl(`/learning-center/${article.slug}`);
   const faqItems = sections.flatMap((section) => { const value = isJsonRecord(section.content) ? section.content.items : null; return section.block_type === "faq_group" && Array.isArray(value) ? value.filter(isJsonRecord).map((item) => ({ "@type": "Question", name: typeof item.question === "string" ? item.question : "", acceptedAnswer: { "@type": "Answer", text: typeof item.answer === "string" ? item.answer : "" } })) : []; });
-  const structuredData: Array<Record<string, unknown>> = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.summary, datePublished: article.published_at, dateModified: article.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: canonical }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://www.guidemytank.com" }, { "@type": "ListItem", position: 2, name: "Learning Center", item: "https://www.guidemytank.com/learning-center" }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
+  const structuredData: Array<Record<string, unknown>> = [{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.summary, datePublished: article.published_at, dateModified: article.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: canonical }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl() }, { "@type": "ListItem", position: 2, name: "Learning Center", item: getSiteUrl("/learning-center") }, { "@type": "ListItem", position: 3, name: article.title, item: canonical }] }];
   if (faqItems.length) structuredData.push({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems });
 
   return <PageContainer><article className="mx-auto max-w-4xl">

@@ -14,6 +14,8 @@ import {
 } from "@/lib/data/species";
 
 import { SpeciesPaginatedTable } from "@/components/species/species-paginated-table";
+import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type PisciDexPageProps = {
   searchParams: Promise<PisciDexFilterSearchParams>;
@@ -25,11 +27,20 @@ function getUniqueValues(values: Array<string | null>) {
   return Array.from(new Set(values.filter(Boolean))).sort() as string[];
 }
 
-export const metadata: Metadata = {
-  title: "PisciDex | Freshwater Fish Species Database | GuideMyTank",
-  description:
-    "Browse freshwater aquarium fish species, care requirements, tank size, temperament, diet, and compatibility data.",
-};
+const pageMetadata = buildPageMetadata({
+  title: "PisciDex Freshwater Fish Species Database",
+  description: "Browse freshwater aquarium fish species, care requirements, tank size, temperament, diet, and compatibility data.",
+  path: "/piscidex",
+});
+
+export async function generateMetadata({
+  searchParams,
+}: PisciDexPageProps): Promise<Metadata> {
+  return {
+    ...pageMetadata,
+    robots: getSearchVariantRobots(await searchParams),
+  };
+}
 
 export const revalidate = 86400;
 

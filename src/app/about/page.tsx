@@ -6,6 +6,7 @@ export const metadata = {
   title: "About | GuideMyTank",
   description:
     "Learn about GuideMyTank, a freshwater aquarium planning tool focused on stocking guidance, compatibility planning, and data-driven fishkeeping.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

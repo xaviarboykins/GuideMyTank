@@ -1,9 +1,13 @@
-export const COMPATIBILITY_BASE_URL = "https://www.guidemytank.com";
+import { getSiteUrl } from "../seo/site-url";
 
 export type CompatibilityPair = {
   speciesA: string;
   speciesB: string;
 };
+
+export function isCompatibilitySitemapSegment(value: string) {
+  return value === "sitemap";
+}
 
 export function getCanonicalCompatibilityPair(
   speciesA: string,
@@ -35,7 +39,7 @@ export function getCompatibilityPath(speciesA: string, speciesB: string) {
 }
 
 export function getCompatibilityUrl(speciesA: string, speciesB: string) {
-  return `${COMPATIBILITY_BASE_URL}${getCompatibilityPath(speciesA, speciesB)}`;
+  return getSiteUrl(getCompatibilityPath(speciesA, speciesB));
 }
 
 export function generateCanonicalCompatibilityPairs(
@@ -48,6 +52,45 @@ export function generateCanonicalCompatibilityPairs(
       pairs.push(
         getCanonicalCompatibilityPair(species[i].slug, species[j].slug),
       );
+    }
+  }
+
+  return pairs;
+}
+
+export function getCanonicalCompatibilityPairCount(speciesCount: number) {
+  return speciesCount > 1 ? (speciesCount * (speciesCount - 1)) / 2 : 0;
+}
+
+export function generateCanonicalCompatibilityPairBatch(
+  species: { slug: string }[],
+  offset: number,
+  limit: number,
+): CompatibilityPair[] {
+  if (offset < 0 || limit < 1) {
+    return [];
+  }
+
+  const sortedSpecies = [...species].sort((a, b) =>
+    a.slug.localeCompare(b.slug),
+  );
+  const pairs: CompatibilityPair[] = [];
+  let pairIndex = 0;
+
+  for (let i = 0; i < sortedSpecies.length; i += 1) {
+    for (let j = i + 1; j < sortedSpecies.length; j += 1) {
+      if (pairIndex >= offset) {
+        pairs.push({
+          speciesA: sortedSpecies[i].slug,
+          speciesB: sortedSpecies[j].slug,
+        });
+      }
+
+      pairIndex += 1;
+
+      if (pairs.length === limit) {
+        return pairs;
+      }
     }
   }
 

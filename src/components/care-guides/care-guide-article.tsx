@@ -1,6 +1,7 @@
 import type { Json } from "@/types/database.types";
 import Link from "next/link";
 import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ImageCredit, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
+import { getSiteUrl } from "@/lib/seo/site-url";
 import styles from "./care-guide-article.module.css";
 
 type ImageAssignment = {
@@ -58,7 +59,7 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
   const faqContent = faqSection ? record(faqSection.content) : {};
   const faqItems = parseFaq(typeof faqContent.text === "string" ? faqContent.text : "");
   const slug = guide.slug ?? guide.species.common_name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
-  const canonical = `https://www.guidemytank.com/care-guides/${slug}`;
+  const canonical = getSiteUrl(`/care-guides/${slug}`);
 
   return (
     <article>

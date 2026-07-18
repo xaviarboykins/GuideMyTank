@@ -6,6 +6,7 @@ export const metadata = {
   title: "Affiliate Disclosure | GuideMyTank",
   description:
     "GuideMyTank affiliate disclosure for qualifying purchases, affiliate links, and future affiliate partnerships.",
+  alternates: { canonical: "/affiliate-disclosure" },
 };
 
 export default function AffiliateDisclosurePage() {

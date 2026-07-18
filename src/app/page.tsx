@@ -48,6 +48,7 @@ export const metadata: Metadata = {
   title: "GuideMyTank | Aquarium Compatibility and Tank Planning Tools",
   description:
     "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.",
+  alternates: { canonical: "/" },
 };
 
 export const revalidate = 3600;

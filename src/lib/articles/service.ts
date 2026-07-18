@@ -18,7 +18,7 @@ export async function listPublishedArticles() {
   const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("articles")
-    .select("id,title,slug,summary,published_at,featured_image_id,article_images(image_id,display_order,content_images(storage_path,alt_text,caption)),article_category_assignments(category_id,article_categories(name,slug)),article_tag_assignments(tag_id,article_tags(name,slug))")
+    .select("id,title,slug,summary,published_at,updated_at,featured_image_id,article_images(image_id,display_order,content_images(storage_path,alt_text,caption)),article_category_assignments(category_id,article_categories(name,slug)),article_tag_assignments(tag_id,article_tags(name,slug))")
     .eq("status", "published")
     .order("published_at", { ascending: false });
   throwContentDatabaseError(error, "list published articles");

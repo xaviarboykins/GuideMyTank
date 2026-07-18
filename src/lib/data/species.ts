@@ -148,7 +148,10 @@ export async function getSpeciesBySlug(slug: string) {
 export async function getSpeciesSlugs() {
   const supabase = createStaticClient();
 
-  const { data, error } = await supabase.from("species").select("slug");
+  const { data, error } = await supabase
+    .from("species")
+    .select("slug,updated_at")
+    .order("slug");
 
   if (error) {
     throw new Error(`Failed to fetch species slugs: ${error.message}`);

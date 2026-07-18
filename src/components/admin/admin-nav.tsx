@@ -9,6 +9,7 @@ const adminLinks = [
   ["Tags", "/admin/tags"],
   ["Images", "/admin/images"],
   ["Sources", "/admin/sources"],
+  ["SEO Health", "/admin/seo"],
 ] as const;
 
 export function AdminNav() {

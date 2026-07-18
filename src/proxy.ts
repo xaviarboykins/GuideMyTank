@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+import { refreshAuthSession } from "@/lib/supabase/proxy";
+
+export async function proxy(request: NextRequest) {
   const [, basePath, speciesA, speciesB] = request.nextUrl.pathname.split("/");
+
+  if (basePath === "admin" || basePath === "auth") {
+    return refreshAuthSession(request);
+  }
 
   if (basePath !== "compatibility" || !speciesA || !speciesB) {
     return NextResponse.next();
@@ -20,5 +26,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/compatibility/:speciesA/:speciesB",
+  matcher: ["/admin/:path*", "/auth/:path*", "/compatibility/:speciesA/:speciesB"],
 };

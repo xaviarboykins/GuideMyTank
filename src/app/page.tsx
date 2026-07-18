@@ -10,92 +10,36 @@ import { BetaBadge } from "@/components/site/beta-badge";
 import { DevelopmentBadge } from "@/components/site/development-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-const featuredCareGuides: FeaturedCareGuide[] = [
-  {
-    slug: "betta-splendens",
-    name: "Betta Fish",
-    scientificName: "Betta splendens",
-    image: "/species/betta-splendens.webp",
-    careLevel: "Easy",
-    tankSize: "5+ gal",
-    temperament: "Territorial",
-    summary:
-      "Learn how to provide warm, filtered water and a calm setup for this colorful labyrinth fish.",
-  },
-  {
-    slug: "corydoras-catfish",
-    name: "Corydoras Catfish",
-    scientificName: "Corydoras spp.",
-    image: "/species/corydoras-catfish.webp",
-    careLevel: "Easy",
-    tankSize: "20+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Plan a social bottom-dwelling group with soft substrate, clean water, and compatible community fish.",
-  },
-  {
-    slug: "angelfish",
-    name: "Freshwater Angelfish",
-    scientificName: "Pterophyllum scalare",
-    image: "/species/angelfish.webp",
-    careLevel: "Intermediate",
-    tankSize: "29+ gal",
-    temperament: "Semi-aggressive",
-    summary:
-      "Understand tall-tank requirements, mature territorial behavior, feeding, and suitable tank mates.",
-  },
-  {
-    slug: "guppy",
-    name: "Guppy",
-    scientificName: "Poecilia reticulata",
-    image: "/species/guppy.webp",
-    careLevel: "Easy",
-    tankSize: "10+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Build a lively guppy setup with stable water, appropriate group ratios, and manageable breeding.",
-  },
-  {
-    slug: "honey-gourami",
-    name: "Honey Gourami",
-    scientificName: "Trichogaster chuna",
-    image: "/species/honey-gourami.webp",
-    careLevel: "Easy",
-    tankSize: "10+ gal",
-    temperament: "Peaceful",
-    summary:
-      "Create a gentle planted community for this small gourami with quiet tank mates and low flow.",
-  },
-];
+import { listPublishedCareGuides } from "@/lib/care-guides/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 
 const utilities = [
   {
-    title: "Compatibility Database",
-    description:
-      "Compare aquarium species using temperament, aggression level, water parameters, schooling behavior, and tank size.",
-    href: "/compatibility",
-    status: "beta",
-  },
-  {
-    title: "Tank Stocking Calculator",
-    description:
-      "Estimate safe stocking levels and identify overcrowding risks for common freshwater setups.",
-    href: "/stocking",
-    status: null,
-  },
-  {
     title: "Aquarium Builder",
     description:
-      "Build a complete setup with a tank, equipment, plants, livestock, and decor.",
+      "Build your freshwater aquarium and receive stocking, compatibility, equipment, temperature, and setup guidance in one place.",
     href: "/aquarium-builder",
     status: "beta",
   },
   {
-    title: "PisciDex Species Database",
+    title: "Compatibility Checker",
     description:
-      "Browse fish species data including temperament, tank size, lifespan, diet, and care requirements.",
-    href: "/piscidex",
+      "Quickly compare species using temperament, aggression, water parameters, schooling behavior, and tank requirements.",
+    href: "/compatibility",
+    status: "beta",
+  },
+  {
+    title: "Care Guides",
+    description:
+      "Browse practical species profiles covering care, behavior, habitat, feeding, water needs, and aquarium requirements.",
+    href: "/care-guides",
+    status: null,
+  },
+  {
+    title: "Products",
+    description:
+      "Explore a structured catalog of tanks, filters, heaters, lighting, substrate, decor, and other aquarium equipment.",
+    href: "/products",
     status: null,
   },
 ];
@@ -106,7 +50,27 @@ export const metadata: Metadata = {
     "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.",
 };
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function Home() {
+  const publishedGuides = await listPublishedCareGuides();
+  const primaryImages = publishedGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
+  const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
+  const featuredCareGuides: FeaturedCareGuide[] = publishedGuides.map((guide) => {
+    const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
+    return {
+      slug: guide.slug ?? guide.species.slug,
+      title: guide.title ?? `${guide.species.common_name} Care Guide`,
+      name: guide.species.common_name,
+      scientificName: guide.species.scientific_name,
+      image: image ? imageUrls.get(image.content_images.storage_path) ?? "" : "",
+      imageAlt: image?.content_images.alt_text ?? `${guide.species.common_name} Care Guide`,
+      careLevel: guide.species.care_level ?? "Unknown",
+      tankSize: guide.species.tank_size_gal ? `${guide.species.tank_size_gal}+ gal` : "Unknown",
+      temperament: guide.species.temperament ?? "Unknown",
+      summary: guide.summary ?? guide.species.summary ?? "Freshwater aquarium care requirements and compatibility guidance.",
+    };
+  });
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Main Utility Header */}
@@ -152,11 +116,15 @@ export default function Home() {
           </Button>
 
           <Button variant="outline" size="sm" asChild>
-            <Link href="/stocking">Stocking Planner</Link>
+            <Link href="/care-guides">Care Guides</Link>
           </Button>
 
           <Button variant="outline" size="sm" asChild>
             <Link href="/aquarium-builder">Aquarium Builder</Link>
+          </Button>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/products">Products</Link>
           </Button>
         </div>
       </section>
@@ -175,9 +143,10 @@ export default function Home() {
               Build your aquarium before you buy.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-sky-100/80">
-              Choose a tank, filter, heater, lighting, substrate, plants, and
-              livestock in one practical workspace. Your build is saved in your
-              browser as you plan.
+              Build your freshwater aquarium and receive stocking,
+              compatibility, equipment, temperature, and setup guidance in one
+              practical workspace. Your build is saved in your browser as you
+              plan.
             </p>
 
             <Button asChild className="mt-6 bg-sky-500 text-white hover:bg-sky-400">

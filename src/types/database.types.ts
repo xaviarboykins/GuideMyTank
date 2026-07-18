@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -39,6 +39,592 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      article_category_assignments: {
+        Row: {
+          article_id: string
+          category_id: string
+        }
+        Insert: {
+          article_id: string
+          category_id: string
+        }
+        Update: {
+          article_id?: string
+          category_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_category_assignments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_category_assignments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_images: {
+        Row: {
+          article_id: string
+          display_order: number
+          image_id: string
+        }
+        Insert: {
+          article_id: string
+          display_order: number
+          image_id: string
+        }
+        Update: {
+          article_id?: string
+          display_order?: number
+          image_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_images_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_images_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "content_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_related_articles: {
+        Row: {
+          article_id: string
+          display_order: number
+          related_article_id: string
+          relationship_label: string | null
+        }
+        Insert: {
+          article_id: string
+          display_order: number
+          related_article_id: string
+          relationship_label?: string | null
+        }
+        Update: {
+          article_id?: string
+          display_order?: number
+          related_article_id?: string
+          relationship_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_related_articles_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_related_articles_related_article_id_fkey"
+            columns: ["related_article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_related_care_guides: {
+        Row: {
+          article_id: string
+          care_guide_id: string
+          display_order: number
+          relationship_label: string | null
+        }
+        Insert: {
+          article_id: string
+          care_guide_id: string
+          display_order: number
+          relationship_label?: string | null
+        }
+        Update: {
+          article_id?: string
+          care_guide_id?: string
+          display_order?: number
+          relationship_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_related_care_guides_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_related_care_guides_care_guide_id_fkey"
+            columns: ["care_guide_id"]
+            isOneToOne: false
+            referencedRelation: "care_guides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_sections: {
+        Row: {
+          article_id: string
+          block_type: string
+          content: Json
+          created_at: string
+          display_order: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          block_type: string
+          content?: Json
+          created_at?: string
+          display_order: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          block_type?: string
+          content?: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_sections_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_sources: {
+        Row: {
+          article_id: string
+          citation_label: string | null
+          display_order: number
+          source_id: string
+        }
+        Insert: {
+          article_id: string
+          citation_label?: string | null
+          display_order: number
+          source_id: string
+        }
+        Update: {
+          article_id?: string
+          citation_label?: string | null
+          display_order?: number
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_sources_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_sources_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_tag_assignments: {
+        Row: {
+          article_id: string
+          tag_id: string
+        }
+        Insert: {
+          article_id: string
+          tag_id: string
+        }
+        Update: {
+          article_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_tag_assignments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "article_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_tags: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      articles: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          featured_image_id: string | null
+          id: string
+          is_featured: boolean
+          meta_description: string | null
+          open_graph_image_id: string | null
+          published_at: string | null
+          seo_title: string | null
+          slug: string | null
+          status: string
+          summary: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          featured_image_id?: string | null
+          id?: string
+          is_featured?: boolean
+          meta_description?: string | null
+          open_graph_image_id?: string | null
+          published_at?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          status?: string
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          featured_image_id?: string | null
+          id?: string
+          is_featured?: boolean
+          meta_description?: string | null
+          open_graph_image_id?: string | null
+          published_at?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          status?: string
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_featured_image_id_fkey"
+            columns: ["featured_image_id"]
+            isOneToOne: false
+            referencedRelation: "content_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_open_graph_image_id_fkey"
+            columns: ["open_graph_image_id"]
+            isOneToOne: false
+            referencedRelation: "content_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_guide_images: {
+        Row: {
+          care_guide_id: string
+          created_at: string
+          display_order: number
+          image_id: string
+          is_primary: boolean
+        }
+        Insert: {
+          care_guide_id: string
+          created_at?: string
+          display_order: number
+          image_id: string
+          is_primary?: boolean
+        }
+        Update: {
+          care_guide_id?: string
+          created_at?: string
+          display_order?: number
+          image_id?: string
+          is_primary?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_guide_images_care_guide_id_fkey"
+            columns: ["care_guide_id"]
+            isOneToOne: false
+            referencedRelation: "care_guides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_guide_images_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "content_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_guide_related_species: {
+        Row: {
+          care_guide_id: string
+          display_order: number
+          relationship_label: string | null
+          species_id: string
+        }
+        Insert: {
+          care_guide_id: string
+          display_order: number
+          relationship_label?: string | null
+          species_id: string
+        }
+        Update: {
+          care_guide_id?: string
+          display_order?: number
+          relationship_label?: string | null
+          species_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_guide_related_species_care_guide_id_fkey"
+            columns: ["care_guide_id"]
+            isOneToOne: false
+            referencedRelation: "care_guides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_guide_related_species_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_guide_sections: {
+        Row: {
+          care_guide_id: string
+          content: Json
+          created_at: string
+          display_order: number
+          heading: string | null
+          id: string
+          section_type: string
+          updated_at: string
+        }
+        Insert: {
+          care_guide_id: string
+          content?: Json
+          created_at?: string
+          display_order: number
+          heading?: string | null
+          id?: string
+          section_type: string
+          updated_at?: string
+        }
+        Update: {
+          care_guide_id?: string
+          content?: Json
+          created_at?: string
+          display_order?: number
+          heading?: string | null
+          id?: string
+          section_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_guide_sections_care_guide_id_fkey"
+            columns: ["care_guide_id"]
+            isOneToOne: false
+            referencedRelation: "care_guides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_guide_sources: {
+        Row: {
+          care_guide_id: string
+          citation_label: string | null
+          display_order: number
+          source_id: string
+        }
+        Insert: {
+          care_guide_id: string
+          citation_label?: string | null
+          display_order: number
+          source_id: string
+        }
+        Update: {
+          care_guide_id?: string
+          citation_label?: string | null
+          display_order?: number
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_guide_sources_care_guide_id_fkey"
+            columns: ["care_guide_id"]
+            isOneToOne: false
+            referencedRelation: "care_guides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_guide_sources_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      care_guides: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          id: string
+          is_featured: boolean
+          meta_description: string | null
+          open_graph_image_id: string | null
+          published_at: string | null
+          quick_facts: Json
+          seo_title: string | null
+          slug: string | null
+          species_id: string
+          status: string
+          summary: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          meta_description?: string | null
+          open_graph_image_id?: string | null
+          published_at?: string | null
+          quick_facts?: Json
+          seo_title?: string | null
+          slug?: string | null
+          species_id: string
+          status?: string
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          meta_description?: string | null
+          open_graph_image_id?: string | null
+          published_at?: string | null
+          quick_facts?: Json
+          seo_title?: string | null
+          slug?: string | null
+          species_id?: string
+          status?: string
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_guides_open_graph_image_id_fkey"
+            columns: ["open_graph_image_id"]
+            isOneToOne: false
+            referencedRelation: "content_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_guides_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: true
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compatibility_rules: {
         Row: {
           compatibility: string
@@ -89,6 +675,143 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_images: {
+        Row: {
+          alt_text: string | null
+          attribution: string | null
+          author: string | null
+          caption: string | null
+          created_at: string
+          file_size_bytes: number | null
+          height: number | null
+          id: string
+          license_name: string | null
+          license_url: string | null
+          mime_type: string | null
+          source_url: string | null
+          species_id: string | null
+          storage_path: string
+          updated_at: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          attribution?: string | null
+          author?: string | null
+          caption?: string | null
+          created_at?: string
+          file_size_bytes?: number | null
+          height?: number | null
+          id?: string
+          license_name?: string | null
+          license_url?: string | null
+          mime_type?: string | null
+          source_url?: string | null
+          species_id?: string | null
+          storage_path: string
+          updated_at?: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          attribution?: string | null
+          author?: string | null
+          caption?: string | null
+          created_at?: string
+          file_size_bytes?: number | null
+          height?: number | null
+          id?: string
+          license_name?: string | null
+          license_url?: string | null
+          mime_type?: string | null
+          source_url?: string | null
+          species_id?: string | null
+          storage_path?: string
+          updated_at?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_images_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plants: {
+        Row: {
+          care_level: string
+          co2_required: boolean
+          common_name: string
+          created_at: string
+          description: string | null
+          growth_rate: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          maximum_height_inches: number | null
+          maximum_light_level: string | null
+          maximum_ph: number | null
+          maximum_temperature_f: number | null
+          minimum_light_level: string | null
+          minimum_ph: number | null
+          minimum_tank_gallons: number | null
+          minimum_temperature_f: number | null
+          placement: string | null
+          scientific_name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          care_level: string
+          co2_required?: boolean
+          common_name: string
+          created_at?: string
+          description?: string | null
+          growth_rate?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          maximum_height_inches?: number | null
+          maximum_light_level?: string | null
+          maximum_ph?: number | null
+          maximum_temperature_f?: number | null
+          minimum_light_level?: string | null
+          minimum_ph?: number | null
+          minimum_tank_gallons?: number | null
+          minimum_temperature_f?: number | null
+          placement?: string | null
+          scientific_name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          care_level?: string
+          co2_required?: boolean
+          common_name?: string
+          created_at?: string
+          description?: string | null
+          growth_rate?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          maximum_height_inches?: number | null
+          maximum_light_level?: string | null
+          maximum_ph?: number | null
+          maximum_temperature_f?: number | null
+          minimum_light_level?: string | null
+          minimum_ph?: number | null
+          minimum_tank_gallons?: number | null
+          minimum_temperature_f?: number | null
+          placement?: string | null
+          scientific_name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       products: {
         Row: {
@@ -177,82 +900,52 @@ export type Database = {
         }
         Relationships: []
       }
-      plants: {
+      sources: {
         Row: {
-          care_level: string
-          co2_required: boolean
-          common_name: string
+          accessed_date: string | null
+          author: string | null
           created_at: string
-          description: string | null
-          growth_rate: string | null
           id: string
-          image_url: string | null
-          is_active: boolean
-          maximum_height_inches: number | null
-          maximum_light_level: string | null
-          maximum_ph: number | null
-          maximum_temperature_f: number | null
-          minimum_light_level: string | null
-          minimum_ph: number | null
-          minimum_tank_gallons: number | null
-          minimum_temperature_f: number | null
-          placement: string | null
-          scientific_name: string
-          slug: string
+          notes: string | null
+          publication_date: string | null
+          publisher: string | null
+          source_type: string
+          title: string
           updated_at: string
+          url: string | null
         }
         Insert: {
-          care_level: string
-          co2_required?: boolean
-          common_name: string
+          accessed_date?: string | null
+          author?: string | null
           created_at?: string
-          description?: string | null
-          growth_rate?: string | null
           id?: string
-          image_url?: string | null
-          is_active?: boolean
-          maximum_height_inches?: number | null
-          maximum_light_level?: string | null
-          maximum_ph?: number | null
-          maximum_temperature_f?: number | null
-          minimum_light_level?: string | null
-          minimum_ph?: number | null
-          minimum_tank_gallons?: number | null
-          minimum_temperature_f?: number | null
-          placement?: string | null
-          scientific_name: string
-          slug: string
+          notes?: string | null
+          publication_date?: string | null
+          publisher?: string | null
+          source_type?: string
+          title: string
           updated_at?: string
+          url?: string | null
         }
         Update: {
-          care_level?: string
-          co2_required?: boolean
-          common_name?: string
+          accessed_date?: string | null
+          author?: string | null
           created_at?: string
-          description?: string | null
-          growth_rate?: string | null
           id?: string
-          image_url?: string | null
-          is_active?: boolean
-          maximum_height_inches?: number | null
-          maximum_light_level?: string | null
-          maximum_ph?: number | null
-          maximum_temperature_f?: number | null
-          minimum_light_level?: string | null
-          minimum_ph?: number | null
-          minimum_tank_gallons?: number | null
-          minimum_temperature_f?: number | null
-          placement?: string | null
-          scientific_name?: string
-          slug?: string
+          notes?: string | null
+          publication_date?: string | null
+          publisher?: string | null
+          source_type?: string
+          title?: string
           updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
       species: {
         Row: {
-          aggression_level: number | null
           activity_level: string | null
+          aggression_level: number | null
           armored_body: boolean
           bioload_rating: number | null
           bonded_pair_suitable: boolean
@@ -265,8 +958,8 @@ export type Database = {
           competitive_feeder: boolean
           created_at: string | null
           data_confidence: string
-          delicate_species: boolean
           deep_bodied: boolean
+          delicate_species: boolean
           diet: string | null
           family: string | null
           fin_nipping_risk: boolean
@@ -277,46 +970,46 @@ export type Database = {
           invert_safe: boolean | null
           lifespan_years: number | null
           long_fin_vulnerable: boolean
-          max_ph: number | null
           max_gh_dgh: number | null
           max_kh_dkh: number | null
+          max_ph: number | null
           max_size_inches: number | null
           max_temp_f: number | null
-          recommended_max_temp_f: number | null
           min_gh_dgh: number | null
           min_group_size: number | null
           min_kh_dkh: number | null
           min_ph: number | null
           min_temp_f: number | null
-          recommended_min_temp_f: number | null
           mouth_gape_risk: boolean
           origin: string | null
+          ph_stability_required: boolean
           plant_safe: boolean | null
           preferred_tank_style: string | null
-          ph_stability_required: boolean
+          recommended_max_temp_f: number | null
+          recommended_min_temp_f: number | null
           region: string | null
           schooling: boolean | null
           scientific_name: string
-          slug: string
+          slender_prey_body: boolean
           slow_moving: boolean
+          slug: string
           specialist_setup: boolean
           species_only_preferred: boolean
-          slender_prey_body: boolean
           summary: string | null
           surface_predator: boolean
           tank_size_gal: number | null
           temp_source_notes: string | null
           temperament: string | null
           temperature_category: string | null
-          tolerated_max_temp_f: number | null
-          tolerated_min_temp_f: number | null
           territory_footprint: string | null
           territory_zone: string | null
+          tolerated_max_temp_f: number | null
+          tolerated_min_temp_f: number | null
           updated_at: string | null
         }
         Insert: {
-          aggression_level?: number | null
           activity_level?: string | null
+          aggression_level?: number | null
           armored_body?: boolean
           bioload_rating?: number | null
           bonded_pair_suitable?: boolean
@@ -329,8 +1022,8 @@ export type Database = {
           competitive_feeder?: boolean
           created_at?: string | null
           data_confidence?: string
-          delicate_species?: boolean
           deep_bodied?: boolean
+          delicate_species?: boolean
           diet?: string | null
           family?: string | null
           fin_nipping_risk?: boolean
@@ -341,46 +1034,46 @@ export type Database = {
           invert_safe?: boolean | null
           lifespan_years?: number | null
           long_fin_vulnerable?: boolean
-          max_ph?: number | null
           max_gh_dgh?: number | null
           max_kh_dkh?: number | null
+          max_ph?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
-          recommended_max_temp_f?: number | null
           min_gh_dgh?: number | null
           min_group_size?: number | null
           min_kh_dkh?: number | null
           min_ph?: number | null
           min_temp_f?: number | null
-          recommended_min_temp_f?: number | null
           mouth_gape_risk?: boolean
           origin?: string | null
+          ph_stability_required?: boolean
           plant_safe?: boolean | null
           preferred_tank_style?: string | null
-          ph_stability_required?: boolean
+          recommended_max_temp_f?: number | null
+          recommended_min_temp_f?: number | null
           region?: string | null
           schooling?: boolean | null
           scientific_name: string
-          slug: string
+          slender_prey_body?: boolean
           slow_moving?: boolean
+          slug: string
           specialist_setup?: boolean
           species_only_preferred?: boolean
-          slender_prey_body?: boolean
           summary?: string | null
           surface_predator?: boolean
           tank_size_gal?: number | null
           temp_source_notes?: string | null
           temperament?: string | null
           temperature_category?: string | null
-          tolerated_max_temp_f?: number | null
-          tolerated_min_temp_f?: number | null
           territory_footprint?: string | null
           territory_zone?: string | null
+          tolerated_max_temp_f?: number | null
+          tolerated_min_temp_f?: number | null
           updated_at?: string | null
         }
         Update: {
-          aggression_level?: number | null
           activity_level?: string | null
+          aggression_level?: number | null
           armored_body?: boolean
           bioload_rating?: number | null
           bonded_pair_suitable?: boolean
@@ -393,8 +1086,8 @@ export type Database = {
           competitive_feeder?: boolean
           created_at?: string | null
           data_confidence?: string
-          delicate_species?: boolean
           deep_bodied?: boolean
+          delicate_species?: boolean
           diet?: string | null
           family?: string | null
           fin_nipping_risk?: boolean
@@ -405,41 +1098,41 @@ export type Database = {
           invert_safe?: boolean | null
           lifespan_years?: number | null
           long_fin_vulnerable?: boolean
-          max_ph?: number | null
           max_gh_dgh?: number | null
           max_kh_dkh?: number | null
+          max_ph?: number | null
           max_size_inches?: number | null
           max_temp_f?: number | null
-          recommended_max_temp_f?: number | null
           min_gh_dgh?: number | null
           min_group_size?: number | null
           min_kh_dkh?: number | null
           min_ph?: number | null
           min_temp_f?: number | null
-          recommended_min_temp_f?: number | null
           mouth_gape_risk?: boolean
           origin?: string | null
+          ph_stability_required?: boolean
           plant_safe?: boolean | null
           preferred_tank_style?: string | null
-          ph_stability_required?: boolean
+          recommended_max_temp_f?: number | null
+          recommended_min_temp_f?: number | null
           region?: string | null
           schooling?: boolean | null
           scientific_name?: string
-          slug?: string
+          slender_prey_body?: boolean
           slow_moving?: boolean
+          slug?: string
           specialist_setup?: boolean
           species_only_preferred?: boolean
-          slender_prey_body?: boolean
           summary?: string | null
           surface_predator?: boolean
           tank_size_gal?: number | null
           temp_source_notes?: string | null
           temperament?: string | null
           temperature_category?: string | null
-          tolerated_max_temp_f?: number | null
-          tolerated_min_temp_f?: number | null
           territory_footprint?: string | null
           territory_zone?: string | null
+          tolerated_max_temp_f?: number | null
+          tolerated_min_temp_f?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -604,7 +1297,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

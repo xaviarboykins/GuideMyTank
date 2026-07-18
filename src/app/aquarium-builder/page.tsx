@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: "Aquarium Builder | Tank Planning Tool | GuideMyTank",
   description:
     "Plan a freshwater aquarium with equipment, plants, livestock, stocking, compatibility, heating, and build-health analysis.",
+  alternates: {
+    canonical: "https://www.guidemytank.com/aquarium-builder",
+  },
+  openGraph: {
+    url: "https://www.guidemytank.com/aquarium-builder",
+  },
 };
 
 export default async function AquariumBuilderPage() {

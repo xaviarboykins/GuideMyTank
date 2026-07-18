@@ -16,6 +16,7 @@ import {
 type NavLink = {
   href: string;
   label: string;
+  primary?: boolean;
 };
 
 type MobileNavProps = {
@@ -53,7 +54,7 @@ export function MobileNav({ links }: MobileNavProps) {
               {links.map((link) => (
                 <Button
                   key={link.href}
-                  variant="ghost"
+                  variant={link.primary ? "default" : "ghost"}
                   className="justify-start"
                   asChild
                 >

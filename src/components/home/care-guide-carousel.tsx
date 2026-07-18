@@ -1,7 +1,8 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,9 +10,11 @@ import { Button } from "@/components/ui/button";
 
 export type FeaturedCareGuide = {
   slug: string;
+  title: string;
   name: string;
   scientificName: string;
   image: string;
+  imageAlt: string;
   careLevel: string;
   tankSize: string;
   temperament: string;
@@ -56,18 +59,12 @@ export function CareGuideCarousel({ guides }: { guides: FeaturedCareGuide[] }) {
           >
             <Link href={`/care-guides/${guide.slug}`} className="group block">
               <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                <Image
-                  src={guide.image}
-                  alt={guide.name}
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                />
+                {guide.image ? <img src={guide.image} alt={guide.imageAlt} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" /> : null}
               </div>
 
               <div className="p-4">
                 <h3 className="text-lg font-semibold group-hover:underline">
-                  {guide.name} Care Guide
+                  {guide.title}
                 </h3>
                 <p className="mt-1 text-xs italic text-muted-foreground">
                   {guide.scientificName}

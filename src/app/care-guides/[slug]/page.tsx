@@ -5,7 +5,12 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
+import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
+import { JsonLd } from "@/components/content/public-content";
+import { getPublishedCareGuideBySlug, listPublishedCareGuides } from "@/lib/care-guides/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
+import { isJsonRecord } from "@/lib/content/structured-data";
 
 type CareGuidePageProps = {
   params: Promise<{
@@ -17,15 +22,24 @@ export const revalidate = 86400;
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const species = await getSpeciesSlugs();
+  const [species, guides] = await Promise.all([getSpeciesSlugs(), listPublishedCareGuides()]);
 
-  return species.map((item) => ({ slug: item.slug }));
+  return [...new Set([...species.map((item) => item.slug), ...guides.map((item) => item.slug)])].map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: CareGuidePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+
+  if (publishedGuide) {
+    const title = publishedGuide.guide.seo_title ?? `${publishedGuide.guide.title} | GuideMyTank`;
+    const description = publishedGuide.guide.meta_description ?? publishedGuide.guide.summary ?? undefined;
+    const canonical = publishedGuide.guide.canonical_url ?? `https://www.guidemytank.com/care-guides/${publishedGuide.guide.slug}`;
+    return { title, description, alternates: { canonical }, openGraph: { title, description, url: canonical, type: "article" } };
+  }
+
   const species = await getSpeciesBySlug(slug);
 
   if (!species) {
@@ -46,6 +60,21 @@ export async function generateMetadata({
 
 export default async function CareGuidePage({ params }: CareGuidePageProps) {
   const { slug } = await params;
+  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+
+  if (publishedGuide) {
+    const imageUrls = await createPublishedContentImageSignedUrls(publishedGuide.images.map((image) => image.content_images.storage_path));
+    const { guide } = publishedGuide;
+    const url = guide.canonical_url ?? `https://www.guidemytank.com/care-guides/${guide.slug}`;
+    const structuredData = [{ "@context": "https://schema.org", "@type": "Article", headline: guide.title, description: guide.summary, datePublished: guide.published_at, dateModified: guide.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: url }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://www.guidemytank.com" }, { "@type": "ListItem", position: 2, name: "Care Guides", item: "https://www.guidemytank.com/care-guides" }, { "@type": "ListItem", position: 3, name: guide.title, item: url }] }] as Array<Record<string, unknown>>;
+    const faqSection = publishedGuide.sections.find((section) => section.section_type === "frequently_asked_questions");
+    const faqRecord = faqSection && isJsonRecord(faqSection.content) ? faqSection.content : null;
+    const faqText = faqRecord && typeof faqRecord.text === "string" ? faqRecord.text : "";
+    const faqItems = [...faqText.matchAll(/([^?]+\?)\s*([^?]*?)(?=\s+(?:Can|Does|Why|How|What|When|Where|Is|Are|Should|Will)\b[^?]*\?|$)/g)].filter((match) => match[1]?.trim() && match[2]?.trim()).map((match) => ({ "@type": "Question", name: match[1].trim(), acceptedAnswer: { "@type": "Answer", text: match[2].trim() } }));
+    if (faqItems.length) structuredData.push({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems });
+    return <PageContainer><JsonLd data={structuredData} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} /></PageContainer>;
+  }
+
   const species = await getSpeciesBySlug(slug);
 
   if (!species) {

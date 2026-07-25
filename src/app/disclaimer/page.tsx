@@ -6,6 +6,7 @@ export const metadata = {
   title: "Disclaimer | GuideMyTank",
   description:
     "GuideMyTank disclaimer for aquarium compatibility data, fish behavior, stocking recommendations, and informational content.",
+  alternates: { canonical: "/disclaimer" },
 };
 
 export default function DisclaimerPage() {

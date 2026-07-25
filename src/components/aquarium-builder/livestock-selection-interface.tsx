@@ -691,7 +691,7 @@ export function LivestockSelectionInterface({
                         />
                         <div className="min-w-0">
                           <Link
-                            href={`/piscidex/${item.slug}`}
+                            href={`/species/${item.slug}`}
                             className="font-semibold underline-offset-4 hover:underline"
                           >
                             {item.common_name}

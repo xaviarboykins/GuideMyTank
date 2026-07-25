@@ -6,6 +6,8 @@ import { BetaBadge } from "@/components/site/beta-badge";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { getAllSpecies } from "@/lib/data/species";
+import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type CompatibilityPageProps = {
   searchParams?: Promise<{
@@ -14,18 +16,20 @@ type CompatibilityPageProps = {
   }>;
 };
 
-export const metadata: Metadata = {
-  title:
-    "Compatibility Checker | Tank Mate Compatibility Checker | GuideMyTank",
-  description:
-    "Compare aquarium species by temperament, size, water parameters, and care requirements.",
-  alternates: {
-    canonical: "https://www.guidemytank.com/compatibility",
-  },
-  openGraph: {
-    url: "https://www.guidemytank.com/compatibility",
-  },
-};
+const pageMetadata = buildPageMetadata({
+  title: "Aquarium Tank Mate Compatibility Checker",
+  description: "Compare aquarium species by temperament, size, water parameters, and care requirements.",
+  path: "/compatibility",
+});
+
+export async function generateMetadata({
+  searchParams,
+}: CompatibilityPageProps): Promise<Metadata> {
+  return {
+    ...pageMetadata,
+    robots: getSearchVariantRobots((await searchParams) ?? {}),
+  };
+}
 
 export const revalidate = 86400;
 

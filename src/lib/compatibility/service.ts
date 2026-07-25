@@ -1,42 +1,12 @@
 import {
   calculateCompatibility,
-  determineStatus,
-  legacyCompatibilityToScore,
   toCompatibilitySpecies,
 } from "./engine";
 import type {
   CompatibilityResult,
   SpeciesCompatibilityGroup,
-  SpeciesRow,
 } from "@/lib/compatibility/types";
 import { createStaticClient } from "../supabase/static";
-
-type WaterParametersRow = {
-  species_id: string;
-  min_temp_f: number | null;
-  max_temp_f: number | null;
-  min_ph: number | null;
-  max_ph: number | null;
-  min_hardness_dgh: number | null;
-  max_hardness_dgh: number | null;
-};
-
-function applyWaterParameters(
-  species: SpeciesRow,
-  waterParameters: WaterParametersRow | undefined,
-): SpeciesRow {
-  if (!waterParameters) {
-    return species;
-  }
-
-  return {
-    ...species,
-    min_temp_f: waterParameters.min_temp_f ?? species.min_temp_f,
-    max_temp_f: waterParameters.max_temp_f ?? species.max_temp_f,
-    min_ph: waterParameters.min_ph ?? species.min_ph,
-    max_ph: waterParameters.max_ph ?? species.max_ph,
-  };
-}
 
 export async function getCompatibility(
   speciesASlug: string,
@@ -64,73 +34,7 @@ export async function getCompatibility(
     return null;
   }
 
-  const speciesIds = [speciesA.id, speciesB.id];
-
-  const { data: waterParameters, error: waterParametersError } = await supabase
-    .from("water_parameters")
-    .select(
-      "species_id, min_temp_f, max_temp_f, min_ph, max_ph, min_hardness_dgh, max_hardness_dgh",
-    )
-    .in("species_id", speciesIds)
-    .returns<WaterParametersRow[]>();
-
-  if (waterParametersError) {
-    throw new Error(
-      `Failed to fetch water parameters: ${waterParametersError.message}`,
-    );
-  }
-
-  const waterParametersBySpeciesId = new Map(
-    (waterParameters ?? []).map((row) => [row.species_id, row]),
-  );
-
-  const speciesAWithWaterParameters = applyWaterParameters(
-    speciesA,
-    waterParametersBySpeciesId.get(speciesA.id),
-  );
-
-  const speciesBWithWaterParameters = applyWaterParameters(
-    speciesB,
-    waterParametersBySpeciesId.get(speciesB.id),
-  );
-
-  const { data: rule, error: ruleError } = await supabase
-    .from("compatibility_rules")
-    .select(
-      "compatibility, confidence, expert_validated, notes, species_a_id, species_b_id",
-    )
-    .or(
-      `and(species_a_id.eq.${speciesA.id},species_b_id.eq.${speciesB.id}),and(species_a_id.eq.${speciesB.id},species_b_id.eq.${speciesA.id})`,
-    )
-    .maybeSingle();
-
-  if (ruleError) {
-    throw new Error(`Failed to fetch compatibility rule: ${ruleError.message}`);
-  }
-
-  if (!rule) {
-    return calculateCompatibility(
-      speciesAWithWaterParameters,
-      speciesBWithWaterParameters,
-    );
-  }
-
-  const compatibility =
-    rule.compatibility as CompatibilityResult["compatibility"];
-
-  const score = legacyCompatibilityToScore(compatibility);
-
-  return {
-    score,
-    status: determineStatus(score),
-    reasons: rule.notes ? [rule.notes] : ["Manual compatibility rule found."],
-    compatibility,
-    confidence: rule.confidence,
-    notes: rule.notes,
-    expertValidated: rule.expert_validated ?? true,
-    species_a: toCompatibilitySpecies(speciesA),
-    species_b: toCompatibilitySpecies(speciesB),
-  };
+  return calculateCompatibility(speciesA, speciesB);
 }
 
 export async function getCompatibilityRule(
@@ -143,7 +47,18 @@ export async function getCompatibilityRule(
 export async function getCompatibilityRulesForSpecies(
   speciesSlug: string,
 ): Promise<SpeciesCompatibilityGroup> {
+  const data = await getSpeciesCompatibilityData(speciesSlug);
+
+  return data.compatibility;
+}
+
+export async function getSpeciesCompatibilityData(speciesSlug: string) {
   const supabase = createStaticClient();
+  const emptyCompatibility: SpeciesCompatibilityGroup = {
+    compatible: [],
+    caution: [],
+    incompatible: [],
+  };
 
   const { data: species, error: speciesError } = await supabase
     .from("species")
@@ -152,9 +67,8 @@ export async function getCompatibilityRulesForSpecies(
 
   if (speciesError || !species) {
     return {
-      compatible: [],
-      caution: [],
-      incompatible: [],
+      compatibility: emptyCompatibility,
+      candidates: [],
     };
   }
 
@@ -162,73 +76,10 @@ export async function getCompatibilityRulesForSpecies(
 
   if (!currentSpecies) {
     return {
-      compatible: [],
-      caution: [],
-      incompatible: [],
+      compatibility: emptyCompatibility,
+      candidates: [],
     };
   }
-
-  const speciesIds = species.map((item) => item.id);
-
-  const { data: waterParameters, error: waterParametersError } = await supabase
-    .from("water_parameters")
-    .select(
-      "species_id, min_temp_f, max_temp_f, min_ph, max_ph, min_hardness_dgh, max_hardness_dgh",
-    )
-    .in("species_id", speciesIds)
-    .returns<WaterParametersRow[]>();
-
-  if (waterParametersError) {
-    throw new Error(
-      `Failed to fetch water parameters: ${waterParametersError.message}`,
-    );
-  }
-
-  const waterParametersBySpeciesId = new Map(
-    (waterParameters ?? []).map((row) => [row.species_id, row]),
-  );
-
-  const speciesWithWaterParameters = species.map((item) =>
-    applyWaterParameters(item, waterParametersBySpeciesId.get(item.id)),
-  );
-
-  const currentSpeciesWithWaterParameters = speciesWithWaterParameters.find(
-    (item) => item.slug === speciesSlug,
-  );
-
-  if (!currentSpeciesWithWaterParameters) {
-    return {
-      compatible: [],
-      caution: [],
-      incompatible: [],
-    };
-  }
-
-  const { data: rules, error: rulesError } = await supabase
-    .from("compatibility_rules")
-    .select(
-      "compatibility, confidence, expert_validated, notes, species_a_id, species_b_id",
-    )
-    .or(
-      `species_a_id.eq.${currentSpecies.id},species_b_id.eq.${currentSpecies.id}`,
-    );
-
-  if (rulesError) {
-    throw new Error(
-      `Failed to fetch compatibility rules: ${rulesError.message}`,
-    );
-  }
-
-  const manualRulesBySpeciesId = new Map(
-    (rules ?? []).map((rule) => {
-      const relatedSpeciesId =
-        rule.species_a_id === currentSpecies.id
-          ? rule.species_b_id
-          : rule.species_a_id;
-
-      return [relatedSpeciesId, rule];
-    }),
-  );
 
   const grouped: SpeciesCompatibilityGroup = {
     compatible: [],
@@ -236,40 +87,12 @@ export async function getCompatibilityRulesForSpecies(
     incompatible: [],
   };
 
-  for (const relatedSpecies of speciesWithWaterParameters) {
+  for (const relatedSpecies of species) {
     if (relatedSpecies.id === currentSpecies.id) {
       continue;
     }
 
-    const manualRule = manualRulesBySpeciesId.get(relatedSpecies.id);
-
-    const computedResult = calculateCompatibility(
-      currentSpeciesWithWaterParameters,
-      relatedSpecies,
-    );
-
-    const result: CompatibilityResult = manualRule
-      ? {
-          score: legacyCompatibilityToScore(
-            manualRule.compatibility as CompatibilityResult["compatibility"],
-          ),
-          status: determineStatus(
-            legacyCompatibilityToScore(
-              manualRule.compatibility as CompatibilityResult["compatibility"],
-            ),
-          ),
-          reasons: manualRule.notes
-            ? [manualRule.notes]
-            : ["Manual compatibility rule found."],
-          compatibility:
-            manualRule.compatibility as CompatibilityResult["compatibility"],
-          confidence: manualRule.confidence,
-          notes: manualRule.notes,
-          expertValidated: manualRule.expert_validated ?? true,
-          species_a: toCompatibilitySpecies(currentSpecies),
-          species_b: toCompatibilitySpecies(relatedSpecies),
-        }
-      : computedResult;
+    const result = calculateCompatibility(currentSpecies, relatedSpecies);
 
     if (result.compatibility === "compatible") {
       grouped.compatible.push(result);
@@ -284,22 +107,26 @@ export async function getCompatibilityRulesForSpecies(
     }
   }
 
-  return grouped;
+  return {
+    compatibility: grouped,
+    candidates: species.filter((item) => item.id !== currentSpecies.id),
+  };
 }
 
 export async function getCompatibleSpeciesPairs() {
   const supabase = createStaticClient();
 
-  const { data: species, error } = await supabase
+  const speciesResult = await supabase
     .from("species")
     .select("*")
     .order("common_name", { ascending: true });
 
-  if (error) {
+  if (speciesResult.error) {
     throw new Error(
-      `Failed to fetch species for compatibility: ${error.message}`,
+      `Failed to fetch species for compatibility: ${speciesResult.error.message}`,
     );
   }
+  const species = speciesResult.data;
 
   return species.map((speciesA) => ({
     species: toCompatibilitySpecies(speciesA),

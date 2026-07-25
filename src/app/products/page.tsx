@@ -17,6 +17,8 @@ import type {
   ProductDifficulty,
 } from "@/lib/products/types";
 import { searchProducts } from "@/lib/products/service";
+import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type ProductsPageProps = {
   searchParams: Promise<ProductFilterSearchParams>;
@@ -47,11 +49,20 @@ const difficultyOptions: ProductDifficulty[] = [
   "advanced",
 ];
 
-export const metadata: Metadata = {
-  title: "Aquarium Product Catalog | GuideMyTank",
-  description:
-    "Browse aquarium tanks, filters, heaters, lighting, substrate, and decor for freshwater tank planning.",
-};
+const pageMetadata = buildPageMetadata({
+  title: "Aquarium Product Catalog",
+  description: "Browse aquarium tanks, filters, heaters, lighting, substrate, and decor for freshwater tank planning.",
+  path: "/products",
+});
+
+export async function generateMetadata({
+  searchParams,
+}: ProductsPageProps): Promise<Metadata> {
+  return {
+    ...pageMetadata,
+    robots: getSearchVariantRobots(await searchParams),
+  };
+}
 
 export const revalidate = 86400;
 

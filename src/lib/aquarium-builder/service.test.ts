@@ -49,7 +49,7 @@ function compatibility(
 ): CompatibilityResult {
   return {
     score: 85,
-    status: "Very Compatible",
+    status: "High Compatibility",
     reasons: ["Compatible test pair."],
     compatibility: "compatible",
     confidence: 0.9,

@@ -1,6 +1,10 @@
 import type { Json } from "@/types/database.types";
 import Link from "next/link";
 import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ImageCredit, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
+import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
+import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
+import { getSiteUrl } from "@/lib/seo/site-url";
+import type { CareGuidePageLinks } from "@/lib/seo/internal-linking/care-guide-page-links";
 import styles from "./care-guide-article.module.css";
 
 type ImageAssignment = {
@@ -39,14 +43,15 @@ function GuideImage({ assignment, url, className }: { assignment?: ImageAssignme
   );
 }
 
-export function CareGuideArticle({ guide, sections, images, sources, imageUrls, relatedSpecies = [], relatedArticles = [] }: {
+export function CareGuideArticle({ guide, sections, images, sources, imageUrls, relatedSpecies = [], relatedArticles = [], internalLinks }: {
   guide: { title: string | null; slug: string | null; summary: string | null; quick_facts: Json; published_at: string | null; updated_at: string; species: { common_name: string; scientific_name: string } };
   sections: Section[];
   images: ImageAssignment[];
   sources: SourceAssignment[];
   imageUrls: Map<string, string>;
-  relatedSpecies: Array<{ species_id: string; relationship_label: string | null; species: { slug: string; common_name: string; scientific_name: string } }>;
+  relatedSpecies?: Array<{ species_id: string; relationship_label: string | null; species: { slug: string; common_name: string; scientific_name: string } }>;
   relatedArticles?: Array<{ article_id: string; article: { slug: string | null; title: string | null; summary: string | null; status: string } }>;
+  internalLinks?: CareGuidePageLinks;
 }) {
   const quickFacts = record(guide.quick_facts);
   const primary = images.find((image) => image.is_primary) ?? images[0];
@@ -58,7 +63,7 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
   const faqContent = faqSection ? record(faqSection.content) : {};
   const faqItems = parseFaq(typeof faqContent.text === "string" ? faqContent.text : "");
   const slug = guide.slug ?? guide.species.common_name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
-  const canonical = `https://www.guidemytank.com/care-guides/${slug}`;
+  const canonical = getSiteUrl(`/care-guides/${slug}`);
 
   return (
     <article>
@@ -113,8 +118,21 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
 
       <div className="mx-5 sm:mx-8 lg:mx-10">
         <SourcesList sources={sources} />
-        <RelatedLinks title="Related species" items={relatedSpecies.map((item) => ({ href: `/species/${item.species.slug}`, title: item.species.common_name, description: item.relationship_label ?? item.species.scientific_name }))} />
-        <RelatedLinks title="Related articles" items={relatedArticles.flatMap((item) => item.article.status === "published" && item.article.slug ? [{ href: `/learning-center/${item.article.slug}`, title: item.article.title ?? "Article", description: item.article.summary }] : [])} />
+        {internalLinks ? (
+          <>
+            <InternalLinksSection title="Species Profile" items={internalLinks.speciesProfile} limit={1} />
+            <InternalLinksSection title="Related Species" items={internalLinks.relatedSpecies} limit={4} />
+            <InternalLinksSection title="Compatibility Research" description="Review these pair reports before planning a shared aquarium." items={internalLinks.compatibilityReports} limit={4} />
+            <InternalLinksSection title="Related Care Guides" items={internalLinks.relatedCareGuides} limit={4} />
+            <InternalLinksSection title="Related Articles" items={internalLinks.articles} limit={4} />
+            <BuilderCallToAction item={internalLinks.builder[0]} />
+          </>
+        ) : (
+          <>
+            <RelatedLinks title="Related species" items={relatedSpecies.map((item) => ({ href: `/species/${item.species.slug}`, title: item.species.common_name, description: item.relationship_label ?? item.species.scientific_name }))} />
+            <RelatedLinks title="Related articles" items={relatedArticles.flatMap((item) => item.article.status === "published" && item.article.slug ? [{ href: `/learning-center/${item.article.slug}`, title: item.article.title ?? "Article", description: item.article.summary }] : [])} />
+          </>
+        )}
         <ShareLinks title={guide.title ?? `${guide.species.common_name} Care Guide`} url={canonical} />
       </div>
     </article>

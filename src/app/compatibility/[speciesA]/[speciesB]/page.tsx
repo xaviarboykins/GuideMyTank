@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { CompatibilitySummary } from "@/components/compatibility/compatibility-summary";
+import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
+import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
 import { getCompatibilityRule } from "@/lib/data/compatibility";
 import { getSpeciesSlugs } from "@/lib/data/species";
 import {
@@ -13,6 +16,10 @@ import {
   getCompatibilityUrl,
   isCanonicalCompatibilityPair,
 } from "@/lib/compatibility/urls";
+import { getSiteUrl } from "@/lib/seo/site-url";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
+import { getCompatibilityPageLinks } from "@/lib/seo/internal-linking/service";
 
 type CompatibilityPageProps = {
   params: Promise<{
@@ -42,40 +49,26 @@ export async function generateMetadata({
   const compatibility = await getCompatibilityRule(speciesA, speciesB);
 
   if (!compatibility) {
-    return {
-      title: "Compatibility Report Not Found | GuideMyTank",
-      robots: {
-        index: false,
-        follow: false,
-      },
-    };
+    return buildPageMetadata({
+      title: "Compatibility Report Not Found",
+      description: "The requested aquarium compatibility report could not be found.",
+      path: getCompatibilityPath(speciesA, speciesB),
+      robots: NOINDEX_NOFOLLOW,
+    });
   }
 
   const speciesAName = compatibility.species_a.common_name;
   const speciesBName = compatibility.species_b.common_name;
 
   const title = `Can ${speciesAName} Live With ${speciesBName}? Compatibility Guide`;
-  const description = `See the GuideMyTank compatibility score for ${speciesAName} and ${speciesBName}, including temperament, water parameters, tank size, confidence, and care considerations.`;
+  const description = `GuideMyTank rates ${speciesAName} and ${speciesBName} as ${compatibility.status}. Review their compatibility score, water parameters, temperament, tank size, and care considerations.`;
 
-  return {
+  return buildPageMetadata({
     title,
     description,
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      title,
-      description,
-      url: canonicalUrl,
-      siteName: "GuideMyTank",
-      type: "article",
-    },
-    twitter: {
-      card: "summary",
-      title,
-      description,
-    },
-  };
+    path: new URL(canonicalUrl).pathname,
+    type: "article",
+  });
 }
 
 export default async function CompatibilityDetailPage({
@@ -93,6 +86,7 @@ export default async function CompatibilityDetailPage({
     notFound();
   }
 
+  const internalLinks = await getCompatibilityPageLinks(compatibility);
   const speciesAName = compatibility.species_a.common_name;
   const speciesBName = compatibility.species_b.common_name;
   const canonicalUrl = getCompatibilityUrl(speciesA, speciesB);
@@ -125,13 +119,13 @@ export default async function CompatibilityDetailPage({
           "@type": "ListItem",
           position: 1,
           name: "Home",
-          item: "https://www.guidemytank.com",
+          item: getSiteUrl(),
         },
         {
           "@type": "ListItem",
           position: 2,
           name: "Compatibility",
-          item: "https://www.guidemytank.com/compatibility",
+          item: getSiteUrl("/compatibility"),
         },
         {
           "@type": "ListItem",
@@ -180,6 +174,14 @@ export default async function CompatibilityDetailPage({
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd),
         }}
+      />
+
+      <ContentBreadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Compatibility", href: "/compatibility" },
+          { label: `${speciesAName} and ${speciesBName}` },
+        ]}
       />
 
       <PageHeader
@@ -263,6 +265,27 @@ export default async function CompatibilityDetailPage({
           care requirements before adding them to the same aquarium.
         </p>
       </section>
+
+      <InternalLinksSection
+        title="Species Care Guides"
+        description="Use the complete care requirements alongside this compatibility result."
+        items={internalLinks.careGuides}
+        limit={2}
+      />
+
+      <InternalLinksSection
+        title="Related Compatibility Reports"
+        description={`Continue researching tank mates for ${speciesAName} and ${speciesBName}.`}
+        items={internalLinks.relatedCompatibility}
+        limit={6}
+      />
+
+      <InternalLinksSection
+        title="Explore This Topic"
+        items={internalLinks.topicClusters}
+      />
+
+      <BuilderCallToAction item={internalLinks.builder[0]} />
     </PageContainer>
   );
 }

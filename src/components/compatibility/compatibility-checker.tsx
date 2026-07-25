@@ -10,6 +10,7 @@ import type {
   CompatibilityResult,
   CompatibilitySpecies,
 } from "@/lib/compatibility/types";
+import { getCompatibilityPath } from "@/lib/compatibility/urls";
 
 type CompatibilityCheckerProps = {
   species: CompatibilitySpecies[];
@@ -263,6 +264,13 @@ export function CompatibilityChecker({
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Link
+                href={getCompatibilityPath(speciesA, speciesB)}
+                className="rounded-lg border bg-primary p-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 sm:col-span-2"
+              >
+                View full compatibility report
+              </Link>
+
               {selectedSpeciesA ? (
                 <Link
                   href={`/species/${selectedSpeciesA.slug}`}

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { getContentImageDimensions } from "@/lib/content-images/dimensions";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"]);
 
@@ -24,6 +25,13 @@ export function CareGuideImageUploader({ careGuideId, speciesId, nextOrder }: { 
     if (!altText) return setMessage("Alt text is required for Care Guide images.");
 
     setPending(true);
+    let dimensions: { width: number; height: number };
+    try {
+      dimensions = await getContentImageDimensions(file);
+    } catch {
+      setPending(false);
+      return setMessage("The image dimensions could not be read.");
+    }
     const supabase = createClient();
     const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "image";
     const storagePath = `care-guides/${speciesId}/${crypto.randomUUID()}.${extension}`;
@@ -37,6 +45,7 @@ export function CareGuideImageUploader({ careGuideId, speciesId, nextOrder }: { 
       source_url: String(formData.get("sourceUrl") ?? "").trim() || null,
       license_name: String(formData.get("licenseName") ?? "").trim() || null,
       mime_type: file.type, file_size_bytes: file.size,
+      width: dimensions.width, height: dimensions.height,
     }).select("id").single();
     if (metadataError || !image) {
       await supabase.storage.from("content-images").remove([storagePath]);

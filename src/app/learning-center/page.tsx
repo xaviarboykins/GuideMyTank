@@ -8,16 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedArticles } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Aquarium Learning Center | GuideMyTank",
+const pageMetadata = buildPageMetadata({
+  title: "Aquarium Learning Center",
   description: "Practical freshwater aquarium articles about fish care, aquarium setup, water quality, equipment, and responsible livestock planning.",
-  alternates: { canonical: "https://www.guidemytank.com/learning-center" },
-};
+  path: "/learning-center",
+});
 
 export const revalidate = 3600;
 
 type LearningCenterPageProps = { searchParams: Promise<{ q?: string; category?: string }> };
+
+export async function generateMetadata({ searchParams }: LearningCenterPageProps): Promise<Metadata> {
+  return { ...pageMetadata, robots: getSearchVariantRobots(await searchParams) };
+}
 
 export default async function LearningCenterPage({ searchParams }: LearningCenterPageProps) {
   const filters = await searchParams;

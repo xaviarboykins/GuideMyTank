@@ -1,13 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  generateCanonicalCompatibilityPairBatch,
   generateCanonicalCompatibilityPairs,
   getCanonicalCompatibilityPair,
+  getCanonicalCompatibilityPairCount,
   getCompatibilityPath,
   isCanonicalCompatibilityPair,
+  isCompatibilitySitemapSegment,
 } from "./urls";
 
 describe("compatibility URL canonicalization", () => {
+  it("distinguishes the framework sitemap route from a species pair", () => {
+    expect(isCompatibilitySitemapSegment("sitemap")).toBe(true);
+    expect(isCompatibilitySitemapSegment("ember-tetra")).toBe(false);
+  });
+
   it("uses the same canonical path regardless of species order", () => {
     expect(getCompatibilityPath("zebra-danio", "ember-tetra")).toBe(
       "/compatibility/ember-tetra/zebra-danio",
@@ -40,5 +48,22 @@ describe("compatibility URL canonicalization", () => {
     expect(pairs).toContainEqual(
       getCanonicalCompatibilityPair("zebra-danio", "ember-tetra"),
     );
+  });
+
+  it("batches canonical pairs without overlap", () => {
+    const species = [
+      { slug: "zebra-danio" },
+      { slug: "ember-tetra" },
+      { slug: "betta-splendens" },
+      { slug: "neon-tetra" },
+    ];
+    const firstBatch = generateCanonicalCompatibilityPairBatch(species, 0, 4);
+    const secondBatch = generateCanonicalCompatibilityPairBatch(species, 4, 4);
+    const combined = [...firstBatch, ...secondBatch];
+
+    expect(getCanonicalCompatibilityPairCount(species.length)).toBe(6);
+    expect(combined).toHaveLength(6);
+    expect(new Set(combined.map((pair) => `${pair.speciesA}/${pair.speciesB}`)).size).toBe(6);
+    expect(combined.every((pair) => pair.speciesA < pair.speciesB)).toBe(true);
   });
 });

@@ -67,8 +67,8 @@ function validateExpertOverrides() {
       errors.push(`${label}: confidence must be a number from 0 to 1.`);
     }
 
-    if (typeof override.expert_validated !== "boolean") {
-      errors.push(`${label}: expert_validated must be a boolean.`);
+    if (override.expert_validated !== true) {
+      errors.push(`${label}: expert_validated must be true.`);
     }
 
     if (typeof override.notes !== "string" || !override.notes.trim()) {

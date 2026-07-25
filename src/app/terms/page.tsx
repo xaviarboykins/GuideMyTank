@@ -6,6 +6,7 @@ export const metadata = {
   title: "Terms of Service | GuideMyTank",
   description:
     "GuideMyTank terms of service for using aquarium planning tools, compatibility information, and site content.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

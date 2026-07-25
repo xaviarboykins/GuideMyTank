@@ -4,8 +4,10 @@ import "./globals.css";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { getSiteOrigin } from "@/lib/seo/site-url";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteOrigin()),
   title: "GuideMyTank | Aquarium Compatibility & Tank Planning",
   description:
     "Plan aquariums, compare fish compatibility, and browse freshwater aquarium species data.",

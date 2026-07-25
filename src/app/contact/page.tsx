@@ -6,6 +6,7 @@ export const metadata = {
   title: "Contact | GuideMyTank",
   description:
     "Contact GuideMyTank for feedback, corrections, aquarium data questions, or partnership inquiries.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

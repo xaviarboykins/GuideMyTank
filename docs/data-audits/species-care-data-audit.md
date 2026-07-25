@@ -13,14 +13,17 @@ This audit flags suspicious values in the source species dataset. It does not pr
 - Temperament and aggression-level consistency
 - Temperament/tag consistency
 - Data confidence and temperature source notes
+- Source coverage and confidence/source consistency
 - Care warnings for high-risk or specialist species
+- Schooling and minimum-group consistency
+- Species-only, community, territory, hardness, flow, and tank-style consistency
 
 ## Summary
 
 - Species audited: 100
 - Batches: barbs-danios-rasboras, bettas-gouramis, cichlids, general-community, invertebrates, nano-fish, tetras
 - High-priority flags: 0
-- Medium-priority flags: 5
+- Medium-priority flags: 0
 - Low-priority flags: 0
 
 ## High Priority
@@ -29,13 +32,7 @@ No issues flagged.
 
 ## Medium Priority
 
-| Species | Field | Issue |
-| --- | --- | --- |
-| Amano Shrimp (`amano-shrimp`) | temperature | Temperature range 64-82 F is very broad and may be too permissive. |
-| Bloodfin Tetra (`bloodfin-tetra`) | temperature | Temperature range 64-82 F is very broad and may be too permissive. |
-| Buenos Aires Tetra (`buenos-aires-tetra`) | temperature | Temperature range 64-82 F is very broad and may be too permissive. |
-| Chili Rasbora (`chili-rasbora`) | pH | pH range 4.5-7 is very broad and may hide a true preference. |
-| Weather Loach (`weather-loach`) | temperature | Temperature range 50-77 F is very broad and may be too permissive. |
+No issues flagged.
 
 ## Low Priority
 
@@ -46,5 +43,5 @@ No issues flagged.
 - Broad ranges are not always wrong, but they can make compatibility look safer than it is.
 - Temperament should describe normal adult community behavior, not just breeding behavior.
 - `aggression_level` should make the temperament label more precise: peaceful is usually 1-3, semi-aggressive 3-6, aggressive 6-10.
-- When sources disagree, prefer conservative values and use special rules for known exceptions.
+- When sources disagree, prefer conservative structured values and improve generic compatibility rules rather than adding named-pair exceptions.
 - High-risk species should have explicit care warnings so users see the issue before running a compatibility comparison.

@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import type { Json } from "@/types/database.types";
+import { getSiteUrl } from "../seo/site-url";
 
 type PdfGuide = {
   title: string | null; slug?: string | null; canonical_url?: string | null; summary: string | null; quick_facts: Json; published_at: string | null; updated_at: string;
@@ -36,7 +37,7 @@ export async function createCareGuidePdf(guide: PdfGuide, sections: PdfSection[]
   drawLines(guide.species.scientific_name, italic, 12, 17); y -= 4;
   if (guide.summary) drawLines(guide.summary, regular, 11, 16);
   drawLines(`Updated ${new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(guide.updated_at))}`, regular, 8.5, 12);
-  const guideUrl = guide.canonical_url ?? (guide.slug ? `https://www.guidemytank.com/care-guides/${guide.slug}` : null);
+  const guideUrl = guide.slug ? getSiteUrl(`/care-guides/${guide.slug}`) : null;
   if (guideUrl) drawLines(`Guide URL: ${guideUrl}`, regular, 8.5, 12);
   if (mainImage) {
     const embedded = await pdf.embedPng(mainImage.bytes);

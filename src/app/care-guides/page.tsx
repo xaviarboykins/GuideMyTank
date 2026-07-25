@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { parsePisciDexFilters, type PisciDexFilterSearchParams } from "@/lib/data/species";
+import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type CareGuidesPageProps = {
   searchParams: Promise<PisciDexFilterSearchParams>;
@@ -19,11 +21,20 @@ function getUniqueValues(values: Array<string | null>) {
   return Array.from(new Set(values.filter(Boolean))).sort() as string[];
 }
 
-export const metadata: Metadata = {
-  title: "Freshwater Fish Care Guides | GuideMyTank",
-  description:
-    "Browse and filter freshwater fish care guides by tank size, temperament, and difficulty.",
-};
+const pageMetadata = buildPageMetadata({
+  title: "Freshwater Fish Care Guides",
+  description: "Browse and filter freshwater fish care guides by tank size, temperament, and difficulty.",
+  path: "/care-guides",
+});
+
+export async function generateMetadata({
+  searchParams,
+}: CareGuidesPageProps): Promise<Metadata> {
+  return {
+    ...pageMetadata,
+    robots: getSearchVariantRobots(await searchParams),
+  };
+}
 
 export const revalidate = 86400;
 

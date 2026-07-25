@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Compatibility Disclaimer | GuideMyTank",
   description:
     "Learn how GuideMyTank compatibility scores work and how to use them responsibly when choosing aquarium tankmates.",
+  alternates: { canonical: "/compatibility/disclaimer" },
 };
 
 export default function CompatibilityDisclaimerPage() {

@@ -15,29 +15,46 @@
     "advanced"
   ],
   "species": {
-    "angelfish": {
-      "category_batch": "starter",
-      "sources": []
+  "angelfish": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/summary/Pterophyllum-scalare.html",
+      "https://www.seriouslyfish.com/species/pterophyllum-scalare/"
+    ]
     },
-    "betta-splendens": {
-      "category_batch": "starter",
-      "sources": []
+  "betta-splendens": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/summary/Betta-splendens",
+      "https://ask.ifas.ufl.edu/publication/FA212.pdf"
+    ]
     },
-    "corydoras-catfish": {
-      "category_batch": "starter",
-      "sources": []
+  "corydoras-catfish": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/summary/Corydoras-paleatus.html",
+      "https://fishbase.se/summary/Hoplisoma_paleatum.html"
+    ]
     },
-    "guppy": {
-      "category_batch": "starter",
-      "sources": []
+  "guppy": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/Summary/Poecilia-reticulata",
+      "https://www.seriouslyfish.com/species/poecilia-reticulata/"
+    ]
     },
-    "honey-gourami": {
-      "category_batch": "starter",
-      "sources": []
+  "honey-gourami": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/summary/11201"
+    ]
     },
-    "neon-tetra": {
-      "category_batch": "starter",
-      "sources": []
+  "neon-tetra": {
+    "category_batch": "starter",
+    "sources": [
+      "https://www.fishbase.se/summary/Paracheirodon-innesi",
+      "https://www.seriouslyfish.com/species/paracheirodon-innesi/"
+    ]
     },
     "cardinal-tetra": {
       "category_batch": "schooling",
@@ -90,19 +107,22 @@
       "category_batch": "schooling",
       "sources": [
         "https://en.wikipedia.org/wiki/Boraras_brigittae",
-        "https://fr.wikipedia.org/wiki/Boraras_brigittae"
+        "https://fr.wikipedia.org/wiki/Boraras_brigittae",
+        "https://www.fishbase.se/summary/boraras-brigittae.html"
       ]
     },
     "brilliant-rummynose-tetra": {
       "category_batch": "schooling",
       "sources": [
         "https://en.wikipedia.org/wiki/Petitella_bleheri",
-        "https://en.wikipedia.org/wiki/Rummy-nose_tetra"
+        "https://en.wikipedia.org/wiki/Rummy-nose_tetra",
+        "https://www.fishbase.se/summary/Petitella-bleheri.html"
       ]
     },
     "panda-cory": {
       "category_batch": "bottom_dwellers",
       "sources": [
+        "https://www.fishbase.se/summary/Corydoras-panda",
         "https://www.thesprucepets.com/panda-cory-1380838",
         "https://www.thesprucepets.com/cory-species-1381075"
       ]
@@ -111,19 +131,22 @@
       "category_batch": "bottom_dwellers",
       "sources": [
         "https://en.wikipedia.org/wiki/Pygmy_corydoras",
-        "https://fr.wikipedia.org/wiki/Corydoras_pygmaeus"
+        "https://fr.wikipedia.org/wiki/Corydoras_pygmaeus",
+        "https://www.fishbase.se/summary/corydoras-pygmaeus.html"
       ]
     },
     "sterbai-cory": {
       "category_batch": "bottom_dwellers",
       "sources": [
         "https://en.wikipedia.org/wiki/Sterba%27s_corydoras",
-        "https://es.wikipedia.org/wiki/Corydoras_sterbai"
+        "https://es.wikipedia.org/wiki/Corydoras_sterbai",
+        "https://www.fishbase.se/summary/Hoplisoma-sterbai.html"
       ]
     },
     "kuhli-loach": {
       "category_batch": "bottom_dwellers",
       "sources": [
+        "https://www.fishbase.se/summary/Pangio_kuhlii.html",
         "https://en.wikipedia.org/wiki/Kuhli_loach",
         "https://es.wikipedia.org/wiki/Pangio_kuhlii",
         "https://www.thesprucepets.com/loach-species-1381078"
@@ -138,14 +161,16 @@
     "otocinclus-catfish": {
       "category_batch": "bottom_dwellers",
       "sources": [
-        "https://en.wikipedia.org/wiki/Otocinclus"
+        "https://en.wikipedia.org/wiki/Otocinclus",
+        "https://www.fishbase.se/summary/Otocinclus-vittatus.html"
       ]
     },
     "reticulated-hillstream-loach": {
       "category_batch": "bottom_dwellers",
       "sources": [
         "https://en.wikipedia.org/wiki/Sewellia_lineolata",
-        "https://en.wikipedia.org/wiki/Sewellia"
+        "https://en.wikipedia.org/wiki/Sewellia",
+        "https://www.dcceew.gov.au/sites/default/files/documents/draft-tor-sewellia-lineolata.pdf"
       ]
     },
     "yoyo-loach": {
@@ -196,7 +221,8 @@
     "peacock-gudgeon": {
       "category_batch": "centerpiece_fish",
       "sources": [
-        "https://en.wikipedia.org/wiki/Peacock_gudgeon"
+        "https://en.wikipedia.org/wiki/Peacock_gudgeon",
+        "https://www.fishbase.se/summary/Tateurndina-ocellicauda.html"
       ]
     },
     "boesemani-rainbowfish": {
@@ -218,12 +244,14 @@
     "endler-livebearer": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Poecilia-wingei.html",
         "https://en.wikipedia.org/wiki/Poecilia_wingei"
       ]
     },
     "platy": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Xiphophorus-maculatus.html",
         "https://en.wikipedia.org/wiki/Platy_%28fish%29",
         "https://es.wikipedia.org/wiki/Xiphophorus_maculatus"
       ]
@@ -231,6 +259,7 @@
     "green-swordtail": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Xiphophorus-hellerii.html",
         "https://en.wikipedia.org/wiki/Green_swordtail",
         "https://es.wikipedia.org/wiki/Xiphophorus_hellerii"
       ]
@@ -238,24 +267,28 @@
     "shortfin-molly": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Poecilia-sphenops.html",
         "https://en.wikipedia.org/wiki/Poecilia_sphenops"
       ]
     },
     "sailfin-molly": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Poecilia-latipinna.html",
         "https://en.wikipedia.org/wiki/Sailfin_molly"
       ]
     },
     "least-killifish": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Heterandria-formosa.html",
         "https://en.wikipedia.org/wiki/Heterandria_formosa"
       ]
     },
     "wrestling-halfbeak": {
       "category_batch": "livebearers",
       "sources": [
+        "https://my-fish.org/my-fishothek/dermogenys-pusilla-halbschnabelhecht/",
         "https://en.wikipedia.org/wiki/Wrestling_halfbeak",
         "https://en.wikipedia.org/wiki/Dermogenys"
       ]
@@ -263,6 +296,7 @@
     "butterfly-splitfin": {
       "category_batch": "livebearers",
       "sources": [
+        "https://www.fishbase.se/summary/Ameca-splendens.html",
         "https://en.wikipedia.org/wiki/Butterfly_splitfin"
       ]
     },
@@ -270,25 +304,29 @@
       "category_batch": "invertebrates",
       "sources": [
         "https://en.wikipedia.org/wiki/Vittina_natalensis",
-        "https://en.wikipedia.org/wiki/Vitta_zebra"
+        "https://en.wikipedia.org/wiki/Vitta_zebra",
+        "https://www.molluscabase.org/aphia.php?p=taxdetails&id=1353177"
       ]
     },
     "mystery-snail": {
       "category_batch": "invertebrates",
       "sources": [
-        "https://en.wikipedia.org/wiki/Pomacea_bridgesii"
+        "https://www.fws.gov/media/ecological-risk-screening-summary-spike-topped-applesnail-pomacea-diffusa-uncertain-risk",
+        "https://en.wikipedia.org/wiki/Pomacea_diffusa"
       ]
     },
     "malaysian-trumpet-snail": {
       "category_batch": "invertebrates",
       "sources": [
         "https://en.wikipedia.org/wiki/Red-rimmed_melania",
-        "https://es.wikipedia.org/wiki/Melanoides_tuberculata"
+        "https://es.wikipedia.org/wiki/Melanoides_tuberculata",
+        "https://nas.er.usgs.gov/queries/FactSheet.aspx?speciesID=1037"
       ]
     },
     "cherry-shrimp": {
       "category_batch": "invertebrates",
       "sources": [
+        "https://ask.ifas.ufl.edu/publication/IN1301/pdf",
         "https://en.wikipedia.org/wiki/Neocaridina_davidi",
         "https://en.wikipedia.org/wiki/Neocaridina"
       ]
@@ -296,12 +334,14 @@
     "amano-shrimp": {
       "category_batch": "invertebrates",
       "sources": [
-        "https://en.wikipedia.org/wiki/Caridina_multidentata"
+        "https://en.wikipedia.org/wiki/Caridina_multidentata",
+        "https://www.zooplus.de/magazin/aquaristik/fischarten-portraits/amanogarnelen-caridina-multidentata"
       ]
     },
     "crystal-red-shrimp": {
       "category_batch": "invertebrates",
       "sources": [
+        "https://my-fish.org/my-fishothek/caridina-cf-cantonensis-kristallrote-bienengarnele/",
         "https://en.wikipedia.org/wiki/Caridina_cantonensis",
         "https://en.wikipedia.org/wiki/Golden_bee_shrimp"
       ]
@@ -309,6 +349,7 @@
     "german-blue-ram": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/12305",
         "https://en.wikipedia.org/wiki/Ram_cichlid",
         "https://www.thesprucepets.com/german-blue-ram-fish-profile-5088724"
       ]
@@ -316,12 +357,14 @@
     "bolivian-ram": {
       "category_batch": "cichlids",
       "sources": [
+        "https://fishbase.se/summary/Mikrogeophagus-altispinosus",
         "https://en.wikipedia.org/wiki/Mikrogeophagus_altispinosus"
       ]
     },
     "kribensis": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/Pelvicachromis-pulcher.html",
         "https://en.wikipedia.org/wiki/Pelvicachromis_pulcher",
         "https://www.thesprucepets.com/kribensis-1378289"
       ]
@@ -329,12 +372,14 @@
     "cockatoo-cichlid": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/Apistogramma-cacatuoides.html",
         "https://en.wikipedia.org/wiki/Apistogramma_cacatuoides"
       ]
     },
     "keyhole-cichlid": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/Cleithracara-maronii.html",
         "https://en.wikipedia.org/wiki/Keyhole_cichlid",
         "https://es.wikipedia.org/wiki/Cleithracara_maronii"
       ]
@@ -342,6 +387,7 @@
     "convict-cichlid": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/Amatitlania_nigrofasciata.html",
         "https://en.wikipedia.org/wiki/Convict_cichlid",
         "https://www.thesprucepets.com/convict-cichlid-fish-species-profile-5188000"
       ]
@@ -349,12 +395,14 @@
     "oscar": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/Astronotus_ocellatus.html",
         "https://en.wikipedia.org/wiki/Oscar_%28fish%29"
       ]
     },
     "electric-yellow-cichlid": {
       "category_batch": "cichlids",
       "sources": [
+        "https://www.fishbase.se/summary/2327",
         "https://en.wikipedia.org/wiki/Labidochromis_caeruleus",
         "https://en.wikipedia.org/wiki/Electric_yellow_cichlid"
       ]
@@ -369,6 +417,7 @@
     "bubble-eye-goldfish": {
       "category_batch": "advanced",
       "sources": [
+        "https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-coldwater-fish/how-to-look-after-fancy-goldfish/",
         "https://en.wikipedia.org/wiki/Bubble_Eye",
         "https://www.thesprucepets.com/bubble-eye-goldfish-species-profile-6374323"
       ]
@@ -376,6 +425,7 @@
     "discus": {
       "category_batch": "advanced",
       "sources": [
+        "https://www.fishbase.se/Summary/Symphysodon-discus",
         "https://en.wikipedia.org/wiki/Symphysodon_discus",
         "https://en.wikipedia.org/wiki/Discus_%28fish%29",
         "https://es.wikipedia.org/wiki/Symphysodon_discus"
@@ -384,6 +434,7 @@
     "black-ghost-knifefish": {
       "category_batch": "advanced",
       "sources": [
+        "https://www.fishbase.se/summary/12220",
         "https://en.wikipedia.org/wiki/Black_ghost_knifefish"
       ]
     },
@@ -397,12 +448,14 @@
     "peters-elephantnose-fish": {
       "category_batch": "advanced",
       "sources": [
+        "https://www.fishbase.se/summary/Gnathonemus_petersii.html",
         "https://en.wikipedia.org/wiki/Peters%27s_elephantnose_fish"
       ]
     },
     "freshwater-butterflyfish": {
       "category_batch": "advanced",
       "sources": [
+        "https://www.fishbase.se/summary/Pantodon-buchholzi",
         "https://en.wikipedia.org/wiki/Freshwater_butterflyfish",
         "https://es.wikipedia.org/wiki/Pantodon_buchholzi"
       ]
@@ -410,6 +463,7 @@
     "pea-puffer": {
       "category_batch": "advanced",
       "sources": [
+        "https://www.fishbase.se/summary/Carinotetraodon-travancoricus",
         "https://en.wikipedia.org/wiki/Dwarf_pufferfish",
         "https://en.wikipedia.org/wiki/Carinotetraodon",
         "https://es.wikipedia.org/wiki/Carinotetraodon_travancoricus"
@@ -426,12 +480,14 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Lemon_tetra",
-        "https://es.wikipedia.org/wiki/Hyphessobrycon_pulchripinnis"
+        "https://es.wikipedia.org/wiki/Hyphessobrycon_pulchripinnis",
+        "https://www.fishbase.se/summary/Hyphessobrycon-pulchripinnis.html"
       ]
     },
     "serpae-tetra": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Hyphessobrycon-eques.html",
         "https://en.wikipedia.org/wiki/Serpae_tetra",
         "https://www.thesprucepets.com/serpae-tetra-1381825"
       ]
@@ -446,24 +502,29 @@
     "x-ray-tetra": {
       "category_batch": "final_100",
       "sources": [
+        "https://fishbase.se/identification/SpeciesList.php?genus=Pristella",
         "https://en.wikipedia.org/wiki/Pristella_maxillaris"
       ]
     },
     "bloodfin-tetra": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Bloodfin_tetra"
+        "https://en.wikipedia.org/wiki/Bloodfin_tetra",
+        "https://www.fishbase.se/summary/Aphyocharax-anisitsi.html"
       ]
     },
     "buenos-aires-tetra": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/51004",
+        "https://sib.gob.ar/especies/psalidodon-anisitsi",
         "https://en.wikipedia.org/wiki/Buenos_Aires_tetra"
       ]
     },
     "red-eye-tetra": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/moenkhausia-sanctaefilomenae.html",
         "https://en.wikipedia.org/wiki/Redeye_tetra"
       ]
     },
@@ -471,7 +532,8 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Danio_margaritatus",
-        "https://es.wikipedia.org/wiki/Danio_margaritatus"
+        "https://es.wikipedia.org/wiki/Danio_margaritatus",
+        "https://www.fishbase.se/summary/Danio-margaritatus.html"
       ]
     },
     "scissortail-rasbora": {
@@ -484,6 +546,7 @@
     "glass-catfish": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.dcceew.gov.au/sites/default/files/env/consultations/1b591465-8486-450a-b12f-2f824fd925ca/files/glass-catfish-risk-assessment.pdf",
         "https://en.wikipedia.org/wiki/Kryptopterus_vitreolus",
         "https://en.wikipedia.org/wiki/Kryptopterus"
       ]
@@ -491,6 +554,7 @@
     "siamese-algae-eater": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/crossocheilus-oblongus.html",
         "https://en.wikipedia.org/wiki/Siamese_algae-eater"
       ]
     },
@@ -504,12 +568,14 @@
     "dwarf-chain-loach": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Ambastaia_sidthimunki"
+        "https://en.wikipedia.org/wiki/Ambastaia_sidthimunki",
+        "https://www.seriouslyfish.com/species/ambastaia-sidthimunki/"
       ]
     },
     "clown-loach": {
       "category_batch": "final_100",
       "sources": [
+        "https://fishbase.org/summary/Chromobotia_macracanthus.html",
         "https://en.wikipedia.org/wiki/Clown_loach",
         "https://www.thesprucepets.com/clown-loach-1378616"
       ]
@@ -517,6 +583,7 @@
     "weather-loach": {
       "category_batch": "final_100",
       "sources": [
+        "https://fishdb.sinica.edu.tw/taxon/380995-fishdb",
         "https://en.wikipedia.org/wiki/Pond_loach",
         "https://www.thesprucepets.com/loach-species-1381078"
       ]
@@ -524,60 +591,71 @@
     "upside-down-catfish": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Synodontis_nigriventris.html",
         "https://en.wikipedia.org/wiki/Upside-down_catfish"
       ]
     },
     "rainbow-shark": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Epalzeorhynchos-frenatum.html",
         "https://en.wikipedia.org/wiki/Epalzeorhynchos_frenatum"
       ]
     },
     "red-tail-shark": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Labeo-bicolor.html",
         "https://en.wikipedia.org/wiki/Red-tailed_black_shark"
       ]
     },
     "cherry-barb": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Cherry_barb"
+        "https://en.wikipedia.org/wiki/Cherry_barb",
+        "https://www.fishbase.se/summary/Puntius-titteya.html"
       ]
     },
     "tiger-barb": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Puntius-tetrazona.html",
         "https://en.wikipedia.org/wiki/Tiger_barb"
       ]
     },
     "rosy-barb": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Rosy_barb"
+        "https://en.wikipedia.org/wiki/Rosy_barb",
+        "https://www.seriouslyfish.com/species/pethia-conchonius/"
       ]
     },
     "odessa-barb": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Odessa_barb"
+        "https://en.wikipedia.org/wiki/Odessa_barb",
+        "https://www.fishbase.se/summary/Pethia-padamya.html"
       ]
     },
     "dwarf-pencilfish": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Nannostomus_marginatus"
+        "https://en.wikipedia.org/wiki/Nannostomus_marginatus",
+        "https://www.fishbase.se/summary/Nannostomus-marginatus.html"
       ]
     },
     "clown-killifish": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Epiplatys_annulatus"
+        "https://en.wikipedia.org/wiki/Epiplatys_annulatus",
+        "https://www.fishbase.se/summary/Epiplatys-annulatus.html"
       ]
     },
     "golden-wonder-killifish": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Aplocheilus_lineatus.html",
+        "https://eheim.com/en_GB/guide/fish-world/aplocheilus-lineatus",
         "https://en.wikipedia.org/wiki/Aplocheilus_lineatus",
         "https://www.thesprucepets.com/killifishes-or-egg-laying-tooth-carps-4107831"
       ]
@@ -585,6 +663,8 @@
     "american-flagfish": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/3209",
+        "https://www.floridamuseum.ufl.edu/discover-fish/florida-fishes-gallery/flagfish/",
         "https://en.wikipedia.org/wiki/Jordanella_floridae"
       ]
     },
@@ -612,6 +692,7 @@
     "common-goldfish": {
       "category_batch": "final_100",
       "sources": [
+        "https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-coldwater-fish/how-to-look-after-fancy-goldfish/",
         "https://en.wikipedia.org/wiki/Goldfish",
         "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
       ]
@@ -633,42 +714,49 @@
     "kissing-gourami": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Helostoma-temminckii.html",
         "https://en.wikipedia.org/wiki/Kissing_gourami"
       ]
     },
     "moonlight-gourami": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Trichogaster-microlepis.html",
         "https://en.wikipedia.org/wiki/Moonlight_gourami"
       ]
     },
     "firemouth-cichlid": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Thorichthys-meeki.html",
         "https://en.wikipedia.org/wiki/Firemouth_cichlid"
       ]
     },
     "green-severum": {
       "category_batch": "final_100",
       "sources": [
-        "https://en.wikipedia.org/wiki/Heros_severus"
+        "https://www.fishbase.se/summary/Heros-efasciatus.html",
+        "https://en.wikipedia.org/wiki/Heros_efasciatus"
       ]
     },
     "jack-dempsey-cichlid": {
       "category_batch": "final_100",
       "sources": [
+        "https://fishbase.se/summary/Rocio-octofasciata",
         "https://en.wikipedia.org/wiki/Jack_Dempsey_%28fish%29"
       ]
     },
     "rope-fish": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Erpetoichthys_calabaricus.html",
         "https://en.wikipedia.org/wiki/Erpetoichthys_calabaricus"
       ]
     },
     "senegal-bichir": {
       "category_batch": "final_100",
       "sources": [
+        "https://www.fishbase.se/summary/Polypterus-senegalus.html",
         "https://en.wikipedia.org/wiki/Polypterus_senegalus"
       ]
     }

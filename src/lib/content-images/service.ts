@@ -6,6 +6,7 @@ import { ContentServiceError } from "@/lib/content/errors";
 import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
 import type { Database } from "@/types/database.types";
+import sharp from "sharp";
 
 const CONTENT_IMAGE_BUCKET = "content-images";
 const MAX_CONTENT_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -23,6 +24,8 @@ export async function uploadContentImage(file: File, speciesId: string | null = 
   await assertAdmin();
   if (!ALLOWED_CONTENT_IMAGE_TYPES.has(file.type)) throw new ContentServiceError("Choose a JPEG, PNG, WebP, AVIF, or GIF image.", "validation");
   if (file.size <= 0 || file.size > MAX_CONTENT_IMAGE_BYTES) throw new ContentServiceError("Content images must be between 1 byte and 10 MB.", "validation");
+  const metadata = await sharp(Buffer.from(await file.arrayBuffer())).metadata();
+  if (!metadata.width || !metadata.height) throw new ContentServiceError("The image dimensions could not be read.", "validation");
 
   const supabase = await createClient();
   const storagePath = `${speciesId ? `care-guides/${speciesId}` : "articles"}/${crypto.randomUUID()}.${extensionFor(file)}`;
@@ -34,7 +37,7 @@ export async function uploadContentImage(file: File, speciesId: string | null = 
 
   const { data, error } = await supabase
     .from("content_images")
-    .insert({ storage_path: storagePath, species_id: speciesId, mime_type: file.type, file_size_bytes: file.size })
+    .insert({ storage_path: storagePath, species_id: speciesId, mime_type: file.type, file_size_bytes: file.size, width: metadata.width, height: metadata.height })
     .select("*")
     .single();
 

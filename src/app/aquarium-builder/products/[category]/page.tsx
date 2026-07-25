@@ -11,6 +11,7 @@ import {
 import { getBuilderProducts } from "@/lib/products/service";
 import { isProductCategory } from "@/lib/products/types";
 import type { ProductCategory } from "@/lib/products/types";
+import { NOINDEX_FOLLOW, NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 
 type AquariumBuilderProductsPageProps = {
   params: Promise<{
@@ -35,16 +36,17 @@ export async function generateMetadata({
   if (!category || !isProductCategory(categorySlug)) {
     return {
       title: "Aquarium Builder Products Not Found | GuideMyTank",
-      robots: {
-        index: false,
-        follow: false,
-      },
+      robots: NOINDEX_NOFOLLOW,
     };
   }
 
   return {
     title: `${category.heading} | Aquarium Builder | GuideMyTank`,
     description: `Browse ${category.label.toLowerCase()} for the GuideMyTank Aquarium Builder.`,
+    alternates: {
+      canonical: `/aquarium-builder/products/${categorySlug}`,
+    },
+    robots: NOINDEX_FOLLOW,
   };
 }
 

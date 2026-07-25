@@ -345,9 +345,11 @@ export type Database = {
           featured_image_id: string | null
           id: string
           is_featured: boolean
+          include_products: boolean
           meta_description: string | null
           open_graph_image_id: string | null
           published_at: string | null
+          product_category: string | null
           seo_title: string | null
           slug: string | null
           status: string
@@ -361,9 +363,11 @@ export type Database = {
           featured_image_id?: string | null
           id?: string
           is_featured?: boolean
+          include_products?: boolean
           meta_description?: string | null
           open_graph_image_id?: string | null
           published_at?: string | null
+          product_category?: string | null
           seo_title?: string | null
           slug?: string | null
           status?: string
@@ -377,9 +381,11 @@ export type Database = {
           featured_image_id?: string | null
           id?: string
           is_featured?: boolean
+          include_products?: boolean
           meta_description?: string | null
           open_graph_image_id?: string | null
           published_at?: string | null
+          product_category?: string | null
           seo_title?: string | null
           slug?: string | null
           status?: string
@@ -1240,53 +1246,6 @@ export type Database = {
             foreignKeyName: "tank_size_guidelines_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
-            referencedRelation: "species"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      water_parameters: {
-        Row: {
-          created_at: string | null
-          id: string
-          max_hardness_dgh: number | null
-          max_ph: number | null
-          max_temp_f: number | null
-          min_hardness_dgh: number | null
-          min_ph: number | null
-          min_temp_f: number | null
-          species_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          max_hardness_dgh?: number | null
-          max_ph?: number | null
-          max_temp_f?: number | null
-          min_hardness_dgh?: number | null
-          min_ph?: number | null
-          min_temp_f?: number | null
-          species_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          max_hardness_dgh?: number | null
-          max_ph?: number | null
-          max_temp_f?: number | null
-          min_hardness_dgh?: number | null
-          min_ph?: number | null
-          min_temp_f?: number | null
-          species_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "water_parameters_species_id_fkey"
-            columns: ["species_id"]
-            isOneToOne: true
             referencedRelation: "species"
             referencedColumns: ["id"]
           },

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { refreshAuthSession } from "@/lib/supabase/proxy";
+import { isCompatibilitySitemapSegment } from "@/lib/compatibility/urls";
 
 export async function proxy(request: NextRequest) {
   const [, basePath, speciesA, speciesB] = request.nextUrl.pathname.split("/");
@@ -10,6 +11,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (basePath !== "compatibility" || !speciesA || !speciesB) {
+    return NextResponse.next();
+  }
+
+  if (isCompatibilitySitemapSegment(speciesA)) {
     return NextResponse.next();
   }
 

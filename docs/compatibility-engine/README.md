@@ -31,8 +31,7 @@ The goal is not to guarantee that two animals will coexist. The goal is to give 
 5. Predation and invertebrate risk
 6. Minimum tank-size compatibility
 7. Structured water, setup, body-shape, and activity risk caps
-8. Species-specific special rules
-9. Severe behavior risk caps
+8. Severe behavior risk caps
 
 Most evaluators add points to the raw score. Predation and severe behavior rules can also apply a maximum score cap. This prevents cases where overlapping temperature, pH, tank size, and body size incorrectly make a dangerous pairing look compatible.
 
@@ -62,11 +61,16 @@ The base score totals 100 points before behavior caps are applied.
 
 | Score | Status |
 | ---: | --- |
-| 96-100 | Overwhelmingly Compatible |
-| 90-95 | Very Compatible |
+| 90-100 | High Compatibility |
 | 70-89 | Compatible |
 | 50-69 | Caution |
 | 0-49 | Incompatible |
+
+The score describes compatibility strength. Confidence is a separate
+structured-data completeness measure: 75% comes from core size, tank,
+temperature, pH, temperament, aggression, and compatibility-tag data; 25%
+comes from contextual temperature, hardness, territory, activity, flow, and
+tank-style data. A low compatibility score can therefore have high confidence.
 
 ## Rule Details
 
@@ -164,34 +168,28 @@ These are separate from predation. Fish attacking, stressing, fin-nipping, or in
 
 Current caps include:
 
-- Other puffer with non-puffer fish: capped at 60 because freshwater puffers are specialist fin-nipping hunters and poor community tankmates.
+- Two semi-aggressive or aggressive species: capped at 60 because neither
+  should be presented as an unconditional community pairing.
+- Puffer-family fish with non-puffer fish: capped at 60 because freshwater puffers are specialist fin-nipping hunters and poor community tankmates.
 - Likely fin-nipper with long-finned or slow tankmate: capped at 60.
 - Two highly aggressive territorial species: capped at 60.
 - Territorial footprint and swimming-zone overlap: capped at 60.
 - Breeding aggression in overlapping zones: capped at 60.
 - Two solitary species where at least one is highly aggressive: capped at 60 unless predation also applies.
 - Schooling or shoaling species with a solitary territorial tankmate: capped at 60 unless predation also applies.
+- Closely related fish sharing a swimming zone where one is both territorial and solitary and their combined aggression is meaningful: capped at 60.
 
 These caps exist because some husbandry conflicts are not solved by water-parameter overlap.
 
-### Species-Specific Special Rules
+### No Species-Specific Production Rules
 
-Some species need named rules that are more specific than generic temperament, size, and tag checks. These live in `src/lib/compatibility/special-rules.ts`.
+The production engine does not key compatibility decisions by Species slug or
+canonical pair. Husbandry requirements must be represented through structured
+Species fields, taxonomy, and general evaluators so newly added Species receive
+the same treatment automatically.
 
-Use special rules when a species has well-known husbandry exceptions, such as:
-
-- Species-only recommendations
-- Narrow known tankmate candidates
-- Specialist diet or hunting behavior
-- Unusual territorial behavior
-- Known incompatibilities that generic scoring would miss
-
-Current special rules:
-
-- Pea puffer with unsuitable tankmate: capped at 45 because pea puffers are best treated as species-only fish unless companions are fast, non-sedentary, and carefully selected.
-- Pea puffer with narrow caution tankmate candidates, such as chili rasboras, clown killifish, zebra danios, or otocinclus catfish: capped at 60 and should still require a heavily planted aquarium.
-
-When adding species in the future, first try to represent care needs with normal species data. Add a special rule only when a species has a known exception that generic data cannot model accurately.
+Known regression pairs may exist in audit fixtures. They verify the generic
+engine but never change its result.
 
 ## Data Signals Used Today
 
@@ -237,9 +235,19 @@ The engine currently uses fields from the `species` table:
 - `min_gh_dgh`, `max_gh_dgh`
 - `min_kh_dkh`, `max_kh_dkh`
 - `ph_stability_required`
-- `summary` for limited text-pattern detection such as fin-nipping notes
+- `summary` for user-facing Species context only
 
-Structured trait fields are preferred over parsing summary text. Summary text should be treated as a fallback only.
+Compatibility decisions use structured trait fields. The production engine
+does not parse summary wording to manufacture behavioral traits.
+
+Oxygen demand has no Species schema field and does not currently change
+compatibility results. GuideMyTank does not infer oxygen requirements from a
+Species name, family, or generic activity level. A field should be added only
+if future freshwater husbandry data demonstrates that it is needed.
+
+Missing tank-style data is treated as unknown, not as a specialist-style
+conflict. A setup conflict is applied only when both Species have explicit,
+incompatible structured styles.
 
 ## Structured Trait Risk Caps
 
@@ -275,9 +283,16 @@ This is not a replacement for expert review, but it prevents obvious regressions
 
 The matrix must contain at least 25% as many cases as there are species in `data/import/species.master.json`. With 100 species, the minimum matrix size is 25 known pairings.
 
-Manual rows in `compatibility_rules` are expert overrides when `expert_validated` is true. Expert-validated compatibility results display an `Expert validated` badge.
+The production compatibility service does not read `compatibility_rules`.
+Every public result comes from structured Species data and generic evaluators.
+Legacy rule rows therefore cannot replace, weaken, or strengthen a computed
+classification.
 
-Expert overrides are maintained in `data/compatibility/expert-overrides.json`.
+`data/compatibility/expert-overrides.json` is intentionally empty. Its
+validation and synchronization tooling is retained only for possible future
+expert-review work and has no runtime effect. A future review system should
+prefer recording agreement, disagreement, evidence, and engine regressions
+instead of silently replacing the computed answer.
 
 Use:
 
@@ -286,7 +301,14 @@ npm run validate:expert-overrides
 npm run import:expert-overrides
 ```
 
-The validator rejects unknown species, duplicate unordered pairs, missing notes, invalid confidence values, and invalid compatibility values.
+The validator rejects unknown species, duplicate unordered pairs, missing
+notes, invalid confidence values, invalid compatibility values, and entries
+that are not explicitly expert validated. Use `--dry-run` to inspect the
+database synchronization counts without changing rows:
+
+```bash
+npm run import:expert-overrides -- --dry-run
+```
 
 ## Factors That Need Better Data Next
 
@@ -308,17 +330,39 @@ The pea puffer / betta issue happened because the engine knew general aggression
 5. Update this README with purpose, scoring behavior, assumptions, and example reasons.
 6. Validate representative pairs, including at least one expected compatible pair and one expected incompatible pair.
 
-## Adding a Species-Specific Rule
+## Representing an Unusual Species
 
-1. Add the rule to `src/lib/compatibility/special-rules.ts`.
-2. Key it by `speciesSlug` so it only runs for the named species.
-3. Keep the rule narrow and explainable.
-4. Prefer a caution cap for manageable risk and an incompatible cap for predation or strongly unsuitable tankmates.
-5. Add representative pair checks for the species, including an unsuitable pair and any known caution tankmate candidates.
-6. Document the rule in this README.
+1. Identify the biological or husbandry trait that makes the Species unusual.
+2. Store that fact in an existing structured field or add a generally reusable
+   field when necessary.
+3. Evaluate the field without checking the Species name or slug.
+4. Add representative fixtures proving that arbitrary Species with the same
+   facts receive the same result.
+5. Add known real-world pairs to the audit fixtures only as regressions.
 
 ## Guiding Philosophy
 
 GuideMyTank should be conservative when animal welfare is at stake. A false "Compatible" result is worse than a cautious warning because it can encourage a user to buy animals that will stress, injure, or kill each other.
 
 Compatibility scores are planning tools. Users should still verify care requirements, avoid overcrowding, quarantine new livestock when possible, and watch behavior after introduction.
+
+## Aquarium Builder Context
+
+The universal pair result describes whether two freshwater Species are
+generally suitable tankmates. It does not change according to a particular
+Builder selection.
+
+The Aquarium Builder reuses that pair result and evaluates contextual facts
+separately:
+
+- selected tank volume;
+- livestock quantities and minimum group sizes;
+- total stocking;
+- water-parameter overlap;
+- heating and selected equipment;
+- same-species and pair-level territorial evidence;
+- predation evidence.
+
+Builder findings must not overwrite compatibility rules or manufacture a
+second pair score. This keeps compatibility reports canonical while allowing a
+generally workable pair to fail in an undersized or incorrectly stocked build.

@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-25T05:42:13.560Z",
+  "readOnly": true,
+  "summary": {
+    "localSpecies": 100,
+    "databaseSpecies": 100,
+    "localOnly": 0,
+    "databaseOnly": 0,
+    "mismatchedFields": 0,
+    "speciesWithMismatches": 0,
+    "structuralIssues": 0,
+    "missingSourceSpecies": 0,
+    "aliasMismatches": 0,
+    "sourceReferenceMismatches": 0,
+    "databaseSourceReferences": 245
+  },
+  "inventory": {
+    "localOnly": [],
+    "databaseOnly": []
+  },
+  "mismatchesByField": {},
+  "sourceIssues": [],
+  "aliasIssues": [],
+  "sourceParityIssues": [],
+  "structuralIssues": [],
+  "mismatches": []
+}

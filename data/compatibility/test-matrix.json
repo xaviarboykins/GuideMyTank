@@ -48,14 +48,14 @@
       "note": "Often attempted, but fin-nipping/activity/territory context matters."
     },
     {
+      "species": ["betta-splendens", "moonlight-gourami"],
+      "expected": ["caution"],
+      "note": "Related surface-oriented labyrinth fish can treat one another as territorial rivals."
+    },
+    {
       "species": ["tiger-barb", "betta-splendens"],
       "expected": ["caution"],
       "note": "Fin-nipping risk should cap at caution rather than being treated as predation."
-    },
-    {
-      "species": ["pea-puffer", "chili-rasbora"],
-      "expected": ["caution"],
-      "note": "Only a narrow, heavily planted, carefully monitored setup."
     },
     {
       "species": ["discus", "clown-loach"],
@@ -74,6 +74,16 @@
     }
   ],
   "known_bad": [
+    {
+      "species": ["pea-puffer", "chili-rasbora"],
+      "expected": ["incompatible"],
+      "note": "The generic engine respects the pea puffer's structured species-only requirement; a narrow experimental setup is not a general compatibility recommendation."
+    },
+    {
+      "species": ["pea-puffer", "otocinclus-catfish"],
+      "expected": ["incompatible"],
+      "note": "Occasional anecdotal success does not override the pea puffer's structured species-only requirement in a general recommendation."
+    },
     {
       "species": ["pea-puffer", "betta-splendens"],
       "expected": ["incompatible"],
@@ -111,11 +121,6 @@
     }
   ],
   "controversial_context_dependent": [
-    {
-      "species": ["pea-puffer", "otocinclus-catfish"],
-      "expected": ["caution"],
-      "note": "One of the more defensible pea puffer tankmates, but still context dependent."
-    },
     {
       "species": ["red-tail-shark", "rainbow-shark"],
       "expected": ["caution"],

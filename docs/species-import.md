@@ -374,7 +374,8 @@ If `aliases` is omitted, the script leaves existing aliases unchanged.
 3. Fix validation errors.
 4. Run real import.
 5. Spot-check Supabase rows.
-6. Run the app locally and verify `/piscidex` and `/species/[slug]`.
+6. Run the app locally and verify `/piscidex`, `/species/[slug]`, and the
+   permanent redirect from `/piscidex/[slug]` to `/species/[slug]`.
 
 Recommended local checks:
 

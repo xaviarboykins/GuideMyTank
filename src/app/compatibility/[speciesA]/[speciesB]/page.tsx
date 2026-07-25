@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { CompatibilitySummary } from "@/components/compatibility/compatibility-summary";
+import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
+import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { ContentBreadcrumbs } from "@/components/content/public-content";
@@ -17,6 +19,7 @@ import {
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
+import { getCompatibilityPageLinks } from "@/lib/seo/internal-linking/service";
 
 type CompatibilityPageProps = {
   params: Promise<{
@@ -83,6 +86,7 @@ export default async function CompatibilityDetailPage({
     notFound();
   }
 
+  const internalLinks = await getCompatibilityPageLinks(compatibility);
   const speciesAName = compatibility.species_a.common_name;
   const speciesBName = compatibility.species_b.common_name;
   const canonicalUrl = getCompatibilityUrl(speciesA, speciesB);
@@ -261,6 +265,27 @@ export default async function CompatibilityDetailPage({
           care requirements before adding them to the same aquarium.
         </p>
       </section>
+
+      <InternalLinksSection
+        title="Species Care Guides"
+        description="Use the complete care requirements alongside this compatibility result."
+        items={internalLinks.careGuides}
+        limit={2}
+      />
+
+      <InternalLinksSection
+        title="Related Compatibility Reports"
+        description={`Continue researching tank mates for ${speciesAName} and ${speciesBName}.`}
+        items={internalLinks.relatedCompatibility}
+        limit={6}
+      />
+
+      <InternalLinksSection
+        title="Explore This Topic"
+        items={internalLinks.topicClusters}
+      />
+
+      <BuilderCallToAction item={internalLinks.builder[0]} />
     </PageContainer>
   );
 }

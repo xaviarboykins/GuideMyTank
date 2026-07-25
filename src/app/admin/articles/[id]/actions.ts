@@ -11,6 +11,7 @@ import { ContentServiceError, getSafeContentError } from "@/lib/content/errors";
 import { createSource } from "@/lib/content-sources/service";
 import type { ValidationIssue } from "@/lib/content/types";
 import type { Json } from "@/types/database.types";
+import { isProductCategory } from "@/lib/products/types";
 
 type PublishState = { ok: boolean; message: string; issues: ValidationIssue[] };
 
@@ -27,7 +28,14 @@ function parseContent(blockType: string, raw: string): Json {
 }
 
 export async function saveArticleFieldsAction(id: string, formData: FormData) {
-  return run(id, "Publishing fields saved.", () => updateArticleDraft(id, { title: value(formData, "title"), slug: value(formData, "slug"), summary: value(formData, "summary"), seo_title: value(formData, "seoTitle"), meta_description: value(formData, "metaDescription"), canonical_url: value(formData, "canonicalUrl"), is_featured: formData.get("isFeatured") === "on" }));
+  const includeProducts = formData.get("includeProducts") === "on";
+  const selectedCategory = String(formData.get("productCategory") ?? "");
+  const productCategory =
+    includeProducts && isProductCategory(selectedCategory)
+      ? selectedCategory
+      : null;
+
+  return run(id, "Publishing fields saved.", () => updateArticleDraft(id, { title: value(formData, "title"), slug: value(formData, "slug"), summary: value(formData, "summary"), seo_title: value(formData, "seoTitle"), meta_description: value(formData, "metaDescription"), canonical_url: value(formData, "canonicalUrl"), is_featured: formData.get("isFeatured") === "on", include_products: includeProducts && productCategory !== null, product_category: productCategory }));
 }
 
 export async function saveArticleSectionsAction(id: string, formData: FormData) {

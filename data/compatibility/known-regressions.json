@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "pairs": [
+    {
+      "species": ["betta-splendens", "moonlight-gourami"],
+      "acceptable": ["caution", "incompatible"],
+      "note": "Two territorial labyrinth fish with meaningful interspecific aggression risk should not receive an unconditional compatible result."
+    }
+  ]
+}

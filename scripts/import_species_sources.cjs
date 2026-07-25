@@ -65,6 +65,7 @@ async function main() {
   const sourceEntries = sourcesPayload.species || {};
   const slugs = Object.keys(sourceEntries);
   const rows = [];
+  const speciesIds = [];
 
   if (dryRun) {
     const sourceCount = slugs.reduce(
@@ -83,6 +84,7 @@ async function main() {
     if (!speciesRows || speciesRows.length !== 1) {
       throw new Error(`Could not find remote species '${slug}'.`);
     }
+    speciesIds.push(speciesRows[0].id);
 
     for (const sourceUrl of sourceEntries[slug].sources || []) {
       rows.push({
@@ -116,7 +118,35 @@ async function main() {
     });
   }
 
+  const desiredKeys = new Set(
+    rows.map(
+      (row) => `${row.species_id}\u0000${row.source_category}\u0000${row.source_url}`,
+    ),
+  );
+  let removed = 0;
+
+  for (const speciesId of speciesIds) {
+    const existingRows =
+      (await request(
+        "species_source_references",
+        `?select=id,species_id,source_category,source_url&species_id=eq.${speciesId}`,
+      )) || [];
+
+    for (const existing of existingRows) {
+      const key = `${existing.species_id}\u0000${existing.source_category}\u0000${existing.source_url}`;
+      if (!desiredKeys.has(key)) {
+        await request(
+          "species_source_references",
+          `?id=eq.${encodeURIComponent(existing.id)}`,
+          { method: "DELETE" },
+        );
+        removed += 1;
+      }
+    }
+  }
+
   console.log(`Imported ${rows.length} species source references.`);
+  console.log(`Removed ${removed} stale source references.`);
 }
 
 main().catch((error) => {

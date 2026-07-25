@@ -37,6 +37,30 @@ export async function getPublishedCareGuideForSpecies(speciesId: string) {
   return data;
 }
 
+export async function getPublishedCareGuidesForSpeciesSlugs(
+  speciesSlugs: string[],
+) {
+  if (speciesSlugs.length === 0) {
+    return [];
+  }
+
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("care_guides")
+    .select(
+      "id,slug,title,summary,species:species!care_guides_species_id_fkey!inner(id,slug,common_name)",
+    )
+    .eq("status", "published")
+    .in("species.slug", speciesSlugs);
+
+  throwContentDatabaseError(
+    error,
+    "load published Care Guides for species",
+  );
+
+  return data ?? [];
+}
+
 export async function getPublishedCareGuideBySlug(slug: string) {
   const supabase = await createClient();
   const { data: guide, error } = await supabase

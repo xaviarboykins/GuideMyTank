@@ -34,6 +34,9 @@ function validateSpeciesSources() {
       errors.push(`${slug}: sources must be an array.`);
       continue;
     }
+    if (sources.length === 0) {
+      errors.push(`${slug}: at least one source URL is required.`);
+    }
 
     const seenUrls = new Set();
     for (const sourceUrl of sources) {

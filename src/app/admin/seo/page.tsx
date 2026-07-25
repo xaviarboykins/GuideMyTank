@@ -11,7 +11,7 @@ export default async function SeoHealthPage() {
     <section>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold">SEO Health</h2>
+          <h2 className="text-xl font-semibold">SEO Utilities</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Repository and database-derived checks generated {new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(report.generatedAt))}.
           </p>
@@ -39,6 +39,18 @@ export default async function SeoHealthPage() {
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <CountTable title="Indexable page families" counts={report.pageFamilies} />
         <CountTable title="Sitemap families" counts={report.sitemapFamilies} />
+      </div>
+
+      <div className="mt-6 border border-border bg-card p-4">
+        <h3 className="font-semibold">Internal-link audit</h3>
+        <dl className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {Object.entries(report.internalLinks).map(([label, value]) => (
+            <div key={label} className="border-t border-border pt-2">
+              <dt className="text-xs capitalize text-muted-foreground">{label.replaceAll(/([A-Z])/g, " $1")}</dt>
+              <dd className="mt-1 font-semibold tabular-nums">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       <div className="mt-6 overflow-x-auto border border-border">

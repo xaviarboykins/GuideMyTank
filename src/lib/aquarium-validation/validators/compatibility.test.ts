@@ -49,7 +49,7 @@ function result(
           : 20,
     status:
       compatibility === "compatible"
-        ? "Very Compatible"
+        ? "High Compatibility"
         : compatibility === "caution"
           ? "Caution"
           : "Incompatible",

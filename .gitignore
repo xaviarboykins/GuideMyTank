@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/reports/seo/
+/reports/compatibility/
 
 # next.js
 /.next/

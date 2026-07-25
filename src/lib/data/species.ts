@@ -159,3 +159,45 @@ export async function getSpeciesSlugs() {
 
   return data;
 }
+
+export async function getSpeciesLinkCandidates(
+  excludedSlugs: string[],
+  limit = 12,
+) {
+  const supabase = createStaticClient();
+  let query = supabase
+    .from("species")
+    .select("id,slug,common_name")
+    .order("common_name", { ascending: true })
+    .limit(Math.max(1, Math.min(limit, 24)));
+
+  if (excludedSlugs.length > 0) {
+    query = query.not("slug", "in", `(${excludedSlugs.join(",")})`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch species link candidates: ${error.message}`,
+    );
+  }
+
+  return data;
+}
+
+export async function getSpeciesBySlugs(slugs: string[]) {
+  if (slugs.length === 0) return [];
+
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("species")
+    .select("id,slug,common_name,scientific_name")
+    .in("slug", [...new Set(slugs)]);
+
+  if (error) {
+    throw new Error(`Failed to fetch species by slugs: ${error.message}`);
+  }
+
+  return data ?? [];
+}

@@ -1,28 +1,20 @@
 import type {
   CompatibilityResult,
+  CompatibilityDiagnostics,
+  CompatibilityEvaluationDiagnostic,
+  CompatibilityFinding,
+  CompatibilityFindingCategory,
   CompatibilitySpecies,
   CompatibilityStatus,
   EvaluationResult,
   SpeciesRow,
 } from "@/lib/compatibility/types";
-import {
-  evaluateSpeciesSpecialRules,
-  hasSpeciesSpecialRule,
-} from "./special-rules";
 
 const invertebrateFamilies = new Set([
   "Atyidae",
   "Neritidae",
   "Ampullariidae",
   "Thiaridae",
-]);
-
-const longFinnedOrSlowSpeciesSlugs = new Set([
-  "betta-splendens",
-  "angelfish",
-  "guppy",
-  "sailfin-molly",
-  "threadfin-rainbowfish",
 ]);
 
 const COMPATIBILITY_WEIGHTS = {
@@ -33,6 +25,309 @@ const COMPATIBILITY_WEIGHTS = {
   predation: 20,
   tankSize: 10,
 } as const;
+
+const evaluationFindingMetadata: Record<
+  string,
+  {
+    category: CompatibilityFindingCategory;
+    maximumPoints: number;
+  }
+> = {
+  temperature: {
+    category: "water-parameters",
+    maximumPoints: COMPATIBILITY_WEIGHTS.temperature,
+  },
+  ph: {
+    category: "water-parameters",
+    maximumPoints: COMPATIBILITY_WEIGHTS.ph,
+  },
+  aggression: {
+    category: "temperament",
+    maximumPoints: COMPATIBILITY_WEIGHTS.aggression,
+  },
+  schooling: {
+    category: "grouping",
+    maximumPoints: COMPATIBILITY_WEIGHTS.schooling,
+  },
+  predation: {
+    category: "predation",
+    maximumPoints: COMPATIBILITY_WEIGHTS.predation,
+  },
+  tank_size: {
+    category: "space",
+    maximumPoints: COMPATIBILITY_WEIGHTS.tankSize,
+  },
+  trait_risk_caps: {
+    category: "configuration",
+    maximumPoints: 0,
+  },
+  behavior_risk_caps: {
+    category: "temperament",
+    maximumPoints: 0,
+  },
+};
+
+const requiredPairFields = [
+  "max_size_inches",
+  "tank_size_gal",
+  "min_temp_f",
+  "max_temp_f",
+  "min_ph",
+  "max_ph",
+  "temperament",
+  "aggression_level",
+] as const;
+
+const SEVERE_AGGRESSION_LEVEL = 7;
+const INCOMPATIBLE_SCORE_CEILING = 49;
+const CAUTION_SCORE = 60;
+const CORE_CONFIDENCE_WEIGHT = 0.75;
+
+const confidenceCoreFields = [
+  "max_size_inches",
+  "tank_size_gal",
+  "min_temp_f",
+  "max_temp_f",
+  "min_ph",
+  "max_ph",
+  "temperament",
+  "aggression_level",
+] as const;
+
+const confidenceContextFields = [
+  "recommended_min_temp_f",
+  "recommended_max_temp_f",
+  "min_gh_dgh",
+  "max_gh_dgh",
+  "min_kh_dkh",
+  "max_kh_dkh",
+  "territory_zone",
+  "territory_footprint",
+  "activity_level",
+  "flow_preference",
+  "preferred_tank_style",
+  "temperature_category",
+] as const;
+
+function hasConfidenceValue(value: unknown) {
+  return value !== null && value !== undefined && value !== "";
+}
+
+function getFieldCompleteness(
+  species: SpeciesRow,
+  fields: readonly (keyof SpeciesRow)[],
+) {
+  const populated = fields.filter((field) =>
+    hasConfidenceValue(species[field]),
+  ).length;
+
+  return populated / fields.length;
+}
+
+export function calculateCompatibilityConfidence(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+) {
+  const speciesConfidence = [speciesA, speciesB].map((species) => {
+    const coreCompleteness =
+      (getFieldCompleteness(species, confidenceCoreFields) * 8 +
+        (species.compatibility_tags.length > 0 ? 1 : 0)) /
+      9;
+    const contextCompleteness = getFieldCompleteness(
+      species,
+      confidenceContextFields,
+    );
+
+    return (
+      coreCompleteness * CORE_CONFIDENCE_WEIGHT +
+      contextCompleteness * (1 - CORE_CONFIDENCE_WEIGHT)
+    );
+  });
+
+  return (
+    Math.round(
+      ((speciesConfidence[0] + speciesConfidence[1]) / 2) * 100,
+    ) / 100
+  );
+}
+
+function buildCompatibilitySummary(
+  compatibility: CompatibilityResult["compatibility"],
+) {
+  if (compatibility === "incompatible") {
+    return "Structured species data identifies a serious conflict for this pairing.";
+  }
+  if (compatibility === "caution") {
+    return "Structured species data identifies risks that require careful aquarium planning.";
+  }
+
+  return "Structured species data supports this pairing when normal tank size, group size, and husbandry requirements are met.";
+}
+
+function getFindingState(
+  evaluation: CompatibilityEvaluationDiagnostic,
+  maximumPoints: number,
+) {
+  if (evaluation.reasons.some((reason) => reason.includes("incomplete"))) {
+    return "data_incomplete";
+  }
+  if (evaluation.scoreCap != null) return "constraint";
+  if (evaluation.points < maximumPoints) return "risk";
+  return "aligned";
+}
+
+function getFindingSeverity(
+  evaluation: CompatibilityEvaluationDiagnostic,
+  state: string,
+): CompatibilityFinding["severity"] {
+  if (state === "data_incomplete") return "warning";
+  if (evaluation.scoreCap != null) {
+    return evaluation.scoreCap < 50 ? "error" : "warning";
+  }
+  return state === "risk" ? "warning" : "info";
+}
+
+export function buildCompatibilityFindings(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+  evaluations: CompatibilityEvaluationDiagnostic[],
+): CompatibilityFinding[] {
+  const findings: CompatibilityFinding[] = evaluations.flatMap((evaluation) => {
+    const metadata = evaluationFindingMetadata[evaluation.code] ?? {
+      category: "configuration" as const,
+      maximumPoints: 0,
+    };
+    const state = getFindingState(evaluation, metadata.maximumPoints);
+
+    return evaluation.reasons.map((message, index) => ({
+      code: `${evaluation.code}.${state}.${index + 1}`,
+      category:
+        state === "data_incomplete"
+          ? ("data-quality" as const)
+          : metadata.category,
+      severity: getFindingSeverity(evaluation, state),
+      message,
+      evidence: {
+        evaluator: evaluation.code,
+        points: evaluation.points,
+        maximumPoints: metadata.maximumPoints,
+        scoreCap: evaluation.scoreCap ?? null,
+      },
+    }));
+  });
+
+  for (const species of [speciesA, speciesB]) {
+    for (const field of requiredPairFields) {
+      if (species[field] == null) {
+        findings.push({
+          code: `data-quality.missing.${field}.${species.slug}`,
+          category: "data-quality",
+          severity: "warning",
+          message: `${species.common_name} is missing ${field.replaceAll("_", " ")} data.`,
+          evidence: {
+            speciesId: species.id,
+            speciesSlug: species.slug,
+            field,
+          },
+        });
+      }
+    }
+    if (species.compatibility_tags.length === 0) {
+      findings.push({
+        code: `data-quality.missing.compatibility_tags.${species.slug}`,
+        category: "data-quality",
+        severity: "warning",
+        message: `${species.common_name} has no structured compatibility tags.`,
+        evidence: {
+          speciesId: species.id,
+          speciesSlug: species.slug,
+          field: "compatibility_tags",
+        },
+      });
+    }
+  }
+
+  const bothExplicitlyAggressive =
+    speciesA.temperament === "Aggressive" &&
+    speciesB.temperament === "Aggressive";
+  const bothSeverelyAggressive =
+    (speciesA.aggression_level ?? 0) >= SEVERE_AGGRESSION_LEVEL &&
+    (speciesB.aggression_level ?? 0) >= SEVERE_AGGRESSION_LEVEL;
+
+  if (bothExplicitlyAggressive || bothSeverelyAggressive) {
+    findings.push({
+      code: "temperament.severe_mutual_aggression",
+      category: "temperament",
+      severity: "error",
+      message:
+        "Both species have severe structured aggression and should not be presented as generally compatible.",
+      evidence: {
+        speciesA: {
+          slug: speciesA.slug,
+          temperament: speciesA.temperament,
+          aggressionLevel: speciesA.aggression_level,
+        },
+        speciesB: {
+          slug: speciesB.slug,
+          temperament: speciesB.temperament,
+          aggressionLevel: speciesB.aggression_level,
+        },
+        severeAggressionLevel: SEVERE_AGGRESSION_LEVEL,
+      },
+    });
+  }
+
+  return findings;
+}
+
+export function resolveCompatibilityFromFindings(
+  legacyResult: CompatibilityResult,
+  findings: CompatibilityFinding[],
+): CompatibilityResult {
+  const hardBlockers = findings.filter(
+    (finding) => finding.severity === "error",
+  );
+  const missingEssentialData = findings.some((finding) =>
+    finding.code.startsWith("data-quality.missing."),
+  );
+
+  let score = legacyResult.score;
+  let compatibility = legacyResult.compatibility;
+
+  if (hardBlockers.length > 0) {
+    score = Math.min(score, INCOMPATIBLE_SCORE_CEILING);
+    compatibility = "incompatible";
+  } else if (missingEssentialData && compatibility === "compatible") {
+    score = Math.min(score, CAUTION_SCORE);
+    compatibility = "caution";
+  }
+
+  if (
+    score === legacyResult.score &&
+    compatibility === legacyResult.compatibility
+  ) {
+    return legacyResult;
+  }
+
+  const additionalReasons = hardBlockers
+    .map((finding) => finding.message)
+    .filter((message) => !legacyResult.reasons.includes(message));
+  if (missingEssentialData && compatibility === "caution") {
+    additionalReasons.push(
+      "Essential compatibility data is incomplete, so this pair cannot be presented as unconditionally compatible.",
+    );
+  }
+  const reasons = [...legacyResult.reasons, ...new Set(additionalReasons)];
+
+  return {
+    ...legacyResult,
+    score,
+    status: determineStatus(score),
+    compatibility,
+    reasons,
+    notes: buildCompatibilitySummary(compatibility),
+  };
+}
 
 function isInvertebrate(species: SpeciesRow) {
   return species.family ? invertebrateFamilies.has(species.family) : false;
@@ -77,7 +372,7 @@ function requiresGroup(species: SpeciesRow) {
 }
 
 function isPuffer(species: SpeciesRow) {
-  return species.family === "Tetraodontidae" || species.slug.includes("puffer");
+  return species.family === "Tetraodontidae";
 }
 
 function isLikelyFinNipper(species: SpeciesRow) {
@@ -92,7 +387,6 @@ function isLongFinnedOrSlow(species: SpeciesRow) {
   return (
     species.long_fin_vulnerable === true ||
     species.slow_moving === true ||
-    longFinnedOrSlowSpeciesSlugs.has(species.slug) ||
     hasSummaryPattern(species, /long .*fin|flowing fin|impressive dorsal fin/)
   );
 }
@@ -137,8 +431,7 @@ export function toCompatibilitySpecies(
 }
 
 export function determineStatus(score: number): CompatibilityStatus {
-  if (score >= 96) return "Overwhelmingly Compatible";
-  if (score >= 90) return "Very Compatible";
+  if (score >= 90) return "High Compatibility";
   if (score >= 70) return "Compatible";
   if (score >= 50) return "Caution";
 
@@ -493,7 +786,11 @@ function hasSpecialistStyleConflict(
   specialist: SpeciesRow,
   tankmate: SpeciesRow,
 ) {
-  if (!specialist.specialist_setup || !specialist.preferred_tank_style) {
+  if (
+    !specialist.specialist_setup ||
+    !specialist.preferred_tank_style ||
+    !tankmate.preferred_tank_style
+  ) {
     return false;
   }
 
@@ -526,12 +823,8 @@ function evaluateTraitRiskCaps(
   const reasons: string[] = [];
 
   if (
-    (speciesA.species_only_preferred &&
-      !hasSpeciesSpecialRule(speciesA) &&
-      speciesA.slug !== speciesB.slug) ||
-    (speciesB.species_only_preferred &&
-      !hasSpeciesSpecialRule(speciesB) &&
-      speciesA.slug !== speciesB.slug)
+    speciesA.species_only_preferred ||
+    speciesB.species_only_preferred
   ) {
     caps.push(45);
     reasons.push("One species is best planned as a species-only setup.");
@@ -665,31 +958,45 @@ function hasBreedingAggressionConflict(
   );
 }
 
+function hasRelatedTerritorialConflict(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+) {
+  if (!speciesA.family || speciesA.family !== speciesB.family) {
+    return false;
+  }
+
+  const hasTerritorialSolitarySpecies =
+    (isTerritorialSpecies(speciesA) && isSolitarySpecies(speciesA)) ||
+    (isTerritorialSpecies(speciesB) && isSolitarySpecies(speciesB));
+  const combinedAggression =
+    (speciesA.aggression_level ?? 0) + (speciesB.aggression_level ?? 0);
+
+  return (
+    hasTerritorialSolitarySpecies &&
+    combinedAggression >= 7 &&
+    zonesOverlap(speciesA, speciesB)
+  );
+}
+
 function evaluateBehaviorRiskCaps(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
 ): EvaluationResult {
   const caps: number[] = [];
   const reasons: string[] = [];
-  const specialRuleEvaluation = evaluateSpeciesSpecialRules(speciesA, speciesB, {
-    hasTag,
-    isLongFinnedOrSlow,
-    isPuffer,
-    requiresGroup,
-  });
-  const hasSpecialPufferRule =
-    specialRuleEvaluation != null &&
-    (isPuffer(speciesA) || isPuffer(speciesB));
 
-  if (specialRuleEvaluation) {
-    if (specialRuleEvaluation.scoreCap != null) {
-      caps.push(specialRuleEvaluation.scoreCap);
-    }
-
-    reasons.push(...specialRuleEvaluation.reasons);
+  if (
+    getTemperamentScore(speciesA) > 0 &&
+    getTemperamentScore(speciesB) > 0
+  ) {
+    caps.push(60);
+    reasons.push(
+      "Two non-peaceful species require cautious stocking, sufficient space, and close behavior monitoring.",
+    );
   }
 
-  if (!hasSpecialPufferRule && isPuffer(speciesA) !== isPuffer(speciesB)) {
+  if (isPuffer(speciesA) !== isPuffer(speciesB)) {
     caps.push(60);
     reasons.push(
       "Freshwater puffers are specialist fin-nipping hunters and are poor community tankmates.",
@@ -728,6 +1035,13 @@ function evaluateBehaviorRiskCaps(
     caps.push(60);
     reasons.push(
       "Breeding aggression can turn an otherwise workable pairing into a caution setup.",
+    );
+  }
+
+  if (hasRelatedTerritorialConflict(speciesA, speciesB)) {
+    caps.push(60);
+    reasons.push(
+      "Closely related fish sharing a swimming zone may recognize each other as territorial rivals.",
     );
   }
 
@@ -807,15 +1121,43 @@ export function calculateCompatibility(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
 ): CompatibilityResult {
+  return calculateCompatibilityDiagnostics(speciesA, speciesB).result;
+}
+
+export function calculateCompatibilityDiagnostics(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+): CompatibilityDiagnostics {
   const evaluations = [
-    evaluateTemperatureCompatibility(speciesA, speciesB),
-    evaluatePhCompatibility(speciesA, speciesB),
-    evaluateAggressionCompatibility(speciesA, speciesB),
-    evaluateSchoolingCompatibility(speciesA, speciesB),
-    evaluatePredationRisk(speciesA, speciesB),
-    evaluateTankSizeCompatibility(speciesA, speciesB),
-    evaluateTraitRiskCaps(speciesA, speciesB),
-    evaluateBehaviorRiskCaps(speciesA, speciesB),
+    {
+      code: "temperature",
+      ...evaluateTemperatureCompatibility(speciesA, speciesB),
+    },
+    { code: "ph", ...evaluatePhCompatibility(speciesA, speciesB) },
+    {
+      code: "aggression",
+      ...evaluateAggressionCompatibility(speciesA, speciesB),
+    },
+    {
+      code: "schooling",
+      ...evaluateSchoolingCompatibility(speciesA, speciesB),
+    },
+    {
+      code: "predation",
+      ...evaluatePredationRisk(speciesA, speciesB),
+    },
+    {
+      code: "tank_size",
+      ...evaluateTankSizeCompatibility(speciesA, speciesB),
+    },
+    {
+      code: "trait_risk_caps",
+      ...evaluateTraitRiskCaps(speciesA, speciesB),
+    },
+    {
+      code: "behavior_risk_caps",
+      ...evaluateBehaviorRiskCaps(speciesA, speciesB),
+    },
   ];
 
   const rawScore = evaluations.reduce(
@@ -833,26 +1175,47 @@ export function calculateCompatibility(
   }, null);
   const score = scoreCap == null ? rawScore : Math.min(rawScore, scoreCap);
 
-  const reasons = evaluations.flatMap((evaluation) => evaluation.reasons);
+  const reasons = evaluations
+    .flatMap((evaluation) => evaluation.reasons)
+    .filter(
+      (reason) =>
+        reason !== "No structured trait override detected." &&
+        reason !== "No severe behavior override detected.",
+    );
   const status = determineStatus(score);
 
   const compatibility =
     score >= 70 ? "compatible" : score >= 50 ? "caution" : "incompatible";
 
-  const notes =
-    reasons.length > 0
-      ? `Computed from species profile data: ${reasons.join(" ")}`
-      : null;
+  const notes = buildCompatibilitySummary(compatibility);
 
-  return {
+  const legacyResult: CompatibilityResult = {
     score,
     status,
     reasons,
     compatibility,
-    confidence: score / 100,
+    confidence: calculateCompatibilityConfidence(speciesA, speciesB),
     notes,
     expertValidated: false,
     species_a: toCompatibilitySpecies(speciesA),
     species_b: toCompatibilitySpecies(speciesB),
+  };
+  const findings = buildCompatibilityFindings(
+    speciesA,
+    speciesB,
+    evaluations,
+  );
+  const result = resolveCompatibilityFromFindings(
+    legacyResult,
+    findings,
+  );
+
+  return {
+    result,
+    legacyResult,
+    rawScore,
+    scoreCap,
+    evaluations,
+    findings,
   };
 }

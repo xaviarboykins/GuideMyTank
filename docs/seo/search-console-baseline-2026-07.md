@@ -26,7 +26,8 @@ These observations are the measurement baseline, not independently recalculated 
 The Milestone 7 repository audit confirmed that:
 
 - Production URL generation had been distributed across multiple files before Phase 2.
-- Both `/piscidex/[slug]` and `/species/[slug]` rendered species details, while the latter was canonical.
+- Before the legacy route was removed, both `/piscidex/[slug]` and
+  `/species/[slug]` rendered species details while the latter was canonical.
 - Internal PisciDex links previously favored the noncanonical alias.
 - The original sitemap regenerated current timestamps for unchanged URLs.
 - Compatibility reports represent the largest page family by a wide margin.

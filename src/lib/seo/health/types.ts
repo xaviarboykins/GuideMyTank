@@ -21,6 +21,14 @@ export type SeoHealthReport = {
   };
   pageFamilies: SeoPageFamilyCounts;
   sitemapFamilies: SeoPageFamilyCounts;
+  internalLinks: {
+    pages: number;
+    links: number;
+    issues: number;
+    errors: number;
+    warnings: number;
+    orphanedPages: number;
+  };
   issues: SeoHealthIssue[];
 };
 

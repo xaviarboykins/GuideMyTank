@@ -14,6 +14,7 @@ import { isJsonRecord } from "@/lib/content/structured-data";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { NOINDEX_FOLLOW, NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { getCareGuidePageLinks } from "@/lib/seo/internal-linking/service";
 
 type CareGuidePageProps = {
   params: Promise<{
@@ -73,7 +74,10 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
   const publishedGuide = await getPublishedCareGuideBySlug(slug);
 
   if (publishedGuide) {
-    const imageUrls = await createPublishedContentImageSignedUrls(publishedGuide.images.map((image) => image.content_images.storage_path));
+    const [imageUrls, internalLinks] = await Promise.all([
+      createPublishedContentImageSignedUrls(publishedGuide.images.map((image) => image.content_images.storage_path)),
+      getCareGuidePageLinks(publishedGuide),
+    ]);
     const { guide } = publishedGuide;
     const url = getSiteUrl(`/care-guides/${guide.slug}`);
     const structuredData = [{ "@context": "https://schema.org", "@type": "Article", headline: guide.title, description: guide.summary, datePublished: guide.published_at, dateModified: guide.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: url }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl() }, { "@type": "ListItem", position: 2, name: "Care Guides", item: getSiteUrl("/care-guides") }, { "@type": "ListItem", position: 3, name: guide.title, item: url }] }] as Array<Record<string, unknown>>;
@@ -82,7 +86,7 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
     const faqText = faqRecord && typeof faqRecord.text === "string" ? faqRecord.text : "";
     const faqItems = [...faqText.matchAll(/([^?]+\?)\s*([^?]*?)(?=\s+(?:Can|Does|Why|How|What|When|Where|Is|Are|Should|Will)\b[^?]*\?|$)/g)].filter((match) => match[1]?.trim() && match[2]?.trim()).map((match) => ({ "@type": "Question", name: match[1].trim(), acceptedAnswer: { "@type": "Answer", text: match[2].trim() } }));
     if (faqItems.length) structuredData.push({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems });
-    return <PageContainer><JsonLd data={structuredData} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} /></PageContainer>;
+    return <PageContainer><JsonLd data={structuredData} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} internalLinks={internalLinks} /></PageContainer>;
   }
 
   const species = await getSpeciesBySlug(slug);

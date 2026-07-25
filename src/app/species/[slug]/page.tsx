@@ -4,13 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SpeciesCompatibilitySections } from "@/components/species/species-compatibility-sections";
+import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
+import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { SpeciesStatCard } from "@/components/species/species-stat-card";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { ContentBreadcrumbs } from "@/components/content/public-content";
 
-import { getCompatibilityRulesForSpecies } from "@/lib/compatibility/service";
+import { getSpeciesCompatibilityData } from "@/lib/compatibility/service";
 import { getPublishedCareGuideForSpecies } from "@/lib/care-guides/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSpeciesImage } from "@/lib/images";
@@ -18,6 +20,7 @@ import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
 import { getSiteOrigin, getSiteUrl } from "@/lib/seo/site-url";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
+import { getSpeciesPageLinks } from "@/lib/seo/internal-linking/service";
 import {
   formatRecommendedTemperature,
   formatToleratedTemperature,
@@ -192,10 +195,15 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
     notFound();
   }
 
-  const [compatibility, publishedCareGuide] = await Promise.all([
-    getCompatibilityRulesForSpecies(slug),
+  const [compatibilityData, publishedCareGuide] = await Promise.all([
+    getSpeciesCompatibilityData(slug),
     getPublishedCareGuideForSpecies(species.id),
   ]);
+  const internalLinks = await getSpeciesPageLinks(
+    species,
+    compatibilityData.candidates,
+    compatibilityData.compatibility,
+  );
 
   const jsonLd = getSpeciesJsonLd(species);
   const compatibilityTags = species.compatibility_tags ?? [];
@@ -374,9 +382,28 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
           </section>
         )}
 
+        <InternalLinksSection
+          title="Similar Species"
+          items={internalLinks.similarSpecies}
+          limit={4}
+        />
+
+        <InternalLinksSection
+          title="Related Articles"
+          items={internalLinks.articles}
+          limit={4}
+        />
+
+        <InternalLinksSection
+          title="Explore This Topic"
+          items={internalLinks.topicClusters}
+        />
+
+        <BuilderCallToAction item={internalLinks.builder[0]} />
+
         <SpeciesCompatibilitySections
           currentSpeciesSlug={slug}
-          compatibility={compatibility}
+          compatibility={internalLinks.remainingCompatibility}
         />
       </PageContainer>
     </>

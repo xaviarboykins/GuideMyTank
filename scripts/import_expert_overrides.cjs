@@ -56,35 +56,58 @@ async function main() {
   const speciesPayload = loadJson(speciesPath);
   const overridesPayload = loadJson(overridesPath);
   const localSpecies = speciesPayload.species || speciesPayload;
-  const slugs = Array.from(
-    new Set(overridesPayload.overrides.flatMap((override) => override.species)),
+  const remoteSpeciesRows = await request("species", "?select=id,slug");
+  const existingExpertRules = await request(
+    "compatibility_rules",
+    "?select=id,species_a_id,species_b_id&expert_validated=eq.true",
+  );
+  const speciesBySlug = new Map(remoteSpeciesRows.map((row) => [row.slug, row]));
+  const speciesById = new Map(remoteSpeciesRows.map((row) => [row.id, row]));
+  const desiredPairKeys = new Set(
+    overridesPayload.overrides.map((override) =>
+      [...override.species].sort().join("|"),
+    ),
   );
 
-  if (dryRun) {
-    console.log(`Dry run: ${overridesPayload.overrides.length} expert overrides ready to import.`);
-    return;
-  }
-
-  const remoteSpeciesRows = [];
-  for (const slug of slugs) {
-    const rows = await request(
-      "species",
-      `?select=id,slug&slug=eq.${encodeURIComponent(slug)}`,
-    );
-    if (!rows || rows.length !== 1) {
-      const localMatch = localSpecies.find((item) => item.slug === slug);
-      throw new Error(
-        `Could not find remote species '${slug}'${localMatch ? ` (${localMatch.common_name})` : ""}.`,
-      );
+  for (const override of overridesPayload.overrides) {
+    for (const slug of override.species) {
+      if (!speciesBySlug.has(slug)) {
+        const localMatch = localSpecies.find((item) => item.slug === slug);
+        throw new Error(
+          `Could not find remote species '${slug}'${localMatch ? ` (${localMatch.common_name})` : ""}.`,
+        );
+      }
     }
-    remoteSpeciesRows.push(rows[0]);
   }
 
-  const speciesBySlug = new Map(remoteSpeciesRows.map((row) => [row.slug, row]));
+  const staleExpertRules = existingExpertRules.filter((rule) => {
+    const speciesA = speciesById.get(rule.species_a_id);
+    const speciesB = speciesById.get(rule.species_b_id);
+    const pairKey =
+      speciesA && speciesB
+        ? [speciesA.slug, speciesB.slug].sort().join("|")
+        : null;
+
+    return !pairKey || !desiredPairKeys.has(pairKey);
+  });
+
+  console.log(
+    `${dryRun ? "Dry run: " : ""}${overridesPayload.overrides.length} expert overrides will be synchronized; ${staleExpertRules.length} stale expert rows will be removed.`,
+  );
+  if (dryRun) return;
+
+  for (const staleRule of staleExpertRules) {
+    await request(
+      "compatibility_rules",
+      `?id=eq.${encodeURIComponent(staleRule.id)}`,
+      { method: "DELETE" },
+    );
+  }
 
   for (const override of overridesPayload.overrides) {
-    const speciesAId = speciesBySlug.get(override.species[0]).id;
-    const speciesBId = speciesBySlug.get(override.species[1]).id;
+    const [speciesASlug, speciesBSlug] = [...override.species].sort();
+    const speciesAId = speciesBySlug.get(speciesASlug).id;
+    const speciesBId = speciesBySlug.get(speciesBSlug).id;
     const deleteQuery =
       `?or=(` +
       `and(species_a_id.eq.${speciesAId},species_b_id.eq.${speciesBId}),` +
@@ -107,7 +130,9 @@ async function main() {
     });
   }
 
-  console.log(`Imported ${overridesPayload.overrides.length} expert overrides.`);
+  console.log(
+    `Synchronized ${overridesPayload.overrides.length} expert overrides and removed ${staleExpertRules.length} stale expert rows.`,
+  );
 }
 
 main().catch((error) => {

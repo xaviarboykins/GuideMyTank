@@ -32,11 +32,15 @@ Run the repository's actual checks:
 npm run lint
 npm test
 npm run build
+npm run seo:audit-links
 ```
 
 There is no dedicated `typecheck` package script. During development, TypeScript can be checked with the installed compiler; the production build also performs TypeScript validation.
 
 Authenticated administrators can run the database-backed SEO health report at `/admin/seo` and retrieve JSON from `/admin/seo/report`.
+
+See `internal-linking.md` for contextual relationship rules, topic-cluster
+maintenance, and the local audit.
 
 ## Documents
 

@@ -63,6 +63,9 @@ Care Guide publication requires:
 Article publication requires a title, unique slug, summary, and at least one
 valid ordered section. Images are optional.
 
+Articles may explicitly opt into one Product Category link. The option defaults
+to off and should remain disabled for livestock-focused content.
+
 ## Care Guide PDFs
 
 Every published Care Guide has a dynamic download at
@@ -96,7 +99,10 @@ The `content-images` bucket is reserved for Article and Care Guide uploads.
 Database metadata is deleted only when an image is unused; storage deletion and
 metadata deletion are handled together by the admin action. Sources can be
 searched, reused, edited, and deleted only when no content relationship uses
-them. Published-content asset metadata is protected by database triggers.
+them. Published-content asset metadata is protected by database triggers. New
+uploads store intrinsic width and height. A dimension-only repair may fill
+missing values on published images, while other published metadata edits remain
+blocked.
 
 ## Verification
 
@@ -121,6 +127,8 @@ npm run validate:compatibility
 npm run validate:expert-overrides
 npm run validate:species
 npm run validate:species-sources
+npm run seo:audit-links
+npm run repair:content-image-dimensions
 npm run build
 ```
 

@@ -43,7 +43,9 @@ export function CompatibilitySummary({
               Confidence
             </p>
             <p className="mt-2 text-3xl font-bold">
-              {Math.round((compatibility.confidence ?? 0) * 100)}%
+              {compatibility.confidence == null
+                ? "Not available"
+                : `${Math.round(compatibility.confidence * 100)}%`}
             </p>
           </div>
         </div>

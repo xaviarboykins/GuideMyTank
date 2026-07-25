@@ -25,6 +25,23 @@ export async function listPublishedArticles() {
   return data ?? [];
 }
 
+export async function getPublishedArticlesBySlugs(slugs: string[]) {
+  if (slugs.length === 0) {
+    return [];
+  }
+
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id,title,slug,summary")
+    .eq("status", "published")
+    .in("slug", slugs);
+
+  throwContentDatabaseError(error, "load published articles by slug");
+
+  return data ?? [];
+}
+
 export async function getPublishedArticleBySlug(slug: string) {
   const supabase = createStaticClient();
   const { data: article, error } = await supabase
@@ -42,7 +59,7 @@ export async function getPublishedArticleBySlug(slug: string) {
     supabase.from("article_category_assignments").select("*,article_categories(*)").eq("article_id", article.id),
     supabase.from("article_tag_assignments").select("*,article_tags(*)").eq("article_id", article.id),
     supabase.from("article_related_articles").select("*,related_article:articles!article_related_articles_related_article_id_fkey(id,slug,title,summary,status)").eq("article_id", article.id).order("display_order"),
-    supabase.from("article_related_care_guides").select("*,care_guide:care_guides(id,slug,title,summary,status)").eq("article_id", article.id).order("display_order"),
+    supabase.from("article_related_care_guides").select("*,care_guide:care_guides(id,slug,title,summary,status,species:species!care_guides_species_id_fkey(id,slug,common_name,scientific_name))").eq("article_id", article.id).order("display_order"),
   ]);
   throwContentDatabaseError(sections.error, "load published article sections");
   throwContentDatabaseError(images.error, "load published article images");

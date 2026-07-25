@@ -5,6 +5,7 @@ const path = require("path");
 
 const rootDir = path.resolve(__dirname, "..");
 const speciesPath = path.join(rootDir, "data", "import", "species.master.json");
+const sourcesPath = path.join(rootDir, "data", "import", "species.sources.json");
 const batchArgIndex = process.argv.indexOf("--batch");
 const selectedBatch =
   batchArgIndex >= 0 ? process.argv[batchArgIndex + 1]?.trim() : "";
@@ -14,7 +15,9 @@ const reportFilename = selectedBatch
 const reportPath = path.join(rootDir, "docs", "data-audits", reportFilename);
 
 const payload = JSON.parse(fs.readFileSync(speciesPath, "utf8"));
+const sourcesPayload = JSON.parse(fs.readFileSync(sourcesPath, "utf8"));
 const allSpecies = payload.species || payload;
+const sourceEntries = sourcesPayload.species || {};
 
 function getBatch(item) {
   if (item.family === "Cichlidae") return "cichlids";
@@ -79,9 +82,14 @@ function issue(item, severity, field, message) {
 
 function auditSpecies(item) {
   const issues = [];
+  const sources = sourceEntries[item.slug]?.sources || [];
+  const compatibilityMinTemp =
+    item.recommended_min_temp_f ?? item.min_temp_f;
+  const compatibilityMaxTemp =
+    item.recommended_max_temp_f ?? item.max_temp_f;
   const tempSpan =
-    item.min_temp_f != null && item.max_temp_f != null
-      ? item.max_temp_f - item.min_temp_f
+    compatibilityMinTemp != null && compatibilityMaxTemp != null
+      ? compatibilityMaxTemp - compatibilityMinTemp
       : null;
   const phSpan =
     item.min_ph != null && item.max_ph != null ? item.max_ph - item.min_ph : null;
@@ -91,6 +99,40 @@ function auditSpecies(item) {
 
   if (!item.data_confidence) {
     issues.push(issue(item, "medium", "data_confidence", "Missing data confidence."));
+  }
+
+  if (sources.length === 0) {
+    issues.push(
+      issue(item, "high", "sources", "No factual source URL is recorded."),
+    );
+  } else {
+    const sourceDomains = new Set(
+      sources.map((url) => new URL(url).hostname.replace(/^www\./, "")),
+    );
+    const wikipediaOnly = [...sourceDomains].every((domain) =>
+      domain.endsWith("wikipedia.org"),
+    );
+
+    if (wikipediaOnly) {
+      issues.push(
+        issue(
+          item,
+          "medium",
+          "sources",
+          "All recorded sources are Wikipedia; compatibility-critical husbandry fields need a stronger reference.",
+        ),
+      );
+    }
+    if (item.data_confidence === "high" && sources.length < 2) {
+      issues.push(
+        issue(
+          item,
+          "medium",
+          "data_confidence/sources",
+          "High confidence is recorded with fewer than two source references.",
+        ),
+      );
+    }
   }
 
   if (!item.temp_source_notes || !item.temp_source_notes.trim()) {
@@ -130,7 +172,7 @@ function auditSpecies(item) {
           item,
           "medium",
           "temperature",
-          `Temperature range ${item.min_temp_f}-${item.max_temp_f} F is very broad and may be too permissive.`,
+          `Compatibility temperature range ${compatibilityMinTemp}-${compatibilityMaxTemp} F is very broad and may be too permissive.`,
         ),
       );
     }
@@ -176,7 +218,9 @@ function auditSpecies(item) {
       );
     }
 
-    if (phSpan != null && phSpan > 2) {
+    const isAcidicBlackwaterRange =
+      hasTag(item, "blackwater") && item.max_ph <= 7;
+    if (phSpan != null && phSpan > 2 && !isAcidicBlackwaterRange) {
       issues.push(
         issue(
           item,
@@ -237,6 +281,132 @@ function auditSpecies(item) {
         "medium",
         "temperament/tags",
         "Peaceful temperament conflicts with aggressive/semi-aggressive tags.",
+      ),
+    );
+  }
+
+  if (item.schooling === true && (item.min_group_size ?? 0) < 2) {
+    issues.push(
+      issue(
+        item,
+        "high",
+        "schooling/min_group_size",
+        "Schooling is true but the minimum group size is below two.",
+      ),
+    );
+  }
+
+  if (
+    item.schooling === true &&
+    !hasTag(item, "schooling")
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "schooling/tags",
+        "Schooling is true but the schooling compatibility tag is missing.",
+      ),
+    );
+  }
+
+  if (
+    item.schooling === false &&
+    hasTag(item, "schooling")
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "schooling/tags",
+        "Schooling is false but the schooling compatibility tag is present.",
+      ),
+    );
+  }
+
+  if (item.species_only_preferred && hasTag(item, "community")) {
+    issues.push(
+      issue(
+        item,
+        "high",
+        "species_only_preferred/tags",
+        "Species-only preference conflicts with the community tag.",
+      ),
+    );
+  }
+
+  if (
+    hasTag(item, "territorial") &&
+    item.territory_footprint === "none"
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "territory",
+        "Territorial tag conflicts with a territory footprint of none.",
+      ),
+    );
+  }
+
+  if (
+    item.hardness_preference === "soft" &&
+    item.min_gh_dgh != null &&
+    item.min_gh_dgh >= 8
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "hardness/GH",
+        "Soft-water preference conflicts with a high minimum GH.",
+      ),
+    );
+  }
+
+  if (
+    item.hardness_preference === "hard" &&
+    item.max_gh_dgh != null &&
+    item.max_gh_dgh <= 8
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "hardness/GH",
+        "Hard-water preference conflicts with a low maximum GH.",
+      ),
+    );
+  }
+
+  if (
+    item.preferred_tank_style === "stream" &&
+    item.flow_preference === "low"
+  ) {
+    issues.push(
+      issue(
+        item,
+        "medium",
+        "tank_style/flow",
+        "Stream-style setup conflicts with low flow preference.",
+      ),
+    );
+  }
+
+  if (
+    item.recommended_min_temp_f != null &&
+    item.recommended_max_temp_f != null &&
+    item.tolerated_min_temp_f != null &&
+    item.tolerated_max_temp_f != null &&
+    (item.recommended_min_temp_f < item.tolerated_min_temp_f ||
+      item.recommended_max_temp_f > item.tolerated_max_temp_f)
+  ) {
+    issues.push(
+      issue(
+        item,
+        "high",
+        "recommended/tolerated temperature",
+        "Recommended temperature range falls outside the tolerated range.",
       ),
     );
   }
@@ -322,7 +492,10 @@ const report = [
   "- Temperament and aggression-level consistency",
   "- Temperament/tag consistency",
   "- Data confidence and temperature source notes",
+  "- Source coverage and confidence/source consistency",
   "- Care warnings for high-risk or specialist species",
+  "- Schooling and minimum-group consistency",
+  "- Species-only, community, territory, hardness, flow, and tank-style consistency",
   "",
   "## Summary",
   "",
@@ -346,7 +519,7 @@ const report = [
   "- Broad ranges are not always wrong, but they can make compatibility look safer than it is.",
   "- Temperament should describe normal adult community behavior, not just breeding behavior.",
   "- `aggression_level` should make the temperament label more precise: peaceful is usually 1-3, semi-aggressive 3-6, aggressive 6-10.",
-  "- When sources disagree, prefer conservative values and use special rules for known exceptions.",
+  "- When sources disagree, prefer conservative structured values and improve generic compatibility rules rather than adding named-pair exceptions.",
   "- High-risk species should have explicit care warnings so users see the issue before running a compatibility comparison.",
   "",
 ].join("\n");

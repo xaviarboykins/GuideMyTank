@@ -12,6 +12,8 @@ import { getSiteUrl } from "../site-url";
 import { COMPATIBILITY_SITEMAP_BATCH_SIZE } from "../sitemaps";
 import { analyzeSeoImages, analyzeSeoPages } from "./analyze";
 import type { SeoHealthPage, SeoHealthReport } from "./types";
+import { generateInternalLinkAudit } from "../internal-linking/audit";
+import { topicClusters } from "../internal-linking/topic-clusters";
 
 const STATIC_PAGES = [
   ["/", "Homepage", "Aquarium planning tools and freshwater species data."],
@@ -42,14 +44,17 @@ function countByFamily(pages: SeoHealthPage[], sitemapOnly = false) {
 export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
   await assertAdmin();
   const supabase = await createClient();
-  const [speciesResult, guidesResult, articlesResult, imagesResult] = await Promise.all([
-    supabase.from("species").select("slug,common_name,summary").order("slug"),
-    supabase.from("care_guides").select("id,title,slug,summary,meta_description,canonical_url,status"),
-    supabase.from("articles").select("id,title,slug,summary,meta_description,canonical_url,status"),
+  const [speciesResult, guidesResult, articlesResult, imagesResult, guideSpeciesResult, articleGuidesResult, articleArticlesResult] = await Promise.all([
+    supabase.from("species").select("id,slug,common_name,summary").order("slug"),
+    supabase.from("care_guides").select("id,title,slug,summary,meta_description,canonical_url,status,species_id"),
+    supabase.from("articles").select("id,title,slug,summary,meta_description,canonical_url,status,include_products,product_category"),
     supabase.from("content_images").select("id,storage_path,alt_text,width,height"),
+    supabase.from("care_guide_related_species").select("care_guide_id,species_id"),
+    supabase.from("article_related_care_guides").select("article_id,care_guide_id"),
+    supabase.from("article_related_articles").select("article_id,related_article_id"),
   ]);
 
-  const databaseError = speciesResult.error ?? guidesResult.error ?? articlesResult.error ?? imagesResult.error;
+  const databaseError = speciesResult.error ?? guidesResult.error ?? articlesResult.error ?? imagesResult.error ?? guideSpeciesResult.error ?? articleGuidesResult.error ?? articleArticlesResult.error;
   if (databaseError) throw new Error(`Unable to generate SEO health report: ${databaseError.message}`);
 
   const species = speciesResult.data ?? [];
@@ -124,6 +129,40 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
       height: image.height,
     }))),
   ];
+  const internalLinkAudit = generateInternalLinkAudit({
+    species: species.map(({ id, slug }) => ({ id, slug })),
+    careGuides: guides.map(({ id, slug, status, species_id }) => ({
+      id,
+      slug,
+      status,
+      species_id,
+    })),
+    articles: articles.map(
+      ({ id, slug, status, include_products, product_category }) => ({
+        id,
+        slug,
+        status,
+        include_products,
+        product_category,
+      }),
+    ),
+    careGuideRelatedSpecies: guideSpeciesResult.data ?? [],
+    articleRelatedCareGuides: articleGuidesResult.data ?? [],
+    articleRelatedArticles: articleArticlesResult.data ?? [],
+    topicClusters,
+  });
+  issues.push(
+    ...internalLinkAudit.issues.map((item) => ({
+      severity: item.severity,
+      category: `internal_link_${item.category}`,
+      urlOrRecord: item.source,
+      description: item.target
+        ? `${item.description} Target: ${item.target}`
+        : item.description,
+      suggestedAction:
+        "Review the structured relationship or internal-link resolver for this page.",
+    })),
+  );
 
   for (const item of guides) {
     if (!item.slug || !item.canonical_url) continue;
@@ -149,9 +188,6 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
   if (invalidCompatibilityPairs) {
     issues.push({ severity: "error", category: "noncanonical_compatibility_pair", urlOrRecord: "compatibility sitemap", description: `${invalidCompatibilityPairs} noncanonical pairs were generated.`, suggestedAction: "Repair pair ordering before publishing the sitemap." });
   }
-  if (compatibilityCount) {
-    issues.push({ severity: "warning", category: "compatibility_internal_links", urlOrRecord: "/compatibility/*", description: `${compatibilityCount} compatibility reports rely primarily on sitemap discovery; complete crawlable pair-directory linking does not exist.`, suggestedAction: "Address through the deferred Related Compatibility Engine or another useful server-rendered relationship system." });
-  }
 
   const pageFamilies = countByFamily(pages);
   pageFamilies.compatibility = compatibilityCount;
@@ -166,6 +202,7 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
     summary: { totalIndexablePages, totalSitemapUrls, totalIssues: issues.length, errors, warnings: issues.length - errors },
     pageFamilies,
     sitemapFamilies,
+    internalLinks: internalLinkAudit.summary,
     issues,
   };
 }

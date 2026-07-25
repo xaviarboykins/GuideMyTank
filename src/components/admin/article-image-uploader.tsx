@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { getContentImageDimensions } from "@/lib/content-images/dimensions";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"]);
 
@@ -22,6 +23,13 @@ export function ArticleImageUploader({ articleId, nextOrder }: { articleId: stri
     if (!allowedTypes.has(file.type)) return setMessage("Choose a JPEG, PNG, WebP, AVIF, or GIF image.");
     if (file.size > 10 * 1024 * 1024) return setMessage("The image must be 10 MB or smaller.");
     setPending(true);
+    let dimensions: { width: number; height: number };
+    try {
+      dimensions = await getContentImageDimensions(file);
+    } catch {
+      setPending(false);
+      return setMessage("The image dimensions could not be read.");
+    }
     const supabase = createClient();
     const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "image";
     const storagePath = `articles/${crypto.randomUUID()}.${extension}`;
@@ -31,6 +39,7 @@ export function ArticleImageUploader({ articleId, nextOrder }: { articleId: stri
       storage_path: storagePath, alt_text: altText || null, caption: String(formData.get("caption") ?? "").trim() || null,
       attribution: String(formData.get("attribution") ?? "").trim() || null, source_url: String(formData.get("sourceUrl") ?? "").trim() || null,
       license_name: String(formData.get("licenseName") ?? "").trim() || null, mime_type: file.type, file_size_bytes: file.size,
+      width: dimensions.width, height: dimensions.height,
     }).select("id").single();
     if (metadataError || !image) { await supabase.storage.from("content-images").remove([storagePath]); setPending(false); return setMessage("Image metadata could not be saved."); }
     const { error: assignmentError } = await supabase.from("article_images").insert({ article_id: articleId, image_id: image.id, display_order: nextOrder });

@@ -341,6 +341,7 @@ export type Database = {
       articles: {
         Row: {
           canonical_url: string | null
+          content_type: string
           created_at: string
           featured_image_id: string | null
           id: string
@@ -359,6 +360,7 @@ export type Database = {
         }
         Insert: {
           canonical_url?: string | null
+          content_type?: string
           created_at?: string
           featured_image_id?: string | null
           id?: string
@@ -377,6 +379,7 @@ export type Database = {
         }
         Update: {
           canonical_url?: string | null
+          content_type?: string
           created_at?: string
           featured_image_id?: string | null
           id?: string
@@ -906,6 +909,145 @@ export type Database = {
         }
         Relationships: []
       }
+      programmatic_guide_metadata: {
+        Row: {
+          article_id: string
+          created_at: string
+          current_content_hash: string | null
+          generated_at: string
+          generated_content_hash: string | null
+          generation_key: string
+          generation_metadata: Json
+          guide_family: string
+          guide_type: string
+          last_regenerated_at: string | null
+          last_regeneration_check_at: string | null
+          manual_edit_protection: boolean
+          manual_edits_detected: boolean
+          normalized_search_intent: string
+          pending_generation: Json | null
+          primary_search_intent: string
+          programmatic_origin: string
+          regeneration_reason: string | null
+          regeneration_status: string
+          requires_regeneration: boolean
+          search_intent_conflict_status: string
+          source_data_fingerprint: string | null
+          source_data_modified_at: string | null
+          source_data_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          current_content_hash?: string | null
+          generated_at?: string
+          generated_content_hash?: string | null
+          generation_key: string
+          generation_metadata?: Json
+          guide_family: string
+          guide_type: string
+          last_regenerated_at?: string | null
+          last_regeneration_check_at?: string | null
+          manual_edit_protection?: boolean
+          manual_edits_detected?: boolean
+          normalized_search_intent: string
+          pending_generation?: Json | null
+          primary_search_intent: string
+          programmatic_origin?: string
+          regeneration_reason?: string | null
+          regeneration_status?: string
+          requires_regeneration?: boolean
+          search_intent_conflict_status?: string
+          source_data_fingerprint?: string | null
+          source_data_modified_at?: string | null
+          source_data_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          current_content_hash?: string | null
+          generated_at?: string
+          generated_content_hash?: string | null
+          generation_key?: string
+          generation_metadata?: Json
+          guide_family?: string
+          guide_type?: string
+          last_regenerated_at?: string | null
+          last_regeneration_check_at?: string | null
+          manual_edit_protection?: boolean
+          manual_edits_detected?: boolean
+          normalized_search_intent?: string
+          pending_generation?: Json | null
+          primary_search_intent?: string
+          programmatic_origin?: string
+          regeneration_reason?: string | null
+          regeneration_status?: string
+          requires_regeneration?: boolean
+          search_intent_conflict_status?: string
+          source_data_fingerprint?: string | null
+          source_data_modified_at?: string | null
+          source_data_version?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programmatic_guide_metadata_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: true
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programmatic_guide_source_entities: {
+        Row: {
+          article_id: string
+          contribution_role: string
+          created_at: string
+          entity_key: string
+          entity_type: string
+          id: string
+          source_fingerprint: string | null
+          source_updated_at: string | null
+          source_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          contribution_role?: string
+          created_at?: string
+          entity_key: string
+          entity_type: string
+          id?: string
+          source_fingerprint?: string | null
+          source_updated_at?: string | null
+          source_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          contribution_role?: string
+          created_at?: string
+          entity_key?: string
+          entity_type?: string
+          id?: string
+          source_fingerprint?: string | null
+          source_updated_at?: string | null
+          source_version?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programmatic_guide_source_entities_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "programmatic_guide_metadata"
+            referencedColumns: ["article_id"]
+          },
+        ]
+      }
       sources: {
         Row: {
           accessed_date: string | null
@@ -1256,7 +1398,59 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_published_programmatic_guide_links: {
+        Args: {
+          target_article_id: string
+        }
+        Returns: Json
+      }
+      create_programmatic_guide_draft: {
+        Args: {
+          draft_current_content_hash?: string
+          draft_generated_content_hash?: string
+          draft_generation_key: string
+          draft_generation_metadata?: Json
+          draft_guide_family: string
+          draft_guide_type: string
+          draft_normalized_search_intent: string
+          draft_primary_search_intent: string
+          draft_programmatic_origin?: string
+          draft_source_data_fingerprint?: string
+          draft_source_data_modified_at?: string
+          draft_source_data_version?: string
+          draft_title: string
+        }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
+      apply_programmatic_guide_regeneration: {
+        Args: {
+          confirm_published_to_draft?: boolean
+          expected_proposal_hash: string
+          target_article_id: string
+        }
+        Returns: undefined
+      }
+      save_programmatic_guide_draft: {
+        Args: {
+          draft_generated_content_hash: string
+          draft_generation_metadata: Json
+          draft_meta_description: string
+          draft_normalized_search_intent: string
+          draft_primary_search_intent: string
+          draft_sections: Json
+          draft_seo_title: string
+          draft_slug: string
+          draft_source_data_fingerprint: string
+          draft_source_data_modified_at?: string
+          draft_source_data_version?: string
+          draft_source_entities: Json
+          draft_summary: string
+          draft_title: string
+          target_article_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

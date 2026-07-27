@@ -38,7 +38,9 @@ Current detail hierarchies:
 - Home → Care Guides → Care Guide title
 - Home → Learning Center → Article title
 
-Existing JSON-LD breadcrumbs remain in place. Broader structured-data consolidation is deferred to the structured-data milestone.
+Visible and JSON-LD breadcrumbs use the same typed `{ name, path }` data.
+Structured conversion generates absolute URLs and sequential positions from
+that shared source.
 
 ## Non-public and missing content
 

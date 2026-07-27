@@ -105,4 +105,45 @@ describe("internal link audit", () => {
       report.issues.filter((item) => item.category === "orphan_page"),
     ).toEqual([]);
   });
+
+  it("models published Guides at their canonical route with generated links", () => {
+    const report = generateInternalLinkAudit({
+      species: [
+        { id: "betta", slug: "betta-splendens" },
+        { id: "guppy", slug: "guppy" },
+      ],
+      careGuides: [],
+      articles: [
+        {
+          id: "comparison",
+          slug: "betta-vs-guppy",
+          status: "published",
+          content_type: "guide",
+          generated_links: [
+            "/species/betta-splendens",
+            "/species/guppy",
+            "/compatibility/betta-splendens/guppy",
+            "/aquarium-builder",
+          ],
+        },
+      ],
+      careGuideRelatedSpecies: [],
+      articleRelatedCareGuides: [],
+      articleRelatedArticles: [],
+      topicClusters: [
+        {
+          hub: { entityType: "species", slug: "betta-splendens" },
+          species: [{ slug: "betta-splendens" }],
+          guides: [{ slug: "betta-vs-guppy" }],
+        },
+      ],
+    });
+
+    expect(
+      report.issues.filter(
+        (item) => item.source === "/learning-center/guides/betta-vs-guppy",
+      ),
+    ).toEqual([]);
+    expect(report.summary.pages).toBe(4);
+  });
 });

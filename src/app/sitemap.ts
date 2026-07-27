@@ -12,6 +12,8 @@ const STATIC_PATHS = [
   "/aquarium-builder",
   "/products",
   "/learning-center",
+  "/learning-center/articles",
+  "/learning-center/guides",
   "/about",
   "/contact",
   "/privacy",

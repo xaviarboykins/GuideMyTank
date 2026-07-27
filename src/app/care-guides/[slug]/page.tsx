@@ -6,15 +6,15 @@ import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
-import { JsonLd } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getPublishedCareGuideBySlug, listPublishedCareGuides } from "@/lib/care-guides/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
-import { isJsonRecord } from "@/lib/content/structured-data";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { NOINDEX_FOLLOW, NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCareGuidePageLinks } from "@/lib/seo/internal-linking/service";
+import { buildArticlePageEntities } from "@/lib/seo/schema/article-page";
 
 type CareGuidePageProps = {
   params: Promise<{
@@ -47,6 +47,7 @@ export async function generateMetadata({
       type: "article",
       publishedTime: publishedGuide.guide.published_at,
       modifiedTime: publishedGuide.guide.updated_at,
+      publisher: "GuideMyTank",
     });
   }
 
@@ -79,14 +80,18 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
       getCareGuidePageLinks(publishedGuide),
     ]);
     const { guide } = publishedGuide;
-    const url = getSiteUrl(`/care-guides/${guide.slug}`);
-    const structuredData = [{ "@context": "https://schema.org", "@type": "Article", headline: guide.title, description: guide.summary, datePublished: guide.published_at, dateModified: guide.updated_at, author: { "@type": "Organization", name: "GuideMyTank" }, mainEntityOfPage: url }, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl() }, { "@type": "ListItem", position: 2, name: "Care Guides", item: getSiteUrl("/care-guides") }, { "@type": "ListItem", position: 3, name: guide.title, item: url }] }] as Array<Record<string, unknown>>;
-    const faqSection = publishedGuide.sections.find((section) => section.section_type === "frequently_asked_questions");
-    const faqRecord = faqSection && isJsonRecord(faqSection.content) ? faqSection.content : null;
-    const faqText = faqRecord && typeof faqRecord.text === "string" ? faqRecord.text : "";
-    const faqItems = [...faqText.matchAll(/([^?]+\?)\s*([^?]*?)(?=\s+(?:Can|Does|Why|How|What|When|Where|Is|Are|Should|Will)\b[^?]*\?|$)/g)].filter((match) => match[1]?.trim() && match[2]?.trim()).map((match) => ({ "@type": "Question", name: match[1].trim(), acceptedAnswer: { "@type": "Answer", text: match[2].trim() } }));
-    if (faqItems.length) structuredData.push({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems });
-    return <PageContainer><JsonLd data={structuredData} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} internalLinks={internalLinks} /></PageContainer>;
+    const guidePath = `/care-guides/${guide.slug}`;
+    const breadcrumbs = [{ name: "Home", path: "/" }, { name: "Care Guides", path: "/care-guides" }, { name: guide.title ?? `${guide.species.common_name} Care Guide`, path: guidePath }];
+    const schemaEntities = buildArticlePageEntities({
+      path: guidePath,
+      headline: guide.title,
+      description: guide.summary,
+      datePublished: guide.published_at,
+      dateModified: guide.updated_at,
+      articleSection: "Care Guides",
+      breadcrumbs,
+    });
+    return <PageContainer><JsonLd entities={schemaEntities} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} breadcrumbs={breadcrumbs} internalLinks={internalLinks} /></PageContainer>;
   }
 
   const species = await getSpeciesBySlug(slug);

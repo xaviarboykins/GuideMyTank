@@ -25,6 +25,12 @@ describe("internal-link route resolution", () => {
         slug: "beginner-fish",
       }),
     ).toBe("/learning-center/beginner-fish");
+    expect(
+      resolveInternalLinkPath({
+        entityType: "guide",
+        slug: "betta-tank-mates",
+      }),
+    ).toBe("/learning-center/guides/betta-tank-mates");
     expect(resolveInternalLinkPath({ entityType: "builder" })).toBe(
       "/aquarium-builder",
     );

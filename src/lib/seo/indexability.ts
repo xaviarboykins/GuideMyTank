@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 type SearchParamValue = string | string[] | undefined;
 type SearchParams = Record<string, SearchParamValue>;
+type PublicationStatus = "draft" | "published" | "archived" | string;
 
 export const NOINDEX_FOLLOW: NonNullable<Metadata["robots"]> = {
   index: false,
@@ -25,4 +26,10 @@ export function hasActiveSearchParams(searchParams: SearchParams) {
 
 export function getSearchVariantRobots(searchParams: SearchParams) {
   return hasActiveSearchParams(searchParams) ? NOINDEX_FOLLOW : undefined;
+}
+
+export function getPublicationRobots(
+  status: PublicationStatus | null | undefined,
+) {
+  return status === "published" ? undefined : NOINDEX_NOFOLLOW;
 }

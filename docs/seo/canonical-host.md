@@ -5,8 +5,8 @@ GuideMyTank's production origin is `https://www.guidemytank.com`.
 ## Application behavior
 
 - `src/lib/seo/site-url.ts` is the single source of truth for absolute GuideMyTank URLs.
-- `SITE_URL` is an optional server-side override. Values using either GuideMyTank hostname are normalized to HTTPS and `www`.
-- Production defaults to the preferred origin. Development defaults to `http://localhost:3000`.
+- Canonical URLs always use the production origin, including in local development and preview deployments.
+- Runtime environment variables cannot override the canonical host.
 - Canonical URLs do not include query strings or fragments.
 - Next.js uses no trailing slash by default and redirects trailing-slash variants.
 - Compatibility species pairs are alphabetically ordered. Reversed pairs receive a permanent redirect.

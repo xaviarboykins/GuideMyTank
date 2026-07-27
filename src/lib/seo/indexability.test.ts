@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getPublicationRobots,
   getSearchVariantRobots,
   hasActiveSearchParams,
   NOINDEX_FOLLOW,
+  NOINDEX_NOFOLLOW,
 } from "./indexability";
 
 describe("SEO indexability", () => {
@@ -19,5 +21,13 @@ describe("SEO indexability", () => {
     expect(getSearchVariantRobots({ q: "neon tetra" })).toEqual(
       NOINDEX_FOLLOW,
     );
+  });
+
+  it("keeps only published content indexable", () => {
+    expect(getPublicationRobots("published")).toBeUndefined();
+    expect(getPublicationRobots("draft")).toEqual(NOINDEX_NOFOLLOW);
+    expect(getPublicationRobots("archived")).toEqual(NOINDEX_NOFOLLOW);
+    expect(getPublicationRobots("rejected")).toEqual(NOINDEX_NOFOLLOW);
+    expect(getPublicationRobots(null)).toEqual(NOINDEX_NOFOLLOW);
   });
 });

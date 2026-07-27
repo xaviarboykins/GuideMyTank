@@ -31,6 +31,7 @@ const [
   speciesResult,
   guidesResult,
   articlesResult,
+  guideMetadataResult,
   guideSpeciesResult,
   articleGuidesResult,
   articleArticlesResult,
@@ -39,7 +40,10 @@ const [
   supabase.from("care_guides").select("id,slug,status,species_id"),
   supabase
     .from("articles")
-    .select("id,slug,status,include_products,product_category"),
+    .select("id,slug,status,content_type,include_products,product_category"),
+  supabase
+    .from("programmatic_guide_metadata")
+    .select("article_id,generation_metadata"),
   supabase
     .from("care_guide_related_species")
     .select("care_guide_id,species_id"),
@@ -55,6 +59,7 @@ const error =
   speciesResult.error ??
   guidesResult.error ??
   articlesResult.error ??
+  guideMetadataResult.error ??
   guideSpeciesResult.error ??
   articleGuidesResult.error ??
   articleArticlesResult.error;
@@ -63,10 +68,40 @@ if (error) {
   throw new Error(`Unable to load internal-link audit data: ${error.message}`);
 }
 
+const guideMetadata = new Map(
+  (guideMetadataResult.data ?? []).map((item) => [
+    item.article_id,
+    item.generation_metadata,
+  ]),
+);
+
+function generatedLinks(articleId) {
+  const metadata = guideMetadata.get(articleId);
+  if (
+    !metadata ||
+    typeof metadata !== "object" ||
+    !Array.isArray(metadata.internalLinks)
+  ) {
+    return [];
+  }
+
+  return metadata.internalLinks.flatMap((item) =>
+    item &&
+    typeof item === "object" &&
+    typeof item.href === "string" &&
+    item.href.startsWith("/")
+      ? [item.href]
+      : [],
+  );
+}
+
 const report = generateInternalLinkAudit({
   species: speciesResult.data ?? [],
   careGuides: guidesResult.data ?? [],
-  articles: articlesResult.data ?? [],
+  articles: (articlesResult.data ?? []).map((article) => ({
+    ...article,
+    generated_links: generatedLinks(article.id),
+  })),
   careGuideRelatedSpecies: guideSpeciesResult.data ?? [],
   articleRelatedCareGuides: articleGuidesResult.data ?? [],
   articleRelatedArticles: articleArticlesResult.data ?? [],

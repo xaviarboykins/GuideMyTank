@@ -1,5 +1,8 @@
 import { filterInternalLinkItems } from "./duplicate-filter";
-import { resolveInternalLinkPath } from "./route-resolver";
+import {
+  normalizeInternalPath,
+  resolveInternalLinkPath,
+} from "./route-resolver";
 import {
   getMatchingTopicClusters,
   resolveTopicClusterHub,
@@ -34,6 +37,7 @@ interface RelatedArticle {
     title: string | null;
     summary: string | null;
     status: string;
+    content_type?: string;
   } | null;
 }
 
@@ -50,10 +54,12 @@ export interface ArticlePageLinkInput {
     slug: string;
     includeProducts?: boolean;
     productCategory?: string | null;
+    contentType?: string;
   };
   relatedCareGuides?: ArticleCareGuide[];
   relatedArticles?: RelatedArticle[];
   clusterSpecies?: ArticleClusterSpecies[];
+  generatedInternalLinks?: unknown[];
 }
 
 export interface ArticlePageLinks {
@@ -75,16 +81,83 @@ function excludeSeen(items: InternalLinkItem[], seen: Set<string>) {
   });
 }
 
+const generatedEntityTypes = new Set([
+  "species",
+  "care-guide",
+  "compatibility-report",
+  "article",
+  "guide",
+  "builder",
+  "product-category",
+]);
+
+function getGeneratedLinks(values: unknown[]) {
+  const links = values.flatMap((value): InternalLinkItem[] => {
+    if (
+      !value ||
+      typeof value !== "object" ||
+      !("type" in value) ||
+      !("title" in value) ||
+      !("href" in value) ||
+      typeof value.type !== "string" ||
+      !generatedEntityTypes.has(value.type) ||
+      typeof value.title !== "string" ||
+      typeof value.href !== "string"
+    ) {
+      return [];
+    }
+
+    const href = normalizeInternalPath(value.href);
+    if (!href) return [];
+
+    const entityType = value.type as InternalLinkItem["entityType"];
+    const relationship =
+      entityType === "care-guide"
+        ? "care-guide"
+        : entityType === "compatibility-report"
+          ? "related-compatibility"
+          : entityType === "builder"
+            ? "builder-action"
+            : entityType === "product-category"
+              ? "product-category"
+              : "related-content";
+
+    return [{
+      entityType,
+      entityId: href,
+      title: value.title,
+      href,
+      relationship,
+    }];
+  });
+
+  return {
+    species: links.filter((item) => item.entityType === "species"),
+    careGuides: links.filter((item) => item.entityType === "care-guide"),
+    compatibilityReports: links.filter(
+      (item) => item.entityType === "compatibility-report",
+    ),
+    relatedArticles: links.filter((item) =>
+      item.entityType === "article" || item.entityType === "guide",
+    ),
+    builder: links.filter((item) => item.entityType === "builder"),
+    productCategories: links.filter(
+      (item) => item.entityType === "product-category",
+    ),
+  };
+}
+
 export function buildArticlePageLinks({
   article,
   relatedCareGuides = [],
   relatedArticles = [],
   clusterSpecies = [],
+  generatedInternalLinks = [],
 }: ArticlePageLinkInput): ArticlePageLinks {
   const source = {
-    entityType: "article" as const,
+    entityType: article.contentType === "guide" ? "guide" as const : "article" as const,
     entityId: article.id,
-    href: `/learning-center/${article.slug}`,
+    href: article.contentType === "guide" ? `/learning-center/guides/${article.slug}` : `/learning-center/${article.slug}`,
   };
   const publishedGuides = relatedCareGuides.flatMap((item) =>
     item.care_guide?.status === "published" &&
@@ -197,14 +270,15 @@ export function buildArticlePageLinks({
     ) {
       return [];
     }
+    const entityType = item.related_article.content_type === "guide" ? "guide" as const : "article" as const;
     const href = resolveInternalLinkPath({
-      entityType: "article",
+      entityType,
       slug: item.related_article.slug,
     });
     return href
       ? [
           {
-            entityType: "article" as const,
+            entityType,
             entityId: item.related_article_id,
             title: item.related_article.title ?? "Aquarium Article",
             href,
@@ -253,6 +327,7 @@ export function buildArticlePageLinks({
         (item) => item.href === hub.href,
       ),
   );
+  const generated = getGeneratedLinks(generatedInternalLinks);
   const seen = new Set<string>();
   const filter = (items: InternalLinkItem[], limit?: number) =>
     excludeSeen(
@@ -262,12 +337,21 @@ export function buildArticlePageLinks({
 
   return {
     clusterSpecies: filter(clusterSpeciesLinks, 10),
-    species: filter(speciesWithClusterContext, 4),
-    careGuides: filter(careGuides, 4),
-    compatibilityReports: filter(compatibilityReports, 4),
-    relatedArticles: filter(articleLinks, 4),
+    species: filter([...speciesWithClusterContext, ...generated.species], 4),
+    careGuides: filter([...careGuides, ...generated.careGuides], 4),
+    compatibilityReports: filter(
+      [...compatibilityReports, ...generated.compatibilityReports],
+      4,
+    ),
+    relatedArticles: filter(
+      [...articleLinks, ...generated.relatedArticles],
+      4,
+    ),
     topicClusters: filter(topicClusters, 1),
-    builder: filter(builder, 1),
-    productCategories: filter(productCategories, 1),
+    builder: filter([...builder, ...generated.builder], 1),
+    productCategories: filter(
+      [...productCategories, ...generated.productCategories],
+      1,
+    ),
   };
 }

@@ -21,6 +21,7 @@ export interface SpeciesPageArticle {
   slug: string | null;
   title: string | null;
   summary: string | null;
+  content_type?: string;
 }
 
 export interface SpeciesPageLinkInput {
@@ -132,9 +133,12 @@ export function buildSpeciesPageLinks({
     entityType: "species",
     slug: currentSpecies.slug,
   });
-  const articleSlugs = new Set(
+  const learningContentSlugs = new Set(
     matchedClusters.flatMap(
-      (cluster) => cluster.articles?.map((article) => article.slug) ?? [],
+      (cluster) => [
+        ...(cluster.articles?.map((article) => article.slug) ?? []),
+        ...(cluster.guides?.map((guide) => guide.slug) ?? []),
+      ],
     ),
   );
   const articleLinks = resolveRelatedContent(
@@ -144,14 +148,17 @@ export function buildSpeciesPageLinks({
       speciesSlugs: [currentSpecies.slug],
     },
     articles.flatMap((article) =>
-      article.slug && articleSlugs.has(article.slug)
+      article.slug && learningContentSlugs.has(article.slug)
         ? [
             {
               entityId: article.id,
               title: article.title ?? "Aquarium Article",
               description: article.summary ?? undefined,
               target: {
-                entityType: "article" as const,
+                entityType:
+                  article.content_type === "guide"
+                    ? "guide" as const
+                    : "article" as const,
                 slug: article.slug,
               },
               explicitRelationship: true,

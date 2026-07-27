@@ -1,59 +1,64 @@
 /* eslint-disable @next/next/no-img-element */
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { GuideCard } from "@/components/guides/guide-card";
 import { listPublishedArticles } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
-import { getSearchVariantRobots } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { listPublishedGuides } from "@/lib/guides/repository";
+import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";
+
+const LEARNING_CENTER_PATH = "/learning-center";
+const LEARNING_CENTER_TITLE = "Learning Center";
+const LEARNING_CENTER_DESCRIPTION =
+  "Practical freshwater aquarium articles covering fish care, aquarium planning, equipment, and responsible livestock choices.";
 
 const pageMetadata = buildPageMetadata({
   title: "Aquarium Learning Center",
   description: "Practical freshwater aquarium articles about fish care, aquarium setup, water quality, equipment, and responsible livestock planning.",
-  path: "/learning-center",
+  path: LEARNING_CENTER_PATH,
 });
 
 export const revalidate = 3600;
 
-type LearningCenterPageProps = { searchParams: Promise<{ q?: string; category?: string }> };
+export const metadata = pageMetadata;
 
-export async function generateMetadata({ searchParams }: LearningCenterPageProps): Promise<Metadata> {
-  return { ...pageMetadata, robots: getSearchVariantRobots(await searchParams) };
-}
-
-export default async function LearningCenterPage({ searchParams }: LearningCenterPageProps) {
-  const filters = await searchParams;
-  const query = filters.q?.trim().toLocaleLowerCase() ?? "";
-  const category = filters.category?.trim() ?? "";
-  const allArticles = await listPublishedArticles();
-  const categories = [...new Map(allArticles.flatMap((article) => article.article_category_assignments.map((assignment) => [assignment.article_categories.slug, assignment.article_categories.name] as const))).entries()].sort((a, b) => a[1].localeCompare(b[1]));
-  const articles = allArticles.filter((article) => {
-    const matchesQuery = !query || article.title?.toLocaleLowerCase().includes(query) || article.summary?.toLocaleLowerCase().includes(query);
-    const matchesCategory = !category || article.article_category_assignments.some((assignment) => assignment.article_categories.slug === category);
-    return matchesQuery && matchesCategory;
+export default async function LearningCenterPage() {
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: LEARNING_CENTER_TITLE, path: LEARNING_CENTER_PATH },
+  ];
+  const schemaEntities = buildCollectionPageEntities({
+    path: LEARNING_CENTER_PATH,
+    name: LEARNING_CENTER_TITLE,
+    description: LEARNING_CENTER_DESCRIPTION,
+    breadcrumbs,
   });
+  const [allArticles, allGuides] = await Promise.all([listPublishedArticles(), listPublishedGuides()]);
+  const articles = allArticles.slice(0, 6);
   const featuredImages = articles.map((article) => article.article_images.find((image) => image.image_id === article.featured_image_id) ?? article.article_images[0]).filter(Boolean);
-  const imageUrls = await createPublishedContentImageSignedUrls(featuredImages.map((image) => image.content_images.storage_path));
+  const firstGuideImages = allGuides.map((guide) => guide.article_images.toSorted((a, b) => a.display_order - b.display_order)[0]).filter(Boolean);
+  const imageUrls = await createPublishedContentImageSignedUrls([...featuredImages, ...firstGuideImages].map((image) => image.content_images.storage_path));
+  const guideCard = (guide: (typeof allGuides)[number]) => {
+    const image = guide.article_images.toSorted((a, b) => a.display_order - b.display_order)[0];
+    return <GuideCard key={guide.id} guide={guide} imageUrl={image ? imageUrls.get(image.content_images.storage_path) : undefined} imageAlt={image?.content_images.alt_text} />;
+  };
 
   return <PageContainer>
-    <PageHeader eyebrow="Aquarium Education" title="Learning Center" description="Practical freshwater aquarium articles covering fish care, aquarium planning, equipment, and responsible livestock choices." />
+    <JsonLd entities={schemaEntities} />
+    <ContentBreadcrumbs items={breadcrumbs} />
+    <PageHeader eyebrow="Aquarium Education" title={LEARNING_CENTER_TITLE} description={LEARNING_CENTER_DESCRIPTION} />
     <div className="mt-6">
-      <Button variant="outline" asChild>
-        <Link href="/care-guides">Browse Care Guides</Link>
-      </Button>
+      <div className="flex flex-wrap gap-2"><Button asChild><Link href="/learning-center/articles">Browse Articles</Link></Button><Button variant="outline" asChild><Link href="/learning-center/guides">Browse Guides</Link></Button><Button variant="outline" asChild><Link href="/care-guides">Browse Care Guides</Link></Button></div>
     </div>
-    <form action="/learning-center" method="get" role="search" className="mt-6 grid gap-3 border border-border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,0.35fr)_auto]">
-      <label className="space-y-1"><span className="text-sm font-medium">Search articles</span><Input name="q" defaultValue={filters.q ?? ""} placeholder="Search titles and summaries" /></label>
-      <label className="space-y-1"><span className="text-sm font-medium">Category</span><select name="category" defaultValue={category} className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm"><option value="">All categories</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
-      <div className="flex items-end gap-2"><Button type="submit">Filter</Button>{query || category ? <Button variant="outline" asChild><Link href="/learning-center">Clear</Link></Button> : null}</div>
-    </form>
     <section className="mt-8" aria-labelledby="published-articles">
       <div className="mb-4 flex items-end justify-between gap-4">
-        <div><h2 id="published-articles" className="text-2xl font-semibold">Latest articles</h2><p className="mt-1 text-sm text-muted-foreground">Showing {articles.length} of {allArticles.length} published {allArticles.length === 1 ? "article" : "articles"}</p></div>
+        <div><h2 id="published-articles" className="text-2xl font-semibold">Latest articles</h2><p className="mt-1 text-sm text-muted-foreground">Recently published aquarium education.</p></div>
       </div>
       {articles.length ? <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{articles.map((article) => {
         const image = article.article_images.find((item) => item.image_id === article.featured_image_id) ?? article.article_images[0];
@@ -69,7 +74,9 @@ export default async function LearningCenterPage({ searchParams }: LearningCente
             </div>
           </Link>
         </article>;
-      })}</div> : <div className="border border-border bg-card p-8"><h3 className="font-semibold">{allArticles.length ? "No articles match these filters" : "No published articles yet"}</h3><p className="mt-2 text-muted-foreground">{allArticles.length ? "Try another search or clear the selected category." : "Published aquarium education articles will appear here."}</p>{allArticles.length ? <Button className="mt-4" variant="outline" asChild><Link href="/learning-center">Clear filters</Link></Button> : null}</div>}
+      })}</div> : <div className="border border-border bg-card p-8"><h3 className="font-semibold">No published articles yet</h3><p className="mt-2 text-muted-foreground">Published aquarium education articles will appear here.</p></div>}
     </section>
+    {allGuides.some((guide) => guide.is_featured) ? <section className="mt-10 border-t border-border pt-8" aria-labelledby="featured-guides"><div className="mb-4 flex items-end justify-between"><div><h2 id="featured-guides" className="text-2xl font-semibold">Featured Guides</h2><p className="mt-1 text-sm text-muted-foreground">Selected data-backed aquarium planning resources.</p></div><Button asChild variant="outline"><Link href="/learning-center/guides">Browse all Guides</Link></Button></div><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{allGuides.filter((guide) => guide.is_featured).slice(0, 3).map(guideCard)}</div></section> : null}
+    {allGuides.length ? <section className={allGuides.some((guide) => guide.is_featured) ? "mt-8" : "mt-10 border-t border-border pt-8"} aria-labelledby="latest-guides"><div className="mb-4 flex items-end justify-between"><div><h2 id="latest-guides" className="text-2xl font-semibold">Latest Guides</h2><p className="mt-1 text-sm text-muted-foreground">Recently published comparisons and planning Guides.</p></div></div><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{allGuides.slice(0, 6).map(guideCard)}</div></section> : null}
   </PageContainer>;
 }

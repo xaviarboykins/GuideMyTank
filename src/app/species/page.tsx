@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type Species = {
   id: string;
@@ -12,15 +13,15 @@ type Species = {
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Freshwater Fish Species Index | GuideMyTank",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Freshwater Fish Species Index",
   description:
     "Browse freshwater aquarium species profiles with care requirements, water parameters, and compatibility data.",
-  alternates: { canonical: "/species" },
-};
+  path: "/species",
+});
 
 export default async function SpeciesIndexPage() {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   const { data: species, error } = await supabase
     .from("species")

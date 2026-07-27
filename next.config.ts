@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
+  typescript: {
+    tsconfigPath: isProduction ? "tsconfig.build.json" : "tsconfig.json",
+  },
   async headers() {
     return [
       {

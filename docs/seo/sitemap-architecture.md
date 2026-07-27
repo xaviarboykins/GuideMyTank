@@ -9,7 +9,7 @@ GuideMyTank uses Next.js metadata sitemap routes rather than custom XML generati
 | `/sitemap.xml` | Canonical static pages and public tool/category pages |
 | `/species/sitemap.xml` | Canonical species detail pages |
 | `/care-guides/sitemap.xml` | Published Care Guides only |
-| `/learning-center/sitemap.xml` | Published educational articles only |
+| `/learning-center/sitemap.xml` | Published educational Articles and Programmatic Guides only |
 | `/compatibility/sitemap/[id].xml` | Canonically ordered compatibility pairs, batched at 10,000 URLs |
 
 `robots.txt` lists every active sitemap. Compatibility sitemap URLs are derived from the current species count, so new batches are advertised automatically.

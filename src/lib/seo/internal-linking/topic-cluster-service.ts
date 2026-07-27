@@ -40,6 +40,10 @@ export function getMatchingTopicClusters(
       return includesMember(cluster.articles, context.slug);
     }
 
+    if (context.entityType === "guide") {
+      return includesMember(cluster.guides, context.slug);
+    }
+
     if (context.entityType === "compatibility-report") {
       return context.speciesSlugs?.some((slug) =>
         cluster.compatibilitySpeciesSlugs?.includes(slug),
@@ -129,6 +133,24 @@ export function resolveTopicClusterMembers(
     if (href && availability.articleSlugs.has(member.slug)) {
       items.push({
         entityType: "article",
+        entityId: member.slug,
+        title: member.title,
+        href,
+        description: member.description,
+        relationship: "topic-cluster",
+      });
+    }
+  }
+
+  for (const member of cluster.guides ?? []) {
+    const href = resolveInternalLinkPath({
+      entityType: "guide",
+      slug: member.slug,
+    });
+
+    if (href && availability.guideSlugs.has(member.slug)) {
+      items.push({
+        entityType: "guide",
         entityId: member.slug,
         title: member.title,
         href,

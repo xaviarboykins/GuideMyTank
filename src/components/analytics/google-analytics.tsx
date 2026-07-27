@@ -1,5 +1,7 @@
 import Script from "next/script";
 
+import { AnalyticsPageView } from "./analytics-page-view";
+
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export function GoogleAnalytics() {
@@ -25,10 +27,11 @@ export function GoogleAnalytics() {
           gtag('js', new Date());
 
           gtag('config', '${GA_MEASUREMENT_ID}', {
-            page_path: window.location.pathname,
+            send_page_view: false,
           });
         `}
       </Script>
+      <AnalyticsPageView measurementId={GA_MEASUREMENT_ID} />
     </>
   );
 }

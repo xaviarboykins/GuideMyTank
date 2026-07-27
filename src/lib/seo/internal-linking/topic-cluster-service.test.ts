@@ -32,6 +32,12 @@ describe("topic cluster matching and resolution", () => {
     ).toContain(popularFishCluster);
     expect(
       getMatchingTopicClusters({
+        entityType: "guide",
+        slug: "betta-splendens-vs-guppy",
+      }),
+    ).toContain(bettaCluster);
+    expect(
+      getMatchingTopicClusters({
         entityType: "compatibility-report",
         speciesSlugs: ["betta-splendens", "neon-tetra"],
       }),
@@ -62,6 +68,7 @@ describe("topic cluster matching and resolution", () => {
         speciesSlugs: new Set(["betta-splendens"]),
         careGuideSlugs: new Set(["betta-splendens"]),
         articleSlugs: new Set(),
+        guideSlugs: new Set(["betta-splendens-vs-guppy"]),
         productCategories: new Set(["heaters"]),
       },
       {
@@ -73,6 +80,7 @@ describe("topic cluster matching and resolution", () => {
 
     expect(links.map((link) => link.href)).toEqual([
       "/care-guides/betta-splendens",
+      "/learning-center/guides/betta-splendens-vs-guppy",
       "/aquarium-builder/products/heaters",
     ]);
   });

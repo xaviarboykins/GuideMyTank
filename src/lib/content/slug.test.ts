@@ -9,6 +9,8 @@ describe("content slugs", () => {
 
   it("rejects reserved and malformed slugs", () => {
     expect(validateContentSlug("admin")).toEqual(expect.arrayContaining([expect.objectContaining({ code: "reserved" })]));
+    expect(validateContentSlug("guides")).toEqual(expect.arrayContaining([expect.objectContaining({ code: "reserved" })]));
+    expect(validateContentSlug("articles")).toEqual(expect.arrayContaining([expect.objectContaining({ code: "reserved" })]));
     expect(validateContentSlug("Bad Slug")).toEqual(expect.arrayContaining([expect.objectContaining({ code: "format" })]));
   });
 });

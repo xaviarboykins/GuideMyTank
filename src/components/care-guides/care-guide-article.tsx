@@ -4,6 +4,7 @@ import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ImageCredit, Rela
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { getSiteUrl } from "@/lib/seo/site-url";
+import type { BreadcrumbItem } from "@/lib/seo/breadcrumbs";
 import type { CareGuidePageLinks } from "@/lib/seo/internal-linking/care-guide-page-links";
 import styles from "./care-guide-article.module.css";
 
@@ -43,12 +44,13 @@ function GuideImage({ assignment, url, className }: { assignment?: ImageAssignme
   );
 }
 
-export function CareGuideArticle({ guide, sections, images, sources, imageUrls, relatedSpecies = [], relatedArticles = [], internalLinks }: {
+export function CareGuideArticle({ guide, sections, images, sources, imageUrls, breadcrumbs, relatedSpecies = [], relatedArticles = [], internalLinks }: {
   guide: { title: string | null; slug: string | null; summary: string | null; quick_facts: Json; published_at: string | null; updated_at: string; species: { common_name: string; scientific_name: string } };
   sections: Section[];
   images: ImageAssignment[];
   sources: SourceAssignment[];
   imageUrls: Map<string, string>;
+  breadcrumbs: readonly BreadcrumbItem[];
   relatedSpecies?: Array<{ species_id: string; relationship_label: string | null; species: { slug: string; common_name: string; scientific_name: string } }>;
   relatedArticles?: Array<{ article_id: string; article: { slug: string | null; title: string | null; summary: string | null; status: string } }>;
   internalLinks?: CareGuidePageLinks;
@@ -67,7 +69,7 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
 
   return (
     <article>
-      <ContentBreadcrumbs items={[{ label: "Home", href: "/" }, { label: "Care Guides", href: "/care-guides" }, { label: guide.species.common_name }]} />
+      <ContentBreadcrumbs items={breadcrumbs} />
       <header>
         <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{guide.species.common_name} Care Guide</p>
         <div className="mt-2 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">

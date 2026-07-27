@@ -9,6 +9,7 @@ export type InternalLinkEntityType =
   | "care-guide"
   | "compatibility-report"
   | "article"
+  | "guide"
   | "builder"
   | "product-category"
   | "topic-cluster";
@@ -50,6 +51,7 @@ export type InternalLinkRouteTarget =
       speciesBSlug: string;
     }
   | { entityType: "article"; slug: string }
+  | { entityType: "guide"; slug: string }
   | { entityType: "builder" }
   | { entityType: "product-category"; category: ProductCategory }
   | { entityType: "topic-cluster"; hubHref: string };
@@ -143,6 +145,7 @@ export interface TopicClusterDefinition {
   hub: InternalLinkRouteTarget;
   species?: readonly TopicClusterMember[];
   articles?: readonly TopicClusterMember[];
+  guides?: readonly TopicClusterMember[];
   careGuides?: readonly TopicClusterMember[];
   compatibilitySpeciesSlugs?: readonly string[];
   productCategories?: readonly ProductCategory[];
@@ -158,6 +161,7 @@ export interface TopicClusterPageContext {
 export interface TopicClusterAvailability {
   speciesSlugs: ReadonlySet<string>;
   articleSlugs: ReadonlySet<string>;
+  guideSlugs: ReadonlySet<string>;
   careGuideSlugs: ReadonlySet<string>;
   productCategories: ReadonlySet<ProductCategory>;
 }

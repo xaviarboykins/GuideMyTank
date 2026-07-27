@@ -153,6 +153,7 @@ export async function getArticlePageLinks(
       slug: content.article.slug!,
       includeProducts: content.article.include_products,
       productCategory: content.article.product_category,
+      contentType: content.article.content_type,
     },
     relatedCareGuides: content.relatedCareGuides,
     relatedArticles: content.relatedArticles,

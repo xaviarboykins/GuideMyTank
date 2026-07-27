@@ -8,6 +8,7 @@ const RESERVED_SLUGS = new Set([
   "auth",
   "care-guides",
   "learning-center",
+  "guides",
   "articles",
   "preview",
   "new",

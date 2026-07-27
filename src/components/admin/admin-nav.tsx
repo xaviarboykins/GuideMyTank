@@ -5,6 +5,7 @@ const adminLinks = [
   ["Content", "/admin/content"],
   ["Care Guides", "/admin/care-guides"],
   ["Articles", "/admin/articles"],
+  ["Guides", "/admin/guides"],
   ["Categories", "/admin/categories"],
   ["Tags", "/admin/tags"],
   ["Images", "/admin/images"],

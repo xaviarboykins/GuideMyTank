@@ -14,11 +14,18 @@ import { ARTICLE_BLOCK_TYPES, validateArticleForPublication } from "./validation
 type ArticleUpdate = Database["public"]["Tables"]["articles"]["Update"];
 type ArticleSectionInsert = Database["public"]["Tables"]["article_sections"]["Insert"];
 
+async function assertArticleTarget(id: string) {
+  if (!(await getAdminArticle(id))) {
+    throw new ContentServiceError("Article not found.", "not_found");
+  }
+}
+
 export async function listPublishedArticles() {
   const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("articles")
     .select("id,title,slug,summary,published_at,updated_at,featured_image_id,article_images(image_id,display_order,content_images(storage_path,alt_text,caption)),article_category_assignments(category_id,article_categories(name,slug)),article_tag_assignments(tag_id,article_tags(name,slug))")
+    .eq("content_type", "article")
     .eq("status", "published")
     .order("published_at", { ascending: false });
   throwContentDatabaseError(error, "list published articles");
@@ -34,6 +41,7 @@ export async function getPublishedArticlesBySlugs(slugs: string[]) {
   const { data, error } = await supabase
     .from("articles")
     .select("id,title,slug,summary")
+    .eq("content_type", "article")
     .eq("status", "published")
     .in("slug", slugs);
 
@@ -48,6 +56,7 @@ export async function getPublishedArticleBySlug(slug: string) {
     .from("articles")
     .select("*")
     .eq("slug", normalizeContentSlug(slug))
+    .eq("content_type", "article")
     .eq("status", "published")
     .maybeSingle();
   throwContentDatabaseError(error, "load the published article");
@@ -58,7 +67,7 @@ export async function getPublishedArticleBySlug(slug: string) {
     supabase.from("article_sources").select("*,sources(*)").eq("article_id", article.id).order("display_order"),
     supabase.from("article_category_assignments").select("*,article_categories(*)").eq("article_id", article.id),
     supabase.from("article_tag_assignments").select("*,article_tags(*)").eq("article_id", article.id),
-    supabase.from("article_related_articles").select("*,related_article:articles!article_related_articles_related_article_id_fkey(id,slug,title,summary,status)").eq("article_id", article.id).order("display_order"),
+    supabase.from("article_related_articles").select("*,related_article:articles!article_related_articles_related_article_id_fkey(id,slug,title,summary,status,content_type)").eq("article_id", article.id).order("display_order"),
     supabase.from("article_related_care_guides").select("*,care_guide:care_guides(id,slug,title,summary,status,species:species!care_guides_species_id_fkey(id,slug,common_name,scientific_name))").eq("article_id", article.id).order("display_order"),
   ]);
   throwContentDatabaseError(sections.error, "load published article sections");
@@ -74,7 +83,11 @@ export async function getPublishedArticleBySlug(slug: string) {
 export async function createArticleDraft(title = "Untitled Article") {
   await assertAdmin();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("articles").insert({ title }).select("*").single();
+  const { data, error } = await supabase
+    .from("articles")
+    .insert({ title, content_type: "article" })
+    .select("*")
+    .single();
   throwContentDatabaseError(error, "create the article draft");
   return data;
 }
@@ -82,7 +95,11 @@ export async function createArticleDraft(title = "Untitled Article") {
 export async function getAdminArticle(id: string) {
   await assertAdmin();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("articles").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   throwContentDatabaseError(error, "load the article");
   return data;
 }
@@ -91,7 +108,11 @@ export async function getArticleEditorData(id: string) {
   await assertAdmin();
   const supabase = await createClient();
   const [article, sections, images, sources, categories, tags, allCategories, allTags] = await Promise.all([
-    supabase.from("articles").select("*").eq("id", id).maybeSingle(),
+    supabase
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle(),
     supabase.from("article_sections").select("*").eq("article_id", id).order("display_order"),
     supabase.from("article_images").select("*,content_images(*)").eq("article_id", id).order("display_order"),
     supabase.from("article_sources").select("*,sources(*)").eq("article_id", id).order("display_order"),
@@ -115,7 +136,11 @@ export async function getArticleEditorData(id: string) {
 export async function listAdminArticles(query = "", status?: string) {
   await assertAdmin();
   const supabase = await createClient();
-  let request = supabase.from("articles").select("*").order("updated_at", { ascending: false });
+  let request = supabase
+    .from("articles")
+    .select("*")
+    .eq("content_type", "article")
+    .order("updated_at", { ascending: false });
   const normalizedQuery = query.replace(/[%_,().]/g, " ").trim();
   if (normalizedQuery) request = request.or(`title.ilike.%${normalizedQuery}%,slug.ilike.%${normalizedQuery}%`);
   if (status) request = request.eq("status", status);
@@ -132,7 +157,14 @@ export async function updateArticleDraft(id: string, update: ArticleUpdate) {
   delete safeUpdate.published_at;
   if (typeof safeUpdate.slug === "string") safeUpdate.slug = normalizeContentSlug(safeUpdate.slug) || null;
   const supabase = await createClient();
-  const { data, error } = await supabase.from("articles").update(safeUpdate).eq("id", id).in("status", ["draft", "archived"]).select("*").single();
+  delete safeUpdate.content_type;
+  const { data, error } = await supabase
+    .from("articles")
+    .update(safeUpdate)
+    .eq("id", id)
+    .in("status", ["draft", "archived"])
+    .select("*")
+    .single();
   throwContentDatabaseError(error, "save the article");
   return data;
 }
@@ -140,13 +172,21 @@ export async function updateArticleDraft(id: string, update: ArticleUpdate) {
 export async function deleteArticleDraft(id: string) {
   await assertAdmin();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("articles").delete().eq("id", id).eq("status", "draft").select("id").maybeSingle();
+  const { data, error } = await supabase
+    .from("articles")
+    .delete()
+    .eq("id", id)
+    .eq("content_type", "article")
+    .eq("status", "draft")
+    .select("id")
+    .maybeSingle();
   throwContentDatabaseError(error, "delete the article draft");
   if (!data) throw new ContentServiceError("Only draft articles can be deleted.", "validation");
 }
 
 export async function saveArticleSections(id: string, sections: Omit<ArticleSectionInsert, "article_id">[]) {
   await assertAdmin();
+  await assertArticleTarget(id);
   for (const section of sections) {
     if (!ARTICLE_BLOCK_TYPES.includes(section.block_type as (typeof ARTICLE_BLOCK_TYPES)[number])) {
       throw new ContentServiceError("Unknown article block type.", "validation");
@@ -175,7 +215,12 @@ export async function publishArticle(id: string) {
   await assertAdmin();
   const supabase = await createClient();
   const [articleResult, sectionsResult] = await Promise.all([
-    supabase.from("articles").select("*").eq("id", id).maybeSingle(),
+    supabase
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .eq("content_type", "article")
+      .maybeSingle(),
     supabase.from("article_sections").select("block_type,content").eq("article_id", id),
   ]);
   throwContentDatabaseError(articleResult.error, "load the article");
@@ -191,7 +236,11 @@ export async function publishArticle(id: string) {
     slugAvailable,
   });
   if (!validation.valid) return validation;
-  const { error } = await supabase.from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase
+    .from("articles")
+    .update({ status: "published", published_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("content_type", "article");
   throwContentDatabaseError(error, "publish the article");
   return validation;
 }
@@ -199,12 +248,17 @@ export async function publishArticle(id: string) {
 export async function archiveArticle(id: string) {
   await assertAdmin();
   const supabase = await createClient();
-  const { error } = await supabase.from("articles").update({ status: "archived" }).eq("id", id);
+  const { error } = await supabase
+    .from("articles")
+    .update({ status: "archived" })
+    .eq("id", id)
+    .eq("content_type", "article");
   throwContentDatabaseError(error, "archive the article");
 }
 
 export async function assignArticleCategory(articleId: string, categoryId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_category_assignments").upsert({ article_id: articleId, category_id: categoryId });
   throwContentDatabaseError(error, "assign the article category");
@@ -212,6 +266,7 @@ export async function assignArticleCategory(articleId: string, categoryId: strin
 
 export async function removeArticleCategory(articleId: string, categoryId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_category_assignments").delete().eq("article_id", articleId).eq("category_id", categoryId);
   throwContentDatabaseError(error, "remove the article category");
@@ -219,6 +274,7 @@ export async function removeArticleCategory(articleId: string, categoryId: strin
 
 export async function assignArticleTag(articleId: string, tagId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_tag_assignments").upsert({ article_id: articleId, tag_id: tagId });
   throwContentDatabaseError(error, "assign the article tag");
@@ -226,6 +282,7 @@ export async function assignArticleTag(articleId: string, tagId: string) {
 
 export async function removeArticleTag(articleId: string, tagId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_tag_assignments").delete().eq("article_id", articleId).eq("tag_id", tagId);
   throwContentDatabaseError(error, "remove the article tag");
@@ -233,6 +290,7 @@ export async function removeArticleTag(articleId: string, tagId: string) {
 
 export async function addArticleImage(articleId: string, imageId: string, displayOrder: number) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_images").insert({ article_id: articleId, image_id: imageId, display_order: displayOrder });
   throwContentDatabaseError(error, "add the article image");
@@ -240,6 +298,7 @@ export async function addArticleImage(articleId: string, imageId: string, displa
 
 export async function removeArticleImage(articleId: string, imageId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_images").delete().eq("article_id", articleId).eq("image_id", imageId);
   throwContentDatabaseError(error, "remove the article image");
@@ -251,6 +310,7 @@ export async function setArticleFeaturedImage(articleId: string, imageId: string
 
 export async function addArticleSource(articleId: string, sourceId: string, displayOrder: number, citationLabel?: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_sources").insert({
     article_id: articleId,
@@ -263,6 +323,7 @@ export async function addArticleSource(articleId: string, sourceId: string, disp
 
 export async function removeArticleSource(articleId: string, sourceId: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_sources").delete().eq("article_id", articleId).eq("source_id", sourceId);
   throwContentDatabaseError(error, "remove the article source");
@@ -270,6 +331,7 @@ export async function removeArticleSource(articleId: string, sourceId: string) {
 
 export async function addRelatedArticle(articleId: string, relatedArticleId: string, displayOrder: number, relationshipLabel?: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   if (articleId === relatedArticleId) throw new ContentServiceError("An article cannot relate to itself.", "validation");
   const supabase = await createClient();
   const { error } = await supabase.from("article_related_articles").insert({
@@ -283,6 +345,7 @@ export async function addRelatedArticle(articleId: string, relatedArticleId: str
 
 export async function addRelatedCareGuide(articleId: string, careGuideId: string, displayOrder: number, relationshipLabel?: string) {
   await assertAdmin();
+  await assertArticleTarget(articleId);
   const supabase = await createClient();
   const { error } = await supabase.from("article_related_care_guides").insert({
     article_id: articleId,

@@ -81,7 +81,7 @@ const images = [
 async function required(result, label) { if (result.error) throw new Error(`${label}: ${result.error.message}`); return result.data; }
 
 async function main() {
-  let article = await required(await supabase.from("articles").select("*").eq("slug", slug).maybeSingle(), "Find article");
+  let article = await required(await supabase.from("articles").select("*").eq("slug", slug).eq("content_type", "article").maybeSingle(), "Find article");
   if (article?.status === "published" && process.env.REFRESH_POPULAR_FISH_IMAGES !== "1") {
     const sections = await required(await supabase.from("article_sections").select("id", { count: "exact" }).eq("article_id", article.id), "Verify sections");
     console.log(`Article already published (${article.id}); sections=${sections.length}.`);
@@ -89,7 +89,7 @@ async function main() {
   }
   if (article?.status === "published") article = await required(await supabase.from("articles").update({ status: "archived" }).eq("id", article.id).select("*").single(), "Archive article for image update");
   const values = { title: "Most Popular Freshwater Aquarium Fish in 2026", slug, summary: "A practical look at ten of 2026's most popular freshwater aquarium fish, why aquarists choose them, and the care requirements beginners should understand before buying.", status: "draft", seo_title: "10 Most Popular Freshwater Aquarium Fish in 2026", meta_description: "Compare 10 popular freshwater aquarium fish for 2026, including guppies, bettas, neon tetras, corydoras, mollies, platies, danios, and more.", canonical_url: `https://www.guidemytank.com/articles/${slug}`, is_featured: true };
-  article = article ? await required(await supabase.from("articles").update(values).eq("id", article.id).select("*").single(), "Update draft") : await required(await supabase.from("articles").insert(values).select("*").single(), "Create draft");
+  article = article ? await required(await supabase.from("articles").update(values).eq("id", article.id).eq("content_type", "article").select("*").single(), "Update draft") : await required(await supabase.from("articles").insert({ ...values, content_type: "article" }).select("*").single(), "Create draft");
   await required(await supabase.from("article_sections").delete().eq("article_id", article.id), "Reset sections");
   await required(await supabase.from("article_sections").insert(blocks.map(([block_type, content], display_order) => ({ article_id: article.id, block_type, content, display_order }))), "Create sections");
   const savedSources = [];

@@ -39,7 +39,8 @@ const [
   supabase.from("care_guides").select("id,slug,status,species_id"),
   supabase
     .from("articles")
-    .select("id,slug,status,include_products,product_category"),
+    .select("id,slug,status,include_products,product_category")
+    .eq("content_type", "article"),
   supabase
     .from("care_guide_related_species")
     .select("care_guide_id,species_id"),

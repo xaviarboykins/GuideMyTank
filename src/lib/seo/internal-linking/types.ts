@@ -9,6 +9,7 @@ export type InternalLinkEntityType =
   | "care-guide"
   | "compatibility-report"
   | "article"
+  | "guide"
   | "builder"
   | "product-category"
   | "topic-cluster";
@@ -50,6 +51,7 @@ export type InternalLinkRouteTarget =
       speciesBSlug: string;
     }
   | { entityType: "article"; slug: string }
+  | { entityType: "guide"; slug: string }
   | { entityType: "builder" }
   | { entityType: "product-category"; category: ProductCategory }
   | { entityType: "topic-cluster"; hubHref: string };

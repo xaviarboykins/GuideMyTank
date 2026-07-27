@@ -6,7 +6,10 @@ async function getAdminCounts() {
   const supabase = await createClient();
   const [careGuides, articles, images] = await Promise.all([
     supabase.from("care_guides").select("id", { count: "exact", head: true }),
-    supabase.from("articles").select("id", { count: "exact", head: true }),
+    supabase
+      .from("articles")
+      .select("id", { count: "exact", head: true })
+      .eq("content_type", "article"),
     supabase.from("content_images").select("id", { count: "exact", head: true }),
   ]);
 

@@ -34,6 +34,7 @@ interface RelatedArticle {
     title: string | null;
     summary: string | null;
     status: string;
+    content_type?: string;
   } | null;
 }
 
@@ -50,6 +51,7 @@ export interface ArticlePageLinkInput {
     slug: string;
     includeProducts?: boolean;
     productCategory?: string | null;
+    contentType?: string;
   };
   relatedCareGuides?: ArticleCareGuide[];
   relatedArticles?: RelatedArticle[];
@@ -82,9 +84,9 @@ export function buildArticlePageLinks({
   clusterSpecies = [],
 }: ArticlePageLinkInput): ArticlePageLinks {
   const source = {
-    entityType: "article" as const,
+    entityType: article.contentType === "guide" ? "guide" as const : "article" as const,
     entityId: article.id,
-    href: `/learning-center/${article.slug}`,
+    href: article.contentType === "guide" ? `/learning-center/guides/${article.slug}` : `/learning-center/${article.slug}`,
   };
   const publishedGuides = relatedCareGuides.flatMap((item) =>
     item.care_guide?.status === "published" &&
@@ -197,14 +199,15 @@ export function buildArticlePageLinks({
     ) {
       return [];
     }
+    const entityType = item.related_article.content_type === "guide" ? "guide" as const : "article" as const;
     const href = resolveInternalLinkPath({
-      entityType: "article",
+      entityType,
       slug: item.related_article.slug,
     });
     return href
       ? [
           {
-            entityType: "article" as const,
+            entityType,
             entityId: item.related_article_id,
             title: item.related_article.title ?? "Aquarium Article",
             href,

@@ -58,6 +58,10 @@ export function resolveInternalLinkPath(
       return isRouteSlug(target.slug)
         ? `/learning-center/${target.slug}`
         : null;
+    case "guide":
+      return isRouteSlug(target.slug)
+        ? `/learning-center/guides/${target.slug}`
+        : null;
     case "builder":
       return "/aquarium-builder";
     case "product-category":

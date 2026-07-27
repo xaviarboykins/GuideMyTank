@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  addArticleSource, archiveArticle, assignArticleCategory, assignArticleTag, publishArticle,
+  addArticleSource, archiveArticle, assignArticleCategory, assignArticleTag, getAdminArticle, publishArticle,
   removeArticleCategory, removeArticleImage, removeArticleSource, removeArticleTag,
   saveArticleSections, setArticleFeaturedImage, updateArticleDraft,
 } from "@/lib/articles/service";
@@ -12,6 +12,7 @@ import { createSource } from "@/lib/content-sources/service";
 import type { ValidationIssue } from "@/lib/content/types";
 import type { Json } from "@/types/database.types";
 import { isProductCategory } from "@/lib/products/types";
+import { archiveGuide, publishGuide } from "@/lib/guides/repository";
 
 type PublishState = { ok: boolean; message: string; issues: ValidationIssue[] };
 
@@ -61,5 +62,5 @@ export async function addArticleSourceAction(id: string, nextOrder: number, form
 }
 export async function removeArticleSourceAction(id: string, formData: FormData) { return run(id, "Source removed.", () => removeArticleSource(id, String(formData.get("sourceId") ?? ""))); }
 
-export async function publishArticleAction(id: string, state: PublishState): Promise<PublishState> { void state; try { const result = await publishArticle(id); if (!result.valid) return { ok: false, message: "The article is not ready to publish.", issues: result.issues }; revalidatePath(`/admin/articles/${id}`); return { ok: true, message: "Article published.", issues: [] }; } catch (error) { return { ok: false, message: getSafeContentError(error).message, issues: [] }; } }
-export async function archiveArticleAction(id: string) { await archiveArticle(id); revalidatePath(`/admin/articles/${id}`); }
+export async function publishArticleAction(id: string, state: PublishState): Promise<PublishState> { void state; try { const item = await getAdminArticle(id); const isGuide = item?.content_type === "guide"; const result = isGuide ? await publishGuide(id) : await publishArticle(id); if (!result.valid) return { ok: false, message: `The ${isGuide ? "Guide" : "article"} is not ready to publish.`, issues: "issues" in result ? result.issues : [...result.errors, ...result.warnings] }; revalidatePath(`/admin/articles/${id}`); return { ok: true, message: `${isGuide ? "Guide" : "Article"} published.`, issues: [] }; } catch (error) { return { ok: false, message: getSafeContentError(error).message, issues: [] }; } }
+export async function archiveArticleAction(id: string) { const item = await getAdminArticle(id); if (item?.content_type === "guide") await archiveGuide(id); else await archiveArticle(id); revalidatePath(`/admin/articles/${id}`); }

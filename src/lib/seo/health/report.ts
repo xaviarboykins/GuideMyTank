@@ -47,7 +47,10 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
   const [speciesResult, guidesResult, articlesResult, imagesResult, guideSpeciesResult, articleGuidesResult, articleArticlesResult] = await Promise.all([
     supabase.from("species").select("id,slug,common_name,summary").order("slug"),
     supabase.from("care_guides").select("id,title,slug,summary,meta_description,canonical_url,status,species_id"),
-    supabase.from("articles").select("id,title,slug,summary,meta_description,canonical_url,status,include_products,product_category"),
+    supabase
+      .from("articles")
+      .select("id,title,slug,summary,meta_description,canonical_url,status,include_products,product_category")
+      .eq("content_type", "article"),
     supabase.from("content_images").select("id,storage_path,alt_text,width,height"),
     supabase.from("care_guide_related_species").select("care_guide_id,species_id"),
     supabase.from("article_related_care_guides").select("article_id,care_guide_id"),

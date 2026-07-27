@@ -14,8 +14,10 @@ export interface InternalLinkAuditArticle {
   id: string;
   slug: string | null;
   status: string;
+  content_type?: "article" | "guide" | string;
   include_products?: boolean;
   product_category?: string | null;
+  generated_links?: string[];
 }
 
 export interface InternalLinkAuditInput {
@@ -40,12 +42,18 @@ export interface InternalLinkAuditInput {
       | { entityType: "article"; slug: string };
     species?: readonly { slug: string }[];
     articles?: readonly { slug: string }[];
+    guides?: readonly { slug: string }[];
   }[];
 }
 
 export interface InternalLinkAuditPage {
   path: string;
-  entityType: "species" | "care-guide" | "article" | "compatibility-report";
+  entityType:
+    | "species"
+    | "care-guide"
+    | "article"
+    | "guide"
+    | "compatibility-report";
   entityId: string;
   indexable: boolean;
   links: string[];
@@ -215,9 +223,15 @@ export function buildKnownInternalLinkPages(
     ) {
       links.push(`/aquarium-builder/products/${article.product_category}`);
     }
+    links.push(...(article.generated_links ?? []));
+    const isGuide = article.content_type === "guide";
     pages.push({
-      path: article.slug ? `/learning-center/${article.slug}` : `/learning-center/id/${article.id}`,
-      entityType: "article",
+      path: article.slug
+        ? isGuide
+          ? `/learning-center/guides/${article.slug}`
+          : `/learning-center/${article.slug}`
+        : `/learning-center/id/${article.id}`,
+      entityType: isGuide ? "guide" : "article",
       entityId: article.id,
       indexable: article.status === "published" && Boolean(article.slug),
       links,
@@ -236,6 +250,9 @@ export function buildKnownInternalLinkPages(
       ) ?? []),
       ...(cluster.articles?.map(
         (member) => `/learning-center/${member.slug}`,
+      ) ?? []),
+      ...(cluster.guides?.map(
+        (member) => `/learning-center/guides/${member.slug}`,
       ) ?? []),
     ];
     const hubPage = pageMap.get(hubPath);

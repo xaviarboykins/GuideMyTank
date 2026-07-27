@@ -140,4 +140,57 @@ describe("Article page internal links", () => {
     );
     expect(links.topicClusters).toEqual([]);
   });
+
+  it("renders validated generated Guide relationships without duplicates", () => {
+    const links = buildArticlePageLinks({
+      article: {
+        id: "guide-id",
+        slug: "betta-vs-guppy",
+        contentType: "guide",
+      },
+      generatedInternalLinks: [
+        {
+          type: "species",
+          title: "Betta",
+          href: "/species/betta-splendens",
+        },
+        {
+          type: "care-guide",
+          title: "Betta Care Guide",
+          href: "/care-guides/betta-splendens",
+        },
+        {
+          type: "compatibility-report",
+          title: "Betta and Guppy Compatibility",
+          href: "/compatibility/betta-splendens/guppy",
+        },
+        {
+          type: "builder",
+          title: "Aquarium Builder",
+          href: "/aquarium-builder",
+        },
+        {
+          type: "species",
+          title: "Duplicate Betta",
+          href: "/species/betta-splendens",
+        },
+        {
+          type: "species",
+          title: "External",
+          href: "https://example.com/species/external",
+        },
+      ],
+    });
+
+    expect(links.species.map((item) => item.href)).toEqual([
+      "/species/betta-splendens",
+    ]);
+    expect(links.careGuides[0]?.href).toBe(
+      "/care-guides/betta-splendens",
+    );
+    expect(links.compatibilityReports[0]?.href).toBe(
+      "/compatibility/betta-splendens/guppy",
+    );
+    expect(links.builder[0]?.href).toBe("/aquarium-builder");
+  });
 });

@@ -145,6 +145,7 @@ export interface TopicClusterDefinition {
   hub: InternalLinkRouteTarget;
   species?: readonly TopicClusterMember[];
   articles?: readonly TopicClusterMember[];
+  guides?: readonly TopicClusterMember[];
   careGuides?: readonly TopicClusterMember[];
   compatibilitySpeciesSlugs?: readonly string[];
   productCategories?: readonly ProductCategory[];
@@ -160,6 +161,7 @@ export interface TopicClusterPageContext {
 export interface TopicClusterAvailability {
   speciesSlugs: ReadonlySet<string>;
   articleSlugs: ReadonlySet<string>;
+  guideSlugs: ReadonlySet<string>;
   careGuideSlugs: ReadonlySet<string>;
   productCategories: ReadonlySet<ProductCategory>;
 }

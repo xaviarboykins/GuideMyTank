@@ -1,5 +1,8 @@
 import { filterInternalLinkItems } from "./duplicate-filter";
-import { resolveInternalLinkPath } from "./route-resolver";
+import {
+  normalizeInternalPath,
+  resolveInternalLinkPath,
+} from "./route-resolver";
 import {
   getMatchingTopicClusters,
   resolveTopicClusterHub,
@@ -56,6 +59,7 @@ export interface ArticlePageLinkInput {
   relatedCareGuides?: ArticleCareGuide[];
   relatedArticles?: RelatedArticle[];
   clusterSpecies?: ArticleClusterSpecies[];
+  generatedInternalLinks?: unknown[];
 }
 
 export interface ArticlePageLinks {
@@ -77,11 +81,78 @@ function excludeSeen(items: InternalLinkItem[], seen: Set<string>) {
   });
 }
 
+const generatedEntityTypes = new Set([
+  "species",
+  "care-guide",
+  "compatibility-report",
+  "article",
+  "guide",
+  "builder",
+  "product-category",
+]);
+
+function getGeneratedLinks(values: unknown[]) {
+  const links = values.flatMap((value): InternalLinkItem[] => {
+    if (
+      !value ||
+      typeof value !== "object" ||
+      !("type" in value) ||
+      !("title" in value) ||
+      !("href" in value) ||
+      typeof value.type !== "string" ||
+      !generatedEntityTypes.has(value.type) ||
+      typeof value.title !== "string" ||
+      typeof value.href !== "string"
+    ) {
+      return [];
+    }
+
+    const href = normalizeInternalPath(value.href);
+    if (!href) return [];
+
+    const entityType = value.type as InternalLinkItem["entityType"];
+    const relationship =
+      entityType === "care-guide"
+        ? "care-guide"
+        : entityType === "compatibility-report"
+          ? "related-compatibility"
+          : entityType === "builder"
+            ? "builder-action"
+            : entityType === "product-category"
+              ? "product-category"
+              : "related-content";
+
+    return [{
+      entityType,
+      entityId: href,
+      title: value.title,
+      href,
+      relationship,
+    }];
+  });
+
+  return {
+    species: links.filter((item) => item.entityType === "species"),
+    careGuides: links.filter((item) => item.entityType === "care-guide"),
+    compatibilityReports: links.filter(
+      (item) => item.entityType === "compatibility-report",
+    ),
+    relatedArticles: links.filter((item) =>
+      item.entityType === "article" || item.entityType === "guide",
+    ),
+    builder: links.filter((item) => item.entityType === "builder"),
+    productCategories: links.filter(
+      (item) => item.entityType === "product-category",
+    ),
+  };
+}
+
 export function buildArticlePageLinks({
   article,
   relatedCareGuides = [],
   relatedArticles = [],
   clusterSpecies = [],
+  generatedInternalLinks = [],
 }: ArticlePageLinkInput): ArticlePageLinks {
   const source = {
     entityType: article.contentType === "guide" ? "guide" as const : "article" as const,
@@ -256,6 +327,7 @@ export function buildArticlePageLinks({
         (item) => item.href === hub.href,
       ),
   );
+  const generated = getGeneratedLinks(generatedInternalLinks);
   const seen = new Set<string>();
   const filter = (items: InternalLinkItem[], limit?: number) =>
     excludeSeen(
@@ -265,12 +337,21 @@ export function buildArticlePageLinks({
 
   return {
     clusterSpecies: filter(clusterSpeciesLinks, 10),
-    species: filter(speciesWithClusterContext, 4),
-    careGuides: filter(careGuides, 4),
-    compatibilityReports: filter(compatibilityReports, 4),
-    relatedArticles: filter(articleLinks, 4),
+    species: filter([...speciesWithClusterContext, ...generated.species], 4),
+    careGuides: filter([...careGuides, ...generated.careGuides], 4),
+    compatibilityReports: filter(
+      [...compatibilityReports, ...generated.compatibilityReports],
+      4,
+    ),
+    relatedArticles: filter(
+      [...articleLinks, ...generated.relatedArticles],
+      4,
+    ),
     topicClusters: filter(topicClusters, 1),
-    builder: filter(builder, 1),
-    productCategories: filter(productCategories, 1),
+    builder: filter([...builder, ...generated.builder], 1),
+    productCategories: filter(
+      [...productCategories, ...generated.productCategories],
+      1,
+    ),
   };
 }

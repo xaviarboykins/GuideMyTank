@@ -82,7 +82,7 @@ export async function getPublishedGuideBySlug(slug: string) {
   throwContentDatabaseError(error, "load the published Guide");
   if (!article) return null;
 
-  const [sections, images, sources, categories, tags, relatedArticles, relatedCareGuides] =
+  const [sections, images, sources, categories, tags, relatedArticles, relatedCareGuides, generatedLinks] =
     await Promise.all([
       supabase.from("article_sections").select("*").eq("article_id", article.id).order("display_order"),
       supabase.from("article_images").select("*,content_images(*)").eq("article_id", article.id).order("display_order"),
@@ -91,6 +91,9 @@ export async function getPublishedGuideBySlug(slug: string) {
       supabase.from("article_tag_assignments").select("*,article_tags(*)").eq("article_id", article.id),
       supabase.from("article_related_articles").select("*,related_article:articles!article_related_articles_related_article_id_fkey(id,slug,title,summary,status,content_type)").eq("article_id", article.id).order("display_order"),
       supabase.from("article_related_care_guides").select("*,care_guide:care_guides(id,slug,title,summary,status,species:species!care_guides_species_id_fkey(id,slug,common_name,scientific_name))").eq("article_id", article.id).order("display_order"),
+      supabase.rpc("get_published_programmatic_guide_links", {
+        target_article_id: article.id,
+      }),
     ]);
   for (const [result, operation] of [
     [sections, "load published Guide sections"],
@@ -100,6 +103,7 @@ export async function getPublishedGuideBySlug(slug: string) {
     [tags, "load published Guide tags"],
     [relatedArticles, "load related Guide content"],
     [relatedCareGuides, "load related Guide Care Guides"],
+    [generatedLinks, "load generated Guide links"],
   ] as const) throwContentDatabaseError(result.error, operation);
 
   return {
@@ -111,6 +115,9 @@ export async function getPublishedGuideBySlug(slug: string) {
     tags: tags.data ?? [],
     relatedArticles: relatedArticles.data ?? [],
     relatedCareGuides: relatedCareGuides.data ?? [],
+    generatedInternalLinks: Array.isArray(generatedLinks.data)
+      ? generatedLinks.data
+      : [],
   };
 }
 
@@ -123,6 +130,21 @@ export async function listPublishedGuides() {
     .eq("status", "published")
     .order("published_at", { ascending: false });
   throwContentDatabaseError(error, "list published Guides");
+  return data ?? [];
+}
+
+export async function getPublishedGuidesBySlugs(slugs: string[]) {
+  if (!slugs.length) return [];
+
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id,slug,title,summary,content_type")
+    .eq("content_type", "guide")
+    .eq("status", "published")
+    .in("slug", slugs);
+
+  throwContentDatabaseError(error, "load published Guides");
   return data ?? [];
 }
 

@@ -19,6 +19,12 @@ export const topicClusters = [
         title: "Betta Fish Care Guide",
       },
     ],
+    guides: [
+      {
+        slug: "betta-splendens-vs-guppy",
+        title: "Betta vs Guppy",
+      },
+    ],
     compatibilitySpeciesSlugs: ["betta-splendens"],
     productCategories: ["tanks", "filters", "heaters"],
   },

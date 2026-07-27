@@ -1398,6 +1398,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_published_programmatic_guide_links: {
+        Args: {
+          target_article_id: string
+        }
+        Returns: Json
+      }
       create_programmatic_guide_draft: {
         Args: {
           draft_current_content_hash?: string

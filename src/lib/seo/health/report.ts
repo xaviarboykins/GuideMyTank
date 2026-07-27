@@ -6,6 +6,7 @@ import {
   getCanonicalCompatibilityPairCount,
   isCanonicalCompatibilityPair,
 } from "@/lib/compatibility/urls";
+import { isJsonRecord } from "@/lib/content/structured-data";
 import { createClient } from "@/lib/supabase/server";
 
 import { getSiteUrl } from "../site-url";
@@ -14,6 +15,7 @@ import { analyzeSeoImages, analyzeSeoPages } from "./analyze";
 import type { SeoHealthPage, SeoHealthReport } from "./types";
 import { generateInternalLinkAudit } from "../internal-linking/audit";
 import { topicClusters } from "../internal-linking/topic-clusters";
+import type { Json } from "@/types/database.types";
 
 const STATIC_PAGES = [
   ["/", "Homepage", "Aquarium planning tools and freshwater species data."],
@@ -33,6 +35,24 @@ const STATIC_PAGES = [
   ["/disclaimer", "Disclaimer", "GuideMyTank aquarium information disclaimer."],
 ] as const;
 
+function getGeneratedInternalPaths(value: Json | null | undefined) {
+  if (
+    value == null ||
+    !isJsonRecord(value) ||
+    !Array.isArray(value.internalLinks)
+  ) {
+    return [];
+  }
+
+  return value.internalLinks.flatMap((item) =>
+    isJsonRecord(item) &&
+    typeof item.href === "string" &&
+    item.href.startsWith("/")
+      ? [item.href]
+      : [],
+  );
+}
+
 function countByFamily(pages: SeoHealthPage[], sitemapOnly = false) {
   return pages.reduce<Record<string, number>>((counts, page) => {
     if (!page.indexable || (sitemapOnly && !page.inSitemap)) return counts;
@@ -44,32 +64,54 @@ function countByFamily(pages: SeoHealthPage[], sitemapOnly = false) {
 export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
   await assertAdmin();
   const supabase = await createClient();
-  const [speciesResult, guidesResult, articlesResult, imagesResult, guideSpeciesResult, articleGuidesResult, articleArticlesResult] = await Promise.all([
+  const [speciesResult, guidesResult, articlesResult, guideMetadataResult, imagesResult, guideSpeciesResult, articleGuidesResult, articleArticlesResult] = await Promise.all([
     supabase.from("species").select("id,slug,common_name,summary").order("slug"),
     supabase.from("care_guides").select("id,title,slug,summary,meta_description,canonical_url,status,species_id"),
     supabase
       .from("articles")
-      .select("id,title,slug,summary,meta_description,canonical_url,status,include_products,product_category")
-      .eq("content_type", "article"),
+      .select("id,title,slug,summary,meta_description,canonical_url,status,content_type,include_products,product_category"),
+    supabase
+      .from("programmatic_guide_metadata")
+      .select("article_id,generation_metadata"),
     supabase.from("content_images").select("id,storage_path,alt_text,width,height"),
     supabase.from("care_guide_related_species").select("care_guide_id,species_id"),
     supabase.from("article_related_care_guides").select("article_id,care_guide_id"),
     supabase.from("article_related_articles").select("article_id,related_article_id"),
   ]);
 
-  const databaseError = speciesResult.error ?? guidesResult.error ?? articlesResult.error ?? imagesResult.error ?? guideSpeciesResult.error ?? articleGuidesResult.error ?? articleArticlesResult.error;
+  const databaseError = speciesResult.error ?? guidesResult.error ?? articlesResult.error ?? guideMetadataResult.error ?? imagesResult.error ?? guideSpeciesResult.error ?? articleGuidesResult.error ?? articleArticlesResult.error;
   if (databaseError) throw new Error(`Unable to generate SEO health report: ${databaseError.message}`);
 
   const species = speciesResult.data ?? [];
   const guides = guidesResult.data ?? [];
   const articles = articlesResult.data ?? [];
+  const guideMetadata = new Map(
+    (guideMetadataResult.data ?? []).map((item) => [
+      item.article_id,
+      item.generation_metadata,
+    ]),
+  );
   const publishedGuides = guides.filter((item) => item.status === "published" && item.slug);
-  const publishedArticles = articles.filter((item) => item.status === "published" && item.slug);
+  const publishedArticles = articles.filter(
+    (item) =>
+      item.content_type === "article" &&
+      item.status === "published" &&
+      item.slug,
+  );
+  const publishedProgrammaticGuides = articles.filter(
+    (item) =>
+      item.content_type === "guide" &&
+      item.status === "published" &&
+      item.slug,
+  );
   const directoryLinks = [
     ...STATIC_PAGES.map(([path]) => path),
     ...species.map((item) => `/species/${item.slug}`),
     ...publishedGuides.map((item) => `/care-guides/${item.slug}`),
     ...publishedArticles.map((item) => `/learning-center/${item.slug}`),
+    ...publishedProgrammaticGuides.map(
+      (item) => `/learning-center/guides/${item.slug}`,
+    ),
   ];
 
   const pages: SeoHealthPage[] = STATIC_PAGES.map(([path, title, description]) => ({
@@ -110,9 +152,14 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
 
   pages.push(...articles.map((item) => {
     const published = item.status === "published" && Boolean(item.slug);
+    const isGuide = item.content_type === "guide";
     return {
-      path: item.slug ? `/learning-center/${item.slug}` : `/admin/articles/${item.id}`,
-      family: "articles",
+      path: item.slug
+        ? isGuide
+          ? `/learning-center/guides/${item.slug}`
+          : `/learning-center/${item.slug}`
+        : `/admin/articles/${item.id}`,
+      family: isGuide ? "guides" : "articles",
       title: item.title,
       description: item.meta_description ?? item.summary,
       canonical: item.slug ? getSiteUrl(`/learning-center/${item.slug}`) : null,
@@ -141,12 +188,14 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
       species_id,
     })),
     articles: articles.map(
-      ({ id, slug, status, include_products, product_category }) => ({
+      ({ id, slug, status, content_type, include_products, product_category }) => ({
         id,
         slug,
         status,
+        content_type,
         include_products,
         product_category,
+        generated_links: getGeneratedInternalPaths(guideMetadata.get(id)),
       }),
     ),
     careGuideRelatedSpecies: guideSpeciesResult.data ?? [],
@@ -176,7 +225,11 @@ export async function generateSeoHealthReport(): Promise<SeoHealthReport> {
   }
   for (const item of articles) {
     if (!item.slug || !item.canonical_url) continue;
-    const expected = getSiteUrl(`/learning-center/${item.slug}`);
+    const expected = getSiteUrl(
+      item.content_type === "guide"
+        ? `/learning-center/guides/${item.slug}`
+        : `/learning-center/${item.slug}`,
+    );
     if (item.canonical_url !== expected) {
       issues.push({ severity: "warning", category: "stored_canonical_mismatch", urlOrRecord: item.id, description: `Stored canonical ${item.canonical_url} differs from emitted canonical ${expected}.`, suggestedAction: "Clear or update the legacy CMS canonical value." });
     }

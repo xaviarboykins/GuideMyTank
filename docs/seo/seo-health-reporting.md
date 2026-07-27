@@ -22,6 +22,7 @@ No Search Console credentials, production crawl, or paid SEO service is required
 - Missing content-image alt text
 - Indexable page counts by family
 - Sitemap URL counts by family
+- Published Programmatic Guide routes and their validated generated links
 
 Draft and archived sitemap leakage is represented by the general nonindexable-in-sitemap check. The report builds sitemap eligibility from publication status, so correctly excluded records do not generate findings.
 
@@ -33,6 +34,11 @@ Compatibility reports are checked without crawling deployed HTML. The modeled
 graph includes canonical reports, Species accordion links, participant links,
 and available Care Guides. Husbandry classifications belong to the separate
 planned Compatibility Engine Audit.
+
+Programmatic Guides are modeled separately from editorial Articles. Their
+public relationship suggestions come from the generated metadata that passed
+Guide publication validation; Draft and Archived Guide suggestions are never
+exposed publicly.
 
 Run the local internal-link report with `npm run seo:audit-links`. It writes
 `reports/seo/internal-links.json`, which is ignored by Git.

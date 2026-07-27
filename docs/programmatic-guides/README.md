@@ -141,6 +141,11 @@ them to `/learning-center/guides/[slug]`. It can surface relevant species, Care
 Guides, compatibility reports, Articles or Guides, Aquarium Builder links, and
 supported product resources.
 
+For Published Guides, a narrow database function returns only the generated
+`internalLinks` suggestions. The public renderer sends them through the shared
+path validation, deduplication, self-link, and limit filters. All other
+generation metadata and source fingerprints remain admin-only.
+
 The Learning Center keeps Articles and Guides as separate discovery streams.
 Guide cards use the first assigned Guide image by display order.
 

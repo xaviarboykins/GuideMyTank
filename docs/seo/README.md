@@ -53,3 +53,5 @@ maintenance, and the local audit.
 - `seo-health-reporting.md` — repeatable report checks and limitations
 - `search-console-baseline-2026-07.md` — supplied measurement baseline
 - `technical-seo-audit.md` — implemented architecture, validation, risks, and deferred work
+- `evergreen-content-launch.md` — controlled publishing, pilot manifest,
+  production verification, and 30-/60-/90-day monitoring

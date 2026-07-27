@@ -142,11 +142,21 @@ describe("species page internal links", () => {
           title: "Popular Freshwater Fish",
           summary: "Popular species overview.",
         },
+        {
+          id: "guide-id",
+          slug: "betta-splendens-vs-guppy",
+          title: "Betta vs Guppy",
+          summary: "Compare their aquarium requirements.",
+          content_type: "guide",
+        },
       ],
     });
 
-    expect(links.articles[0]?.href).toBe(
-      "/learning-center/most-popular-freshwater-aquarium-fish-2026",
+    expect(links.articles.map((item) => item.href)).toEqual(
+      expect.arrayContaining([
+        "/learning-center/most-popular-freshwater-aquarium-fish-2026",
+        "/learning-center/guides/betta-splendens-vs-guppy",
+      ]),
     );
     expect(links.topicClusters).toEqual([]);
     expect(links.builder[0].href).toBe("/aquarium-builder");

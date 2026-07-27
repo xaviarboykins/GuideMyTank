@@ -3,6 +3,7 @@ import "server-only";
 import { getPublishedCareGuidesForSpeciesSlugs } from "../../care-guides/service";
 import { getSpeciesBySlugs, getSpeciesLinkCandidates } from "../../data/species";
 import { getPublishedArticlesBySlugs } from "../../articles/service";
+import { getPublishedGuidesBySlugs } from "../../guides/repository";
 import {
   buildCompatibilityPageLinks,
   type CompatibilityPageLinks,
@@ -31,7 +32,9 @@ type PublishedCareGuide = NonNullable<
 >;
 type PublishedArticle = NonNullable<
   Awaited<ReturnType<typeof import("../../articles/service").getPublishedArticleBySlug>>
->;
+> & {
+  generatedInternalLinks?: unknown[];
+};
 
 export async function getCompatibilityPageLinks(
   compatibility: CompatibilityResult,
@@ -82,13 +85,24 @@ export async function getSpeciesPageLinks(
       ),
     ),
   ];
-  const articles = await getPublishedArticlesBySlugs(articleSlugs);
+  const guideSlugs = [
+    ...new Set(
+      clusters.flatMap(
+        (cluster) =>
+          cluster.guides?.map((guide) => guide.slug) ?? [],
+      ),
+    ),
+  ];
+  const [articles, guides] = await Promise.all([
+    getPublishedArticlesBySlugs(articleSlugs),
+    getPublishedGuidesBySlugs(guideSlugs),
+  ]);
 
   return buildSpeciesPageLinks({
     currentSpecies,
     candidates,
     compatibility,
-    articles,
+    articles: [...articles, ...guides],
   });
 }
 
@@ -158,5 +172,6 @@ export async function getArticlePageLinks(
     relatedCareGuides: content.relatedCareGuides,
     relatedArticles: content.relatedArticles,
     clusterSpecies,
+    generatedInternalLinks: content.generatedInternalLinks,
   });
 }

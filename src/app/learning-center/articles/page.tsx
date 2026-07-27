@@ -4,16 +4,23 @@ import Link from "next/link";
 
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedArticles } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
-import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { getSearchVariantRobots, hasActiveSearchParams } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";
 
 const PAGE_SIZE = 12;
+const ARTICLES_PATH = "/learning-center/articles";
+const ARTICLES_TITLE = "Aquarium Articles";
+const ARTICLES_DESCRIPTION =
+  "Editorial education about freshwater aquarium care, setup, equipment, and responsible livestock planning.";
 type Props = { searchParams: Promise<{ q?: string; category?: string; page?: string }> };
-const baseMetadata = buildPageMetadata({ title: "Aquarium Articles", description: "Browse practical freshwater aquarium articles covering care, setup, water quality, equipment, and responsible livestock planning.", path: "/learning-center/articles" });
+const baseMetadata = buildPageMetadata({ title: ARTICLES_TITLE, description: "Browse practical freshwater aquarium articles covering care, setup, water quality, equipment, and responsible livestock planning.", path: ARTICLES_PATH });
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   return { ...baseMetadata, robots: getSearchVariantRobots(await searchParams) };
@@ -33,9 +40,28 @@ export default async function ArticlesIndexPage({ searchParams }: Props) {
   const images = articles.map((article) => article.article_images.find((image) => image.image_id === article.featured_image_id) ?? article.article_images[0]).filter(Boolean);
   const imageUrls = await createPublishedContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
   const pageHref = (target: number) => { const params = new URLSearchParams(); if (filters.q) params.set("q", filters.q); if (category) params.set("category", category); params.set("page", String(target)); return `/learning-center/articles?${params}`; };
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: "Learning Center", path: "/learning-center" },
+    { name: "Articles", path: ARTICLES_PATH },
+  ];
+  const schemaEntities = hasActiveSearchParams(filters)
+    ? null
+    : buildCollectionPageEntities({
+        path: ARTICLES_PATH,
+        name: ARTICLES_TITLE,
+        description: ARTICLES_DESCRIPTION,
+        breadcrumbs,
+        visibleItems: articles.map((article) => ({
+          name: article.title,
+          path: `/learning-center/${article.slug}`,
+        })),
+      });
 
   return <PageContainer>
-    <PageHeader eyebrow="Learning Center" title="Aquarium Articles" description="Editorial education about freshwater aquarium care, setup, equipment, and responsible livestock planning." />
+    <JsonLd entities={schemaEntities} />
+    <ContentBreadcrumbs items={breadcrumbs} />
+    <PageHeader eyebrow="Learning Center" title={ARTICLES_TITLE} description={ARTICLES_DESCRIPTION} />
     <form action="/learning-center/articles" role="search" className="mt-6 grid gap-3 border border-border bg-card p-4 sm:grid-cols-[1fr_14rem_auto]">
       <label className="space-y-1"><span className="text-sm font-medium">Search Articles</span><Input name="q" defaultValue={filters.q} placeholder="Search titles and summaries" /></label>
       <label className="space-y-1"><span className="text-sm font-medium">Category</span><select name="category" defaultValue={category} className="h-8 w-full rounded-lg border border-input bg-background px-2 text-sm"><option value="">All categories</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>

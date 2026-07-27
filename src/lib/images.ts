@@ -13,3 +13,7 @@ export function getSpeciesImage(slug: string) {
     ? `/species/${slug}.webp`
     : SPECIES_PLACEHOLDER_IMAGE;
 }
+
+export function hasSpeciesImage(slug: string) {
+  return AVAILABLE_SPECIES_IMAGES.includes(slug);
+}

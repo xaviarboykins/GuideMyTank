@@ -2,18 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { GuideCard } from "@/components/guides/guide-card";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { listPublishedGuides } from "@/lib/guides/repository";
-import { getSearchVariantRobots } from "@/lib/seo/indexability";
+import { getSearchVariantRobots, hasActiveSearchParams } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";
 
 const PAGE_SIZE = 12;
+const GUIDES_PATH = "/learning-center/guides";
+const GUIDES_TITLE = "Aquarium Guides";
+const GUIDES_DESCRIPTION =
+  "Data-backed comparisons, tank-mate recommendations, and aquarium planning resources.";
 type Props = { searchParams: Promise<{ q?: string; category?: string; family?: string; page?: string }> };
-const baseMetadata = buildPageMetadata({ title: "Aquarium Guides", description: "Browse structured aquarium comparisons, tank-mate recommendations, and tank-size planning Guides.", path: "/learning-center/guides" });
+const baseMetadata = buildPageMetadata({ title: GUIDES_TITLE, description: "Browse structured aquarium comparisons, tank-mate recommendations, and tank-size planning Guides.", path: GUIDES_PATH });
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   return { ...baseMetadata, robots: getSearchVariantRobots(await searchParams) };
@@ -34,9 +41,28 @@ export default async function GuidesIndexPage({ searchParams }: Props) {
   const featuredImages = guides.map((guide) => guide.article_images.toSorted((a, b) => a.display_order - b.display_order)[0]).filter(Boolean);
   const imageUrls = await createPublishedContentImageSignedUrls(featuredImages.map((image) => image.content_images.storage_path));
   const pageHref = (target: number) => { const params = new URLSearchParams(); if (filters.q) params.set("q", filters.q); if (category) params.set("category", category); if (family) params.set("family", family); params.set("page", String(target)); return `/learning-center/guides?${params}`; };
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: "Learning Center", path: "/learning-center" },
+    { name: "Guides", path: GUIDES_PATH },
+  ];
+  const schemaEntities = hasActiveSearchParams(filters)
+    ? null
+    : buildCollectionPageEntities({
+        path: GUIDES_PATH,
+        name: GUIDES_TITLE,
+        description: GUIDES_DESCRIPTION,
+        breadcrumbs,
+        visibleItems: guides.map((guide) => ({
+          name: guide.title,
+          path: `/learning-center/guides/${guide.slug}`,
+        })),
+      });
 
   return <PageContainer>
-    <PageHeader eyebrow="Learning Center" title="Aquarium Guides" description="Data-backed comparisons, tank-mate recommendations, and aquarium planning resources." />
+    <JsonLd entities={schemaEntities} />
+    <ContentBreadcrumbs items={breadcrumbs} />
+    <PageHeader eyebrow="Learning Center" title={GUIDES_TITLE} description={GUIDES_DESCRIPTION} />
     <form action="/learning-center/guides" role="search" className="mt-6 grid gap-3 border border-border bg-card p-4 md:grid-cols-[1fr_13rem_13rem_auto]">
       <label className="space-y-1"><span className="text-sm font-medium">Search Guides</span><Input name="q" defaultValue={filters.q} placeholder="Search titles and summaries" /></label>
       <label className="space-y-1"><span className="text-sm font-medium">Category</span><select name="category" defaultValue={category} className="h-8 w-full rounded-lg border border-input bg-background px-2 text-sm"><option value="">All categories</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>

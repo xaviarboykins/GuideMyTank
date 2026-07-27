@@ -62,7 +62,7 @@ export async function getPublishedCareGuidesForSpeciesSlugs(
 }
 
 export async function getPublishedCareGuideBySlug(slug: string) {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data: guide, error } = await supabase
     .from("care_guides")
     .select("*,species!care_guides_species_id_fkey(id,slug,common_name,scientific_name)")

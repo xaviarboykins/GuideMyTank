@@ -11,16 +11,18 @@ import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 
 import { getSpeciesCompatibilityData } from "@/lib/compatibility/service";
 import { getPublishedCareGuideForSpecies } from "@/lib/care-guides/service";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
-import { getSpeciesImage } from "@/lib/images";
+import { getSpeciesImage, hasSpeciesImage } from "@/lib/images";
 import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
-import { getSiteOrigin, getSiteUrl } from "@/lib/seo/site-url";
+import { getSiteUrl } from "@/lib/seo/site-url";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import { getSpeciesPageLinks } from "@/lib/seo/internal-linking/service";
+import { buildSpeciesPageEntities } from "@/lib/seo/schema/species-page";
 import {
   formatRecommendedTemperature,
   formatToleratedTemperature,
@@ -34,10 +36,6 @@ type SpeciesPageProps = {
 };
 
 type Species = NonNullable<Awaited<ReturnType<typeof getSpeciesBySlug>>>;
-type SpeciesProperty = {
-  name: string;
-  value: string;
-};
 
 function getSpeciesPageUrl(slug: string) {
   return getSiteUrl(`/species/${slug}`);
@@ -85,75 +83,6 @@ function formatTag(tag: string) {
     .join(" ");
 }
 
-function getSpeciesJsonLd(species: Species) {
-  const url = getSpeciesPageUrl(species.slug);
-  const properties = [
-    species.scientific_name
-      ? { name: "Scientific name", value: species.scientific_name }
-      : null,
-    species.family ? { name: "Family", value: species.family } : null,
-    species.origin ? { name: "Origin", value: species.origin } : null,
-    species.region ? { name: "Region", value: species.region } : null,
-    species.tank_size_gal
-      ? {
-          name: "Minimum tank size",
-          value: `${species.tank_size_gal} gallons`,
-        }
-      : null,
-    species.min_ph && species.max_ph
-      ? { name: "pH range", value: `${species.min_ph}-${species.max_ph}` }
-      : null,
-    species.min_temp_f && species.max_temp_f
-      ? {
-          name: "Temperature range",
-          value: `${species.min_temp_f}-${species.max_temp_f} F`,
-        }
-      : null,
-    species.temperament
-      ? { name: "Temperament", value: species.temperament }
-      : null,
-    species.aggression_level
-      ? { name: "Aggression level", value: `${species.aggression_level}/10` }
-      : null,
-    species.diet ? { name: "Diet", value: species.diet } : null,
-    species.care_level
-      ? { name: "Care level", value: species.care_level }
-      : null,
-    species.max_size_inches
-      ? { name: "Adult size", value: `${species.max_size_inches} inches` }
-      : null,
-    species.lifespan_years
-      ? { name: "Lifespan", value: `${species.lifespan_years} years` }
-      : null,
-    species.bioload_rating
-      ? { name: "Bioload rating", value: `${species.bioload_rating}/10` }
-      : null,
-  ].filter((property): property is SpeciesProperty => Boolean(property));
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: `${species.common_name} Care Guide`,
-    description: getSpeciesDescription(species),
-    url,
-    isPartOf: {
-      "@type": "WebSite",
-      name: "GuideMyTank",
-      url: getSiteOrigin(),
-    },
-    mainEntity: {
-      "@type": "Thing",
-      name: species.common_name,
-      alternateName: species.scientific_name,
-      description: getSpeciesDescription(species),
-      additionalProperty: properties.map((property) => ({
-        "@type": "PropertyValue",
-        ...property,
-      })),
-    },
-  };
-}
-
 export const revalidate = 86400;
 export const dynamicParams = false;
 
@@ -184,7 +113,17 @@ export async function generateMetadata({
   const description = getSpeciesDescription(species);
   const url = getSpeciesPageUrl(species.slug);
 
-  return buildPageMetadata({ title, description, path: new URL(url).pathname });
+  return buildPageMetadata({
+    title,
+    description,
+    path: new URL(url).pathname,
+    image: hasSpeciesImage(species.slug)
+      ? {
+          url: getSpeciesImage(species.slug),
+          alt: `${species.common_name} aquarium species`,
+        }
+      : null,
+  });
 }
 
 export default async function SpeciesPage({ params }: SpeciesPageProps) {
@@ -205,26 +144,30 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
     compatibilityData.compatibility,
   );
 
-  const jsonLd = getSpeciesJsonLd(species);
+  const speciesPath = `/species/${species.slug}`;
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: "Species", path: "/species" },
+    { name: species.common_name, path: speciesPath },
+  ];
+  const schemaEntities = buildSpeciesPageEntities({
+    slug: species.slug,
+    name: species.common_name,
+    scientificName: species.scientific_name,
+    description: getSpeciesDescription(species),
+    dateModified: species.updated_at,
+    breadcrumbs,
+  });
   const compatibilityTags = species.compatibility_tags ?? [];
   const careWarnings = species.care_warnings ?? [];
   const speciesImage = getSpeciesImage(species.slug);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-        }}
-      />
+      <JsonLd entities={schemaEntities} />
       <PageContainer>
         <ContentBreadcrumbs
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Species", href: "/species" },
-            { label: species.common_name },
-          ]}
+          items={breadcrumbs}
         />
         <PageHeader
           eyebrow="PisciDex Species Profile"

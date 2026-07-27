@@ -3,6 +3,7 @@ import "server-only";
 import { assertAdmin } from "@/lib/auth/admin";
 import { throwContentDatabaseError } from "@/lib/content/database";
 import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 
 import type { GuideMetadataInput, GuideSourceEntityInput } from "./types";
 import type { GeneratedGuideDraft } from "./generation/types";
@@ -70,7 +71,7 @@ export async function archiveGuide(articleId: string) {
 }
 
 export async function getPublishedGuideBySlug(slug: string) {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data: article, error } = await supabase
     .from("articles")
     .select("*")
@@ -114,7 +115,7 @@ export async function getPublishedGuideBySlug(slug: string) {
 }
 
 export async function listPublishedGuides() {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("articles")
     .select("id,title,slug,summary,published_at,updated_at,is_featured,featured_image_id,article_images(image_id,display_order,content_images(storage_path,alt_text,caption)),article_category_assignments(category_id,article_categories(name,slug)),programmatic_guide_metadata(guide_family,guide_type)")

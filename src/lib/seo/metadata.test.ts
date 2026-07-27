@@ -32,4 +32,37 @@ describe("shared page metadata", () => {
     });
     expect(metadata.twitter).toMatchObject({ card: "summary" });
   });
+
+  it("adds a stable image consistently to social metadata", () => {
+    const metadata = buildPageMetadata({
+      title: "Betta Species Profile",
+      description: "Freshwater aquarium species data.",
+      path: "/species/betta",
+      image: {
+        url: "/species/betta-splendens.webp",
+        alt: "Betta splendens",
+        width: 1200,
+        height: 900,
+      },
+    });
+
+    expect(metadata.openGraph).toMatchObject({
+      images: [
+        {
+          url: "https://www.guidemytank.com/species/betta-splendens.webp",
+          alt: "Betta splendens",
+          width: 1200,
+          height: 900,
+        },
+      ],
+    });
+    expect(metadata.twitter).toMatchObject({
+      card: "summary_large_image",
+      images: [
+        {
+          url: "https://www.guidemytank.com/species/betta-splendens.webp",
+        },
+      ],
+    });
+  });
 });

@@ -8,10 +8,17 @@ import {
 } from "@/components/home/care-guide-carousel";
 import { BetaBadge } from "@/components/site/beta-badge";
 import { DevelopmentBadge } from "@/components/site/development-badge";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildHomePageEntities } from "@/lib/seo/schema/home";
+
+const HOME_TITLE = "Aquarium Compatibility and Tank Planning Tools";
+const HOME_DESCRIPTION =
+  "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.";
 
 const utilities = [
   {
@@ -44,16 +51,19 @@ const utilities = [
   },
 ];
 
-export const metadata: Metadata = {
-  title: "GuideMyTank | Aquarium Compatibility and Tank Planning Tools",
-  description:
-    "Search freshwater species, compare tank mate compatibility, estimate stocking levels, and plan an aquarium build.",
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  path: "/",
+});
 
 export const revalidate = 3600;
 
 export default async function Home() {
+  const schemaEntities = buildHomePageEntities({
+    name: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+  });
   const publishedGuides = await listPublishedCareGuides();
   const primaryImages = publishedGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
   const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
@@ -73,7 +83,9 @@ export default async function Home() {
     };
   });
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <>
+      <JsonLd entities={schemaEntities} />
+      <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Main Utility Header */}
       <section className="border border-border bg-card p-6">
         <div className="flex flex-wrap items-center gap-3">
@@ -233,6 +245,7 @@ export default async function Home() {
         ))}
       </section>
 
-    </div>
+      </div>
+    </>
   );
 }

@@ -16,6 +16,15 @@ export default async function CareGuidePreviewPage({ params }: { params: Promise
   if (!editor) notFound();
   const { guide, sections, images, sources, relatedSpecies } = editor;
   const imageUrls = await createContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
+  const slug = guide.slug ?? guide.species.slug;
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: "Care Guides", path: "/care-guides" },
+    {
+      name: guide.title ?? `${guide.species.common_name} Care Guide`,
+      path: `/care-guides/${slug}`,
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -23,7 +32,7 @@ export default async function CareGuidePreviewPage({ params }: { params: Promise
         <strong>Protected draft preview</strong>
         <Button asChild size="sm" variant="outline"><Link href={`/admin/care-guides/${id}`}>Back to editor</Link></Button>
       </div>
-      <CareGuideArticle guide={guide} sections={sections} images={images} sources={sources} relatedSpecies={relatedSpecies} imageUrls={imageUrls} />
+      <CareGuideArticle guide={guide} sections={sections} images={images} sources={sources} relatedSpecies={relatedSpecies} imageUrls={imageUrls} breadcrumbs={breadcrumbs} />
     </div>
   );
 }

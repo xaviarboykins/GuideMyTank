@@ -1,7 +1,9 @@
 import Link from "next/link";
 
-export function ContentBreadcrumbs({ items }: { items: Array<{ label: string; href?: string }> }) {
-  return <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground"><ol className="flex flex-wrap gap-2">{items.map((item, index) => <li key={`${item.label}-${index}`} className="flex gap-2">{index ? <span aria-hidden="true">/</span> : null}{item.href ? <Link href={item.href} className="underline-offset-4 hover:underline">{item.label}</Link> : <span aria-current="page">{item.label}</span>}</li>)}</ol></nav>;
+import type { BreadcrumbItem } from "@/lib/seo/breadcrumbs";
+
+export function ContentBreadcrumbs({ items }: { items: readonly BreadcrumbItem[] }) {
+  return <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground"><ol className="flex flex-wrap gap-2">{items.map((item, index) => { const isCurrentPage = index === items.length - 1; return <li key={item.path} className="flex gap-2">{index ? <span aria-hidden="true">/</span> : null}{isCurrentPage ? <span aria-current="page">{item.name}</span> : <Link href={item.path} className="underline-offset-4 hover:underline">{item.name}</Link>}</li>; })}</ol></nav>;
 }
 
 export function ContentByline({ publishedAt, updatedAt }: { publishedAt: string | null; updatedAt: string }) {
@@ -32,8 +34,4 @@ export function ShareLinks({ title, url }: { title: string; url: string }) {
 export function AdvertisementSlot({ name }: { name: "content-top" | "content-middle" | "content-bottom" }) {
   if (process.env.NEXT_PUBLIC_ADS_ENABLED !== "true") return null;
   return <aside data-ad-slot={name} aria-label="Advertisement" className="my-8 min-h-24 border border-dashed border-border bg-muted/30 p-3 text-center text-xs text-muted-foreground">Advertisement</aside>;
-}
-
-export function JsonLd({ data }: { data: Record<string, unknown> | Array<Record<string, unknown>> }) {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
 }

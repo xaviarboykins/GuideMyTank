@@ -3,17 +3,25 @@ import Link from "next/link";
 
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
+import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { GuideCard } from "@/components/guides/guide-card";
 import { listPublishedArticles } from "@/lib/articles/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { listPublishedGuides } from "@/lib/guides/repository";
+import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";
+
+const LEARNING_CENTER_PATH = "/learning-center";
+const LEARNING_CENTER_TITLE = "Learning Center";
+const LEARNING_CENTER_DESCRIPTION =
+  "Practical freshwater aquarium articles covering fish care, aquarium planning, equipment, and responsible livestock choices.";
 
 const pageMetadata = buildPageMetadata({
   title: "Aquarium Learning Center",
   description: "Practical freshwater aquarium articles about fish care, aquarium setup, water quality, equipment, and responsible livestock planning.",
-  path: "/learning-center",
+  path: LEARNING_CENTER_PATH,
 });
 
 export const revalidate = 3600;
@@ -21,6 +29,16 @@ export const revalidate = 3600;
 export const metadata = pageMetadata;
 
 export default async function LearningCenterPage() {
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: LEARNING_CENTER_TITLE, path: LEARNING_CENTER_PATH },
+  ];
+  const schemaEntities = buildCollectionPageEntities({
+    path: LEARNING_CENTER_PATH,
+    name: LEARNING_CENTER_TITLE,
+    description: LEARNING_CENTER_DESCRIPTION,
+    breadcrumbs,
+  });
   const [allArticles, allGuides] = await Promise.all([listPublishedArticles(), listPublishedGuides()]);
   const articles = allArticles.slice(0, 6);
   const featuredImages = articles.map((article) => article.article_images.find((image) => image.image_id === article.featured_image_id) ?? article.article_images[0]).filter(Boolean);
@@ -32,7 +50,9 @@ export default async function LearningCenterPage() {
   };
 
   return <PageContainer>
-    <PageHeader eyebrow="Aquarium Education" title="Learning Center" description="Practical freshwater aquarium articles covering fish care, aquarium planning, equipment, and responsible livestock choices." />
+    <JsonLd entities={schemaEntities} />
+    <ContentBreadcrumbs items={breadcrumbs} />
+    <PageHeader eyebrow="Aquarium Education" title={LEARNING_CENTER_TITLE} description={LEARNING_CENTER_DESCRIPTION} />
     <div className="mt-6">
       <div className="flex flex-wrap gap-2"><Button asChild><Link href="/learning-center/articles">Browse Articles</Link></Button><Button variant="outline" asChild><Link href="/learning-center/guides">Browse Guides</Link></Button><Button variant="outline" asChild><Link href="/care-guides">Browse Care Guides</Link></Button></div>
     </div>

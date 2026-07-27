@@ -8,6 +8,7 @@ import { InternalLinksSection } from "@/components/internal-linking/internal-lin
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { ContentBreadcrumbs } from "@/components/content/public-content";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getCompatibilityRule } from "@/lib/data/compatibility";
 import { getSpeciesSlugs } from "@/lib/data/species";
 import {
@@ -16,10 +17,10 @@ import {
   getCompatibilityUrl,
   isCanonicalCompatibilityPair,
 } from "@/lib/compatibility/urls";
-import { getSiteUrl } from "@/lib/seo/site-url";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import { getCompatibilityPageLinks } from "@/lib/seo/internal-linking/service";
+import { buildCompatibilityPageEntities } from "@/lib/seo/schema/compatibility-page";
 
 type CompatibilityPageProps = {
   params: Promise<{
@@ -67,7 +68,6 @@ export async function generateMetadata({
     title,
     description,
     path: new URL(canonicalUrl).pathname,
-    type: "article",
   });
 }
 
@@ -89,105 +89,41 @@ export default async function CompatibilityDetailPage({
   const internalLinks = await getCompatibilityPageLinks(compatibility);
   const speciesAName = compatibility.species_a.common_name;
   const speciesBName = compatibility.species_b.common_name;
-  const canonicalUrl = getCompatibilityUrl(speciesA, speciesB);
-
-  const jsonLd = [
+  const compatibilityPath = getCompatibilityPath(speciesA, speciesB);
+  const pageTitle = `Can ${speciesAName} Live With ${speciesBName}?`;
+  const pageDescription = `GuideMyTank compatibility analysis for ${speciesAName} and ${speciesBName}.`;
+  const breadcrumbs = [
+    { name: "Home", path: "/" },
+    { name: "Compatibility", path: "/compatibility" },
     {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      headline: `Can ${speciesAName} Live With ${speciesBName}?`,
-      description: `Aquarium compatibility report for ${speciesAName} and ${speciesBName}.`,
-      url: canonicalUrl,
-      author: {
-        "@type": "Organization",
-        name: "GuideMyTank",
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "GuideMyTank",
-      },
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": canonicalUrl,
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: getSiteUrl(),
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Compatibility",
-          item: getSiteUrl("/compatibility"),
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: `${speciesAName} and ${speciesBName} Compatibility`,
-          item: canonicalUrl,
-        },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: `Can ${speciesAName} live with ${speciesBName}?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `GuideMyTank rates ${speciesAName} and ${speciesBName} as ${compatibility.status} with a compatibility score of ${compatibility.score}. This result is based on aquarium husbandry factors like water parameters, temperament, size, schooling needs, and predation risk.`,
-          },
-        },
-        {
-          "@type": "Question",
-          name: `Why did ${speciesAName} and ${speciesBName} receive this compatibility result?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: compatibility.reasons.join(" "),
-          },
-        },
-        {
-          "@type": "Question",
-          name: `Should I use this compatibility score as the final decision?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "No. Compatibility scores are planning tools. Always confirm each species' care requirements, observe fish behavior carefully, quarantine new additions when possible, and avoid overcrowding.",
-          },
-        },
-      ],
+      name: `${speciesAName} and ${speciesBName} Compatibility`,
+      path: compatibilityPath,
     },
   ];
+  const schemaEntities = buildCompatibilityPageEntities({
+    speciesA: {
+      slug: compatibility.species_a.slug,
+      name: speciesAName,
+    },
+    speciesB: {
+      slug: compatibility.species_b.slug,
+      name: speciesBName,
+    },
+    name: pageTitle,
+    description: pageDescription,
+    breadcrumbs,
+  });
 
   return (
     <PageContainer>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
-        }}
-      />
+      <JsonLd entities={schemaEntities} />
 
-      <ContentBreadcrumbs
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Compatibility", href: "/compatibility" },
-          { label: `${speciesAName} and ${speciesBName}` },
-        ]}
-      />
+      <ContentBreadcrumbs items={breadcrumbs} />
 
       <PageHeader
         eyebrow="Compatibility Report"
-        title={`Can ${speciesAName} Live With ${speciesBName}?`}
-        description={`GuideMyTank compatibility analysis for ${speciesAName} and ${speciesBName}.`}
+        title={pageTitle}
+        description={pageDescription}
       />
 
       <CompatibilitySummary compatibility={compatibility} />

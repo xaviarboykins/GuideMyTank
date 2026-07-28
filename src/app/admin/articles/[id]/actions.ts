@@ -13,6 +13,7 @@ import type { ValidationIssue } from "@/lib/content/types";
 import type { Json } from "@/types/database.types";
 import { isProductCategory } from "@/lib/products/types";
 import { archiveGuide, publishGuide } from "@/lib/guides/repository";
+import { revalidateEditorialContent } from "@/lib/cache/revalidation";
 
 type PublishState = { ok: boolean; message: string; issues: ValidationIssue[] };
 
@@ -36,7 +37,13 @@ export async function saveArticleFieldsAction(id: string, formData: FormData) {
       ? selectedCategory
       : null;
 
-  return run(id, "Publishing fields saved.", () => updateArticleDraft(id, { title: value(formData, "title"), slug: value(formData, "slug"), summary: value(formData, "summary"), seo_title: value(formData, "seoTitle"), meta_description: value(formData, "metaDescription"), canonical_url: value(formData, "canonicalUrl"), is_featured: formData.get("isFeatured") === "on", include_products: includeProducts && productCategory !== null, product_category: productCategory }));
+  const previous = await getAdminArticle(id);
+  return run(id, "Publishing fields saved.", async () => {
+    const updated = await updateArticleDraft(id, { title: value(formData, "title"), slug: value(formData, "slug"), summary: value(formData, "summary"), seo_title: value(formData, "seoTitle"), meta_description: value(formData, "metaDescription"), canonical_url: value(formData, "canonicalUrl"), is_featured: formData.get("isFeatured") === "on", include_products: includeProducts && productCategory !== null, product_category: productCategory });
+    if (previous?.slug !== updated.slug) {
+      revalidateEditorialContent(previous?.content_type === "guide" ? "guide" : "article", [previous?.slug, updated.slug]);
+    }
+  });
 }
 
 export async function saveArticleSectionsAction(id: string, formData: FormData) {
@@ -62,5 +69,5 @@ export async function addArticleSourceAction(id: string, nextOrder: number, form
 }
 export async function removeArticleSourceAction(id: string, formData: FormData) { return run(id, "Source removed.", () => removeArticleSource(id, String(formData.get("sourceId") ?? ""))); }
 
-export async function publishArticleAction(id: string, state: PublishState): Promise<PublishState> { void state; try { const item = await getAdminArticle(id); const isGuide = item?.content_type === "guide"; const result = isGuide ? await publishGuide(id) : await publishArticle(id); if (!result.valid) return { ok: false, message: `The ${isGuide ? "Guide" : "article"} is not ready to publish.`, issues: "issues" in result ? result.issues : [...result.errors, ...result.warnings] }; revalidatePath(`/admin/articles/${id}`); return { ok: true, message: `${isGuide ? "Guide" : "Article"} published.`, issues: [] }; } catch (error) { return { ok: false, message: getSafeContentError(error).message, issues: [] }; } }
-export async function archiveArticleAction(id: string) { const item = await getAdminArticle(id); if (item?.content_type === "guide") await archiveGuide(id); else await archiveArticle(id); revalidatePath(`/admin/articles/${id}`); }
+export async function publishArticleAction(id: string, state: PublishState): Promise<PublishState> { void state; try { const item = await getAdminArticle(id); const isGuide = item?.content_type === "guide"; const result = isGuide ? await publishGuide(id) : await publishArticle(id); if (!result.valid) return { ok: false, message: `The ${isGuide ? "Guide" : "article"} is not ready to publish.`, issues: "issues" in result ? result.issues : [...result.errors, ...result.warnings] }; revalidatePath(`/admin/articles/${id}`); revalidateEditorialContent(isGuide ? "guide" : "article", [item?.slug]); return { ok: true, message: `${isGuide ? "Guide" : "Article"} published.`, issues: [] }; } catch (error) { return { ok: false, message: getSafeContentError(error).message, issues: [] }; } }
+export async function archiveArticleAction(id: string) { const item = await getAdminArticle(id); if (item?.content_type === "guide") await archiveGuide(id); else await archiveArticle(id); revalidatePath(`/admin/articles/${id}`); revalidateEditorialContent(item?.content_type === "guide" ? "guide" : "article", [item?.slug]); }

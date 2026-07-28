@@ -11,7 +11,7 @@ type Species = {
   scientific_name: string | null;
 };
 
-export const revalidate = 86400;
+export const revalidate = 604_800; // CACHE_TTL.species
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Freshwater Fish Species Index",

@@ -57,7 +57,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/",
 });
 
-export const revalidate = 3600;
+export const revalidate = 21_600; // CACHE_TTL.homepage
 
 export default async function Home() {
   const schemaEntities = buildHomePageEntities({

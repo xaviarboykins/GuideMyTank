@@ -64,7 +64,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 86400;
+export const revalidate = 604_800; // CACHE_TTL.products
 
 function getFirstSearchParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;

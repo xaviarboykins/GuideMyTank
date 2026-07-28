@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { cache } from "react";
 
 import { CompatibilitySummary } from "@/components/compatibility/compatibility-summary";
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
@@ -10,9 +11,7 @@ import { PageHeader } from "@/components/site/page-header";
 import { ContentBreadcrumbs } from "@/components/content/public-content";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getCompatibilityRule } from "@/lib/data/compatibility";
-import { getSpeciesSlugs } from "@/lib/data/species";
 import {
-  generateCanonicalCompatibilityPairs,
   getCompatibilityPath,
   getCompatibilityUrl,
   isCanonicalCompatibilityPair,
@@ -29,16 +28,14 @@ type CompatibilityPageProps = {
   }>;
 };
 
-export const revalidate = 86400;
-export const dynamicParams = false;
+const getCachedCompatibilityRule = cache(getCompatibilityRule);
 
-export async function generateStaticParams() {
-  const species = await getSpeciesSlugs();
+export const revalidate = 2_592_000; // CACHE_TTL.compatibility
+export const dynamic = "force-static";
+export const dynamicParams = true;
 
-  return generateCanonicalCompatibilityPairs(species).map((pair) => ({
-    speciesA: pair.speciesA,
-    speciesB: pair.speciesB,
-  }));
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({
@@ -47,7 +44,7 @@ export async function generateMetadata({
   const { speciesA, speciesB } = await params;
 
   const canonicalUrl = getCompatibilityUrl(speciesA, speciesB);
-  const compatibility = await getCompatibilityRule(speciesA, speciesB);
+  const compatibility = await getCachedCompatibilityRule(speciesA, speciesB);
 
   if (!compatibility) {
     return buildPageMetadata({
@@ -80,7 +77,7 @@ export default async function CompatibilityDetailPage({
     permanentRedirect(getCompatibilityPath(speciesA, speciesB));
   }
 
-  const compatibility = await getCompatibilityRule(speciesA, speciesB);
+  const compatibility = await getCachedCompatibilityRule(speciesA, speciesB);
 
   if (!compatibility) {
     notFound();

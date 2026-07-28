@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
 import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ShareLinks, SourcesList } from "@/components/content/public-content";
@@ -19,6 +20,7 @@ import { buildArticlePageEntities } from "@/lib/seo/schema/article-page";
 import type { Json } from "@/types/database.types";
 
 type Props = { params: Promise<{ slug: string }> };
+const getCachedPublishedArticleBySlug = cache(getPublishedArticleBySlug);
 
 function text(content: Json) { return isJsonRecord(content) && typeof content.text === "string" ? content.text : ""; }
 
@@ -35,7 +37,7 @@ function Block({ type, content, imageUrls }: { type: string; content: Json; imag
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const result = await getPublishedArticleBySlug(slug);
+  const result = await getCachedPublishedArticleBySlug(slug);
   if (!result) return buildPageMetadata({ title: "Article Not Found", description: "The requested aquarium article could not be found.", path: `/learning-center/${slug}`, robots: NOINDEX_NOFOLLOW });
   return buildPageMetadata({
     title: result.article.seo_title ?? result.article.title ?? "Aquarium Article",
@@ -48,11 +50,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export const revalidate = 3600;
+export const revalidate = 604_800; // CACHE_TTL.careGuides
+export const dynamic = "force-static";
+
+export function generateStaticParams() {
+  return [];
+}
 
 export default async function PublishedArticlePage({ params }: Props) {
   const { slug } = await params;
-  const result = await getPublishedArticleBySlug(slug);
+  const result = await getCachedPublishedArticleBySlug(slug);
   if (!result) notFound();
   const { article, sections, images, sources, categories, tags } = result;
   const internalLinks = await getArticlePageLinks(result);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
@@ -22,8 +23,11 @@ type CareGuidePageProps = {
   }>;
 };
 
-export const revalidate = 86400;
-export const dynamicParams = false;
+const getCachedPublishedCareGuideBySlug = cache(getPublishedCareGuideBySlug);
+const getCachedSpeciesBySlug = cache(getSpeciesBySlug);
+
+export const revalidate = 604_800; // CACHE_TTL.careGuides
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const [species, guides] = await Promise.all([getSpeciesSlugs(), listPublishedCareGuides()]);
@@ -35,7 +39,7 @@ export async function generateMetadata({
   params,
 }: CareGuidePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+  const publishedGuide = await getCachedPublishedCareGuideBySlug(slug);
 
   if (publishedGuide) {
     const title = publishedGuide.guide.seo_title ?? publishedGuide.guide.title ?? `${publishedGuide.guide.species.common_name} Care Guide`;
@@ -51,7 +55,7 @@ export async function generateMetadata({
     });
   }
 
-  const species = await getSpeciesBySlug(slug);
+  const species = await getCachedSpeciesBySlug(slug);
 
   if (!species) {
     return buildPageMetadata({ title: "Care Guide Not Found", description: "The requested aquarium Care Guide could not be found.", path: `/care-guides/${slug}`, robots: NOINDEX_NOFOLLOW });
@@ -72,7 +76,7 @@ export async function generateMetadata({
 
 export default async function CareGuidePage({ params }: CareGuidePageProps) {
   const { slug } = await params;
-  const publishedGuide = await getPublishedCareGuideBySlug(slug);
+  const publishedGuide = await getCachedPublishedCareGuideBySlug(slug);
 
   if (publishedGuide) {
     const [imageUrls, internalLinks] = await Promise.all([
@@ -94,7 +98,7 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
     return <PageContainer><JsonLd entities={schemaEntities} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} breadcrumbs={breadcrumbs} internalLinks={internalLinks} /></PageContainer>;
   }
 
-  const species = await getSpeciesBySlug(slug);
+  const species = await getCachedSpeciesBySlug(slug);
 
   if (!species) {
     notFound();

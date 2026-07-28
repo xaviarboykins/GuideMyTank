@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { SpeciesCompatibilitySections } from "@/components/species/species-compatibility-sections";
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
@@ -36,6 +37,7 @@ type SpeciesPageProps = {
 };
 
 type Species = NonNullable<Awaited<ReturnType<typeof getSpeciesBySlug>>>;
+const getCachedSpeciesBySlug = cache(getSpeciesBySlug);
 
 function getSpeciesPageUrl(slug: string) {
   return getSiteUrl(`/species/${slug}`);
@@ -83,7 +85,7 @@ function formatTag(tag: string) {
     .join(" ");
 }
 
-export const revalidate = 86400;
+export const revalidate = 604_800; // CACHE_TTL.species
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
@@ -98,7 +100,7 @@ export async function generateMetadata({
   params,
 }: SpeciesPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const species = await getSpeciesBySlug(slug);
+  const species = await getCachedSpeciesBySlug(slug);
 
   if (!species) {
     return buildPageMetadata({
@@ -128,7 +130,7 @@ export async function generateMetadata({
 
 export default async function SpeciesPage({ params }: SpeciesPageProps) {
   const { slug } = await params;
-  const species = await getSpeciesBySlug(slug);
+  const species = await getCachedSpeciesBySlug(slug);
 
   if (!species) {
     notFound();

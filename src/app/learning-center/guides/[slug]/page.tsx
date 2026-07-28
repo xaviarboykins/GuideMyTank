@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { ArticleBlock } from "@/components/articles/article-block";
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
@@ -19,19 +20,25 @@ import { getSiteUrl } from "@/lib/seo/site-url";
 
 type Props = { params: Promise<{ slug: string }> };
 const path = (slug: string) => `/learning-center/guides/${slug}`;
+const getCachedPublishedGuideBySlug = cache(getPublishedGuideBySlug);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const result = await getPublishedGuideBySlug(slug);
+  const result = await getCachedPublishedGuideBySlug(slug);
   if (!result) return buildPageMetadata({ title: "Guide Not Found", description: "The requested aquarium Guide could not be found.", path: path(slug), robots: NOINDEX_NOFOLLOW });
   return buildPageMetadata({ title: result.article.seo_title ?? result.article.title ?? "Aquarium Guide", description: result.article.meta_description ?? result.article.summary ?? "Practical freshwater aquarium guidance from GuideMyTank.", path: path(result.article.slug!), type: "article", publishedTime: result.article.published_at, modifiedTime: result.article.updated_at, publisher: "GuideMyTank" });
 }
 
-export const revalidate = 3600;
+export const revalidate = 604_800; // CACHE_TTL.careGuides
+export const dynamic = "force-static";
+
+export function generateStaticParams() {
+  return [];
+}
 
 export default async function PublishedGuidePage({ params }: Props) {
   const { slug } = await params;
-  const result = await getPublishedGuideBySlug(slug);
+  const result = await getCachedPublishedGuideBySlug(slug);
   if (!result) notFound();
   const { article, sections, images, sources, categories, tags } = result;
   const internalLinks = await getArticlePageLinks(result);

@@ -8,6 +8,7 @@ import {
   addCareGuideSource,
   addRelatedSpecies,
   archiveCareGuide,
+  getAdminCareGuide,
   publishCareGuide,
   removeCareGuideImage,
   removeCareGuideSource,
@@ -21,6 +22,7 @@ import { getSafeContentError } from "@/lib/content/errors";
 import { createSource } from "@/lib/content-sources/service";
 import type { ValidationIssue } from "@/lib/content/types";
 import type { Json } from "@/types/database.types";
+import { revalidateEditorialContent } from "@/lib/cache/revalidation";
 
 type PublishState = { ok: boolean; message: string; issues: ValidationIssue[] };
 
@@ -40,11 +42,17 @@ async function runGuideAction(id: string, successMessage: string, operation: () 
 }
 
 export async function saveCareGuideFieldsAction(id: string, formData: FormData) {
-  return runGuideAction(id, "Publishing fields saved.", () => updateCareGuideDraft(id, {
+  const previous = await getAdminCareGuide(id);
+  return runGuideAction(id, "Publishing fields saved.", async () => {
+    const updated = await updateCareGuideDraft(id, {
       title: value(formData, "title"), slug: value(formData, "slug"), summary: value(formData, "summary"),
       seo_title: value(formData, "seoTitle"), meta_description: value(formData, "metaDescription"),
       canonical_url: value(formData, "canonicalUrl"), is_featured: formData.get("isFeatured") === "on",
-    }));
+    });
+    if (previous?.slug !== updated.slug) {
+      revalidateEditorialContent("care-guide", [previous?.slug, updated.slug]);
+    }
+  });
 }
 
 export async function saveQuickFactsAction(id: string, formData: FormData) {
@@ -109,11 +117,15 @@ export async function publishCareGuideAction(id: string, state: PublishState): P
     const result = await publishCareGuide(id);
     if (!result.valid) return { ok: false, message: "The Care Guide is not ready to publish.", issues: result.issues };
     revalidatePath(`/admin/care-guides/${id}`);
+    const guide = await getAdminCareGuide(id);
+    revalidateEditorialContent("care-guide", [guide?.slug]);
     return { ok: true, message: "Care Guide published.", issues: [] };
   } catch (error) { return { ok: false, message: getSafeContentError(error).message, issues: [] }; }
 }
 
 export async function archiveCareGuideAction(id: string) {
+  const guide = await getAdminCareGuide(id);
   await archiveCareGuide(id);
   revalidatePath(`/admin/care-guides/${id}`);
+  revalidateEditorialContent("care-guide", [guide?.slug]);
 }

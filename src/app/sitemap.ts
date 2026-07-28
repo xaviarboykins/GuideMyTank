@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { getSiteUrl } from "@/lib/seo/site-url";
 
+export const revalidate = 86_400; // CACHE_TTL.sitemap
+
 const STATIC_PATHS = [
   "/",
   "/piscidex",

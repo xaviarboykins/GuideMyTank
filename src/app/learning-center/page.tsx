@@ -24,7 +24,7 @@ const pageMetadata = buildPageMetadata({
   path: LEARNING_CENTER_PATH,
 });
 
-export const revalidate = 3600;
+export const revalidate = 21_600; // CACHE_TTL.learningCenter
 
 export const metadata = pageMetadata;
 

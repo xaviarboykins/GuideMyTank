@@ -42,7 +42,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 86400;
+export const revalidate = 604_800; // CACHE_TTL.species
 
 export default async function PisciDexPage({
   searchParams,

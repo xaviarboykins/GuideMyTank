@@ -20,6 +20,7 @@ type AquariumBuilderProductsPageProps = {
 };
 
 export const dynamicParams = false;
+export const revalidate = 604_800; // CACHE_TTL.products
 
 export function generateStaticParams() {
   return aquariumBuilderProductCategories.map((category) => ({

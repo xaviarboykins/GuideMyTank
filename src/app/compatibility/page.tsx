@@ -31,7 +31,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 86400;
+export const revalidate = 2_592_000; // CACHE_TTL.compatibility
 
 export default async function CompatibilityPage({
   searchParams,

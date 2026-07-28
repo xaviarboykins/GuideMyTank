@@ -4,7 +4,7 @@ import { listPublishedArticles } from "@/lib/articles/service";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { listPublishedGuides } from "@/lib/guides/repository";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86_400; // CACHE_TTL.sitemap
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [articles, guides] = await Promise.all([listPublishedArticles(), listPublishedGuides()]);

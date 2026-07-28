@@ -36,7 +36,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 86400;
+export const revalidate = 604_800; // CACHE_TTL.careGuides
 
 export default async function CareGuidesPage({
   searchParams,

@@ -11,6 +11,8 @@ import {
   getSitemapBatchIds,
 } from "@/lib/seo/sitemaps";
 
+export const revalidate = 86_400; // CACHE_TTL.sitemap
+
 export async function generateSitemaps() {
   const species = await getSpeciesSlugs();
 

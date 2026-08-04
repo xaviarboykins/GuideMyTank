@@ -102,22 +102,25 @@ Mixed-use purchases are recorded using documented business-use percentages.
 
 # Banking & Transaction Workflow
 
-GuideMyTank currently uses the Wave Starter manual import workflow.
+GuideMyTank maintains a dedicated Bluevine Business Checking account to keep business and personal finances fully separated.
 
-Business transactions are maintained in a master Google Sheets Transactions ledger before being imported into Wave using Wave Connect.
+Wave Accounting Starter is the official accounting system of record. Because the Starter plan does not include automatic bank synchronization, business transactions are first maintained in the Google Sheets Transactions ledger before being imported into Wave using Wave Connect.
 
 The bookkeeping workflow consists of:
 
-1. Record transactions in Google Sheets.
-2. Assign payment account.
-3. Assign expense or income category.
-4. Record business-use percentage when applicable.
-5. Maintain receipt status.
-6. Import transactions into Wave Connect.
-7. Categorize imported transactions.
-8. Perform monthly reconciliation.
+1. Business income and expenses are deposited into or paid from the Bluevine Business Checking account whenever possible.
+2. Record transactions in Google Sheets.
+3. Assign the payment account.
+4. Assign the appropriate income or expense category.
+5. Record business-use percentage when applicable.
+6. Maintain receipt status.
+7. Import transactions into Wave Connect.
+8. Categorize imported transactions in Wave.
+9. Perform monthly reconciliation.
 
-Automatic bank synchronization has been intentionally deferred until business growth justifies a paid accounting solution.
+Startup expenses incurred before the Bluevine account was established may be recorded using the Personal Bank Account asset account and documented as owner-funded business expenses.
+
+Automatic bank synchronization has been intentionally deferred until business growth justifies upgrading to a paid accounting solution.
 
 ---
 
@@ -149,7 +152,7 @@ GuideMyTank uses a streamlined Chart of Accounts appropriate for a sole propriet
 
 ## Assets
 
-- Novo Business Checking
+- Bluevine Business Checking
 - Personal Bank Account
 - Cash on Hand
 
@@ -205,6 +208,7 @@ Google Sheets provides additional operational reporting for:
 The following documentation has been completed:
 
 - Accounting platform selection
+- Business banking selection
 - Wave organization configuration
 - Chart of Accounts
 - Google Sheets financial dashboard
@@ -221,6 +225,7 @@ The following documentation has been completed:
 | Category | Decision |
 |----------|----------|
 | Accounting Platform | Wave Accounting Starter |
+| Business Bank | Bluevine Business Checking |
 | Accounting Method | Double-Entry Bookkeeping |
 | Bookkeeping Dashboard | Google Sheets |
 | Import Method | Wave Connect CSV |
@@ -240,21 +245,23 @@ The following documentation has been completed:
 - [x] Initial business transactions recorded
 - [x] Financial reporting verified
 - [x] Bookkeeping standards documented
+- [x] Bluevine Business Checking established
 
 ---
 
 # Future Migration
 
-Wave Accounting Starter is expected to support GuideMyTank throughout its early growth.
+Wave Accounting Starter and Bluevine Business Checking are expected to support GuideMyTank throughout its early growth.
 
 Future upgrades may include:
 
 - Automatic bank synchronization
 - Wave Pro (if justified)
-- Advanced reporting
+- Advanced financial reporting
 - Payment processor integration
 - Automated receipt capture
 - Expanded financial automation
+- Multi-account banking support if business operations expand
 
 Any future migration will prioritize preserving historical financial records, minimizing operational disruption, and maintaining continuity of financial reporting.
 

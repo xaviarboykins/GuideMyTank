@@ -17,7 +17,7 @@ The purpose of reconciliation is to ensure that business banking records, bookke
 
 GuideMyTank uses a hybrid bookkeeping workflow consisting of:
 
-- Novo Business Checking
+- Bluevine Business Checking
 - Google Sheets Financial Dashboard
 - Wave Accounting Starter
 
@@ -34,7 +34,7 @@ The monthly reconciliation process is designed to:
 - Verify the accuracy of all financial records.
 - Ensure all business income and expenses have been recorded.
 - Verify Google Sheets matches Wave Accounting.
-- Confirm Novo account activity matches accounting records.
+- Confirm Bluevine account activity matches accounting records.
 - Detect missing or duplicate transactions.
 - Maintain audit-ready financial records.
 - Prepare the business for tax reporting and financial analysis.
@@ -58,7 +58,7 @@ Reconciliation should be completed:
 Business Month Ends
         │
         ▼
-Review Novo Business Checking
+Review Bluevine Business Checking
         │
         ▼
 Review Google Sheets Transactions
@@ -76,7 +76,7 @@ Verify Receipts & Supporting Documents
 Investigate Discrepancies
         │
         ▼
-Confirm Google Sheets = Wave = Novo
+Confirm Google Sheets = Wave = Bluevine
         │
         ▼
 Generate Financial Reports
@@ -97,7 +97,7 @@ Close Monthly Books
 
 ## 1. Banking Review
 
-Review Novo Business Checking.
+Review Bluevine Business Checking.
 
 Verify:
 
@@ -221,7 +221,7 @@ Before taking an owner draw, verify:
 - Tax reserves are adequate.
 - Sufficient operating cash remains.
 
-If these conditions are not exist, postpone the owner draw.
+If any of these conditions are not met, postpone the owner draw.
 
 ---
 
@@ -229,7 +229,7 @@ If these conditions are not exist, postpone the owner draw.
 
 The accounting period may be considered complete when:
 
-- Novo account activity has been reviewed.
+- Bluevine account activity has been reviewed.
 - Google Sheets matches Wave Accounting.
 - All income has been verified.
 - All expenses have been categorized.
@@ -244,7 +244,7 @@ The accounting period may be considered complete when:
 If discrepancies are discovered:
 
 1. Identify the affected transaction.
-2. Determine whether the issue exists in Novo, Google Sheets, or Wave.
+2. Determine whether the issue exists in Bluevine, Google Sheets, or Wave.
 3. Correct the affected records.
 4. Verify supporting documentation.
 5. Document significant corrections when appropriate.
@@ -269,6 +269,7 @@ The monthly reconciliation should not be considered complete until all material 
 |------|---------|-------------|
 | 2026-07-26 | 1.0 | Initial monthly reconciliation process created. |
 | 2026-07-27 | 2.0 | Updated for the production Google Sheets + Wave Accounting Starter reconciliation workflow. |
+| 2026-07-27 | 2.1 | Updated to reflect Bluevine Business Checking as the production banking platform. |
 
 ---
 
@@ -278,7 +279,7 @@ Complete the following before closing each month:
 
 ## Banking
 
-- [ ] Novo account reviewed
+- [ ] Bluevine account reviewed
 - [ ] Deposits verified
 - [ ] Withdrawals verified
 - [ ] No unauthorized transactions
@@ -310,7 +311,7 @@ Complete the following before closing each month:
 ## Close
 
 - [ ] Google Sheets matches Wave Accounting
-- [ ] Wave matches Novo Business Checking
+- [ ] Wave matches Bluevine Business Checking
 - [ ] Monthly books closed
 
 ---

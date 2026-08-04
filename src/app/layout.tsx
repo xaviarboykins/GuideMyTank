@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "GuideMyTank | Aquarium Compatibility & Tank Planning",
   description:
     "Plan aquariums, compare fish compatibility, and browse freshwater aquarium species data.",
+  other: {
+    "google-adsense-account": "ca-pub-7577700971513069",
+  },
 };
 
 export default function RootLayout({

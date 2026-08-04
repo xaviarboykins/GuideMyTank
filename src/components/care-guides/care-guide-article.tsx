@@ -1,6 +1,6 @@
 import type { Json } from "@/types/database.types";
 import Link from "next/link";
-import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ImageCredit, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
+import { ContentBreadcrumbs, ContentByline, ImageCredit, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { getSiteUrl } from "@/lib/seo/site-url";
@@ -92,8 +92,6 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
           <dl className={`mt-4 grid grid-cols-2 ${styles.factGrid}`}>{Object.entries(quickFacts).map(([key, value]) => <div key={key} className={`${styles.fact} min-w-0 border-t border-border py-2.5 first:border-t-0 first:pt-0 [&:nth-child(2)]:border-t-0 [&:nth-child(2)]:pt-0`}><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{key.replaceAll("_", " ")}</dt><dd className="mt-1 break-words text-sm leading-5">{typeof value === "string" || typeof value === "number" ? value : "—"}</dd></div>)}</dl>
         </aside>
       </section>
-
-      <AdvertisementSlot name="content-top" />
 
       <section className={`mt-10 items-start px-5 sm:px-8 lg:px-10 ${styles.contentGrid}`}>
         {columns.map((column, columnIndex) => <div key={columnIndex} className="space-y-8">

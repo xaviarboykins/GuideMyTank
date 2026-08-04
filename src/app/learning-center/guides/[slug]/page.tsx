@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { ArticleBlock } from "@/components/articles/article-block";
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
-import { AdvertisementSlot, ContentBreadcrumbs, ContentByline, ShareLinks, SourcesList } from "@/components/content/public-content";
+import { ContentBreadcrumbs, ContentByline, ShareLinks, SourcesList } from "@/components/content/public-content";
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -66,7 +66,6 @@ export default async function PublishedGuidePage({ params }: Props) {
     <ContentBreadcrumbs items={breadcrumbs} />
     <header><div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{categories.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div><h1 className="mt-2 text-4xl font-bold tracking-tight">{article.title}</h1>{article.summary ? <p className="mt-4 text-lg leading-8 text-muted-foreground">{article.summary}</p> : null}<ContentByline publishedAt={article.published_at} updatedAt={article.updated_at} /><div className="mt-3 flex flex-wrap gap-2">{tags.map((item) => <span key={item.tag_id} className="border border-border px-2 py-1 text-xs">{item.article_tags.name}</span>)}</div></header>
     {galleryImages.length ? <div className="my-8"><ArticleImageFlipbook images={galleryImages} /></div> : null}
-    <AdvertisementSlot name="content-top" />
     <div className="mt-10 space-y-8">{sections.map((section) => <section id={`section-${section.id}`} key={section.id} className="scroll-mt-24"><ArticleBlock type={section.block_type} content={section.content} imageUrls={imageUrls} /></section>)}</div>
     <SourcesList sources={sources} />
     <InternalLinksSection title="Relevant Species" items={internalLinks.species} limit={4} />

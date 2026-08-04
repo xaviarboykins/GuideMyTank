@@ -30,8 +30,3 @@ export function ShareLinks({ title, url }: { title: string; url: string }) {
   const encodedUrl = encodeURIComponent(url); const encodedTitle = encodeURIComponent(title);
   return <div aria-label="Share this page" className="mt-8 flex flex-wrap items-center gap-3 text-sm"><span className="font-medium">Share:</span><a className="underline" href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noreferrer">Facebook</a><a className="underline" href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`} target="_blank" rel="noreferrer">Reddit</a><a className="underline" href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}>Email</a></div>;
 }
-
-export function AdvertisementSlot({ name }: { name: "content-top" | "content-middle" | "content-bottom" }) {
-  if (process.env.NEXT_PUBLIC_ADS_ENABLED !== "true") return null;
-  return <aside data-ad-slot={name} aria-label="Advertisement" className="my-8 min-h-24 border border-dashed border-border bg-muted/30 p-3 text-center text-xs text-muted-foreground">Advertisement</aside>;
-}

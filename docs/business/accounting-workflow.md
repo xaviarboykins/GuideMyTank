@@ -17,7 +17,7 @@ Its purpose is to ensure that all business funds are handled consistently, busin
 
 GuideMyTank currently uses a hybrid bookkeeping workflow consisting of:
 
-- Novo Business Checking
+- Bluevine Business Checking
 - Wave Accounting Starter
 - Google Sheets Financial Dashboard
 
@@ -44,9 +44,9 @@ The banking workflow is designed to:
 | Category | Selection |
 |----------|-----------|
 | Business Structure | Sole Proprietorship |
-| Business Bank | Novo Business Checking |
+| Business Bank | Bluevine Business Checking |
 | Federal Tax ID | Employer Identification Number (EIN) |
-| Business Name | GuideMyTank (California FBN/DBA) |
+| Business Name | GuideMyTank (California FBN/DBA Pending) |
 | Accounting Platform | Wave Accounting Starter |
 | Bookkeeping Dashboard | Google Sheets |
 
@@ -58,7 +58,7 @@ GuideMyTank follows these banking principles:
 
 - Never mix personal and business finances.
 - Deposit all business income into the business checking account.
-- Pay all business expenses from the business checking account whenever practical.
+- Pay all ongoing business expenses from the Bluevine Business Checking account whenever practical. Startup expenses incurred before the account was established should be documented separately.
 - Startup expenses paid personally must be documented and categorized appropriately.
 - Maintain complete transaction records.
 - Retain receipts for deductible expenses.
@@ -103,7 +103,7 @@ Wave Accounting remains the official accounting ledger.
 Revenue Received
         │
         ▼
-Novo Business Checking
+Bluevine Business Checking
         │
         ▼
 Record Transaction in Google Sheets
@@ -136,8 +136,8 @@ Examples include:
 Business Purchase
         │
         ▼
-Novo Business Checking
-(or Personal Account for Startup Expenses)
+Bluevine Business Checking
+(or Personal Bank Account for documented startup expenses)
         │
         ▼
 Save Receipt
@@ -179,7 +179,7 @@ Examples include:
 
 # Startup Expenses
 
-Some GuideMyTank startup expenses were paid before the Novo business account was established.
+Some GuideMyTank startup expenses were paid before the Bluevine Business Checking account was established.
 
 These transactions are:
 
@@ -200,7 +200,7 @@ Owner contributions occur when personal funds are added to the business.
 Personal Funds
         │
         ▼
-Transfer to Novo Business Checking
+Transfer to Bluevine Business Checking
         │
         ▼
 Record in Google Sheets
@@ -221,7 +221,7 @@ Owner contributions are not business income.
 Owner draws occur when money is withdrawn from the business.
 
 ```text
-Novo Business Checking
+Bluevine Business Checking
         │
         ▼
 Transfer to Personal Account
@@ -244,7 +244,7 @@ Owner draws are not business expenses.
 
 At least once each month:
 
-- Review Novo account activity.
+- Review Bluevine account activity.
 - Review Google Sheets transactions.
 - Verify payment accounts.
 - Verify business-use percentages.
@@ -283,7 +283,7 @@ If an incorrect transaction occurs:
 If unauthorized activity is detected:
 
 1. Freeze affected payment methods if possible.
-2. Contact Novo immediately.
+2. Contact Bluevine immediately.
 3. Document the incident.
 4. Update credentials.
 5. Verify recent transactions.
@@ -302,10 +302,11 @@ If unauthorized activity is detected:
 
 # Revision History
 
-| Date | Version | Description |
-|------|---------|-------------|
-| 2026-07-26 | 1.0 | Initial banking workflow created. |
-| 2026-07-27 | 2.0 | Updated to reflect the production Wave Accounting Starter + Google Sheets bookkeeping workflow. |
+| Date       | Version | Description |
+|------------|---------|-------------|
+| 2026-07-26 | 1.0     | Initial banking workflow created. |
+| 2026-07-27 | 2.0     | Updated to reflect the production Wave Accounting Starter + Google Sheets bookkeeping workflow. |
+| 2026-07-27 | 2.1     | Updated banking platform from Novo Business Checking to Bluevine Business Checking after production account approval. |
 
 ---
 

@@ -17,7 +17,7 @@ The objective is to ensure every dollar earned by the business is accurately rec
 
 GuideMyTank uses a hybrid bookkeeping workflow consisting of:
 
-- Novo Business Checking
+- Bluevine Business Checking
 - Google Sheets Financial Dashboard
 - Wave Accounting Starter
 
@@ -73,7 +73,7 @@ Platform Records Earnings
 Platform Issues Payment
         │
         ▼
-Novo Business Checking
+Bluevine Business Checking
         │
         ▼
 Record Deposit in Google Sheets
@@ -124,6 +124,7 @@ Each deposit should be categorized according to its source.
 Each revenue transaction recorded in Google Sheets should include:
 
 - Date received
+- Deposit date
 - Reference number (if applicable)
 - Revenue source
 - Description
@@ -145,7 +146,7 @@ Verification includes:
 
 - Expected payment amount
 - Payment date
-- Deposit received in Novo
+- Deposit received in Bluevine Business Checking
 - Platform payment report
 - Google Sheets transaction
 - Wave Accounting transaction
@@ -179,6 +180,7 @@ At least once each month:
 
 - Review all revenue sources.
 - Confirm expected payments were received.
+- Verify all deposits have been received in Bluevine Business Checking.
 - Verify all deposits have been recorded in Google Sheets.
 - Import outstanding revenue into Wave.
 - Verify revenue categories.
@@ -193,7 +195,7 @@ If an expected payment is not received:
 
 1. Verify the platform payment report.
 2. Confirm payment status.
-3. Check Novo Business Checking.
+3. Check Bluevine Business Checking.
 4. Verify Google Sheets records.
 5. Verify Wave Accounting.
 6. Contact the payment platform if necessary.
@@ -214,11 +216,19 @@ Revenue contributes directly to:
 
 Revenue reporting should always agree between:
 
-- Novo Business Checking
+- Bluevine Business Checking
 - Google Sheets Financial Dashboard
 - Wave Accounting
 
 ---
+
+# Revenue Recognition Policy
+
+GuideMyTank recognizes revenue when funds are received in the Bluevine Business Checking account.
+
+Pending earnings displayed by advertising platforms, affiliate networks, or other third-party services are not recorded as revenue until payment has been deposited into the business account.
+
+This policy ensures financial records remain accurate, verifiable, and consistent with cash-basis accounting during the early stages of the business.
 
 # Related Documentation
 
@@ -246,7 +256,8 @@ Revenue reporting should always agree between:
 | Date | Version | Description |
 |------|---------|-------------|
 | 2026-07-26 | 1.0 | Initial revenue tracking process created. |
-| 2026-07-27 | 2.0 | Updated to reflect the production Novo + Google Sheets + Wave Accounting Starter revenue workflow. |
+| 2026-07-27 | 2.0 | Updated to reflect the production Google Sheets + Wave Accounting Starter revenue workflow. |
+| 2026-07-27 | 2.1 | Updated to reflect Bluevine Business Checking as the production banking platform. |
 
 ---
 

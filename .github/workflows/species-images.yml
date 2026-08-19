@@ -1,0 +1,113 @@
+name: Species image audit and sourcing
+
+on:
+  schedule:
+    # One check per week. Successful sourcing is independently capped at 3/UTC month.
+    - cron: "23 10 * * 2"
+  workflow_dispatch:
+    inputs:
+      audit_only:
+        description: "Run the audit without sourcing"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Select a batch without downloading candidates"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: species-image-sourcing
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      eligible: ${{ steps.gate.outputs.eligible }}
+      allowed: ${{ steps.gate.outputs.allowed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run species-images:audit
+      - id: gate
+        shell: bash
+        run: |
+          node -e 'const a=require("./reports/species-images/audit.json");const fs=require("fs");fs.appendFileSync(process.env.GITHUB_OUTPUT,`eligible=${a.eligible.length>0}\nallowed=${a.sourcing.allowed}\n`)'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: species-image-audit
+          path: reports/species-images/
+
+  source:
+    needs: audit
+    if: >-
+      needs.audit.outputs.eligible == 'true' &&
+      needs.audit.outputs.allowed == 'true' &&
+      (github.event_name == 'schedule' || inputs.audit_only != true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check for an existing review batch
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          count="$(gh pr list --state open --json headRefName --jq '[.[] | select(.headRefName | startswith("automation/species-images-"))] | length')"
+          if [ "$count" -gt 0 ]; then
+            echo "An automated review PR is already open; no second batch will be sourced."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Select only
+        if: ${{ steps.pending.outputs.proceed == 'true' && inputs.dry_run == true }}
+        run: npm run species-images:source -- dry-run 10
+      - name: Source review candidates
+        if: ${{ steps.pending.outputs.proceed == 'true' && inputs.dry_run != true }}
+        run: npm run species-images:source -- 10
+      - uses: actions/upload-artifact@v4
+        if: ${{ steps.pending.outputs.proceed == 'true' }}
+        with:
+          name: species-image-review
+          if-no-files-found: ignore
+          path: |
+            reports/species-images/
+            assets/species-candidates/
+      - name: Open a draft review PR when candidates were sourced
+        if: ${{ steps.pending.outputs.proceed == 'true' && inputs.dry_run != true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if git diff --quiet -- data/images/species-image-candidates.json data/images/species-image-runs.json; then
+            echo "No candidates were sourced; no run is counted and no PR is opened."
+            exit 0
+          fi
+          branch="automation/species-images-$(date -u +%Y%m%d)-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add data/images/species-image-candidates.json data/images/species-image-runs.json
+          git add -f assets/species-candidates/*/source.* assets/species-candidates/*/prepared.webp || true
+          git add -f reports/species-images/review.html
+          git commit -m "chore: prepare species image review batch"
+          git push origin "$branch"
+          gh pr create --draft --base "${{ github.event.repository.default_branch }}" --head "$branch" --title "Review species image candidates $(date -u +%Y-%m-%d)" --body "Automated candidate batch for human review. Nothing in this PR is approved, and this workflow never writes to public/species. Review identity, anatomy, crop, transparency, provenance, attribution, license, and commercial/modification rights."

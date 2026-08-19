@@ -14,6 +14,11 @@
 /coverage
 /reports/seo/
 /reports/compatibility/
+/reports/species-images/
+
+# species image sourcing workspace (manifests and review previews are tracked)
+/assets/species-candidates/*/source.*
+/assets/species-candidates/*/prepared.webp
 
 # next.js
 /.next/

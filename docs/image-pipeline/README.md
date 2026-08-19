@@ -174,21 +174,11 @@ Future Species Cards
 
 ---
 
-## Future Automation Pipeline
+## Repository workflow
 
-Future automated workflow:
-
-Wikimedia API
-↓
-Auto image download
-↓
-AI background removal
-↓
-AI visual standardization
-↓
-Compression pipeline
-↓
-Metadata generation
-↓
-Automatic production deployment
+The current controlled workflow is documented in
+[`docs/species-image-workflow.md`](../species-image-workflow.md). Automated
+sourcing may prepare draft review candidates, but it must never deploy or copy
+an image into `public/species`. Publication always requires explicit human
+approval and a separate command.
 

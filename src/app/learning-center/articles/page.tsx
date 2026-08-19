@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedArticles } from "@/lib/articles/service";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { getSearchVariantRobots, hasActiveSearchParams } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";

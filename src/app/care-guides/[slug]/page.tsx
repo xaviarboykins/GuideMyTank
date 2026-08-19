@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getPublishedCareGuideBySlug, listPublishedCareGuides } from "@/lib/care-guides/service";
-import { resolvePublishedSpeciesImageUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { NOINDEX_FOLLOW, NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
@@ -80,10 +80,9 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
 
   if (publishedGuide) {
     const [imageUrls, internalLinks] = await Promise.all([
-      resolvePublishedSpeciesImageUrls(publishedGuide.images.map((image) => ({
-        speciesSlug: publishedGuide.guide.species.slug,
-        storagePath: image.content_images.storage_path,
-      }))),
+      createPublishedContentImageSignedUrls(
+        publishedGuide.images.map((image) => image.content_images.storage_path),
+      ),
       getCareGuidePageLinks(publishedGuide),
     ]);
     const { guide } = publishedGuide;

@@ -1,4 +1,4 @@
-import { createPublishedContentImageFetchUrl } from "@/lib/content-images/service";
+import { createPublishedContentImageFetchUrl } from "@/lib/content-images/public";
 
 type ContentImageRouteProps = {
   params: Promise<{ path: string[] }>;

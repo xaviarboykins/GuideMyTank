@@ -106,7 +106,15 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$branch"
           git add data/images/species-image-candidates.json data/images/species-image-runs.json
-          git add -f assets/species-candidates/*/source.* assets/species-candidates/*/prepared.webp || true
+          mapfile -d '' candidate_files < <(
+            find assets/species-candidates -type f \
+              \( -name 'source.*' -o -name 'prepared.webp' \) -print0
+          )
+          if [ "${#candidate_files[@]}" -eq 0 ]; then
+            echo "Candidate metadata changed, but no candidate image files were produced."
+            exit 1
+          fi
+          git add -f -- "${candidate_files[@]}"
           git add -f reports/species-images/review.html
           git commit -m "chore: prepare species image review batch"
           git push origin "$branch"

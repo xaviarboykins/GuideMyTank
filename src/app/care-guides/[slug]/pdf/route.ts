@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPublishedCareGuideBySlug } from "@/lib/care-guides/service";
 import { createCareGuidePdf } from "@/lib/care-guides/pdf";
-import { createPublishedContentImageFetchUrl } from "@/lib/content-images/service";
+import { createPublishedContentImageFetchUrl } from "@/lib/content-images/public";
 import sharp from "sharp";
 
 export const runtime = "nodejs";

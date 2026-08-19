@@ -10,7 +10,7 @@ import { InternalLinksSection } from "@/components/internal-linking/internal-lin
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageContainer } from "@/components/site/page-container";
 import { getPublishedArticleBySlug } from "@/lib/articles/service";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { isJsonRecord } from "@/lib/content/structured-data";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { buildPageMetadata } from "@/lib/seo/metadata";

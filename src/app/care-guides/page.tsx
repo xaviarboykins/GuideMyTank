@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
-import { resolvePublishedSpeciesImageUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { parsePisciDexFilters, type PisciDexFilterSearchParams } from "@/lib/data/species";
 import { getSearchVariantRobots } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -54,10 +54,12 @@ export default async function CareGuidesPage({
     if (filters.beginnerFriendly && species.care_level !== "Easy") return false;
     return true;
   });
-  const imageUrls = await resolvePublishedSpeciesImageUrls(allGuides.flatMap((guide) => {
-    const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
-    return image ? [{ speciesSlug: guide.species.slug, storagePath: image.content_images.storage_path }] : [];
-  }));
+  const primaryImages = allGuides
+    .map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0])
+    .filter(Boolean);
+  const imageUrls = await createPublishedContentImageSignedUrls(
+    primaryImages.map((image) => image.content_images.storage_path),
+  );
   const temperamentOptions = getUniqueValues(
     allSpecies.map((item) => item.temperament),
   );

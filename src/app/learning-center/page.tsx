@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { GuideCard } from "@/components/guides/guide-card";
 import { listPublishedArticles } from "@/lib/articles/service";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { listPublishedGuides } from "@/lib/guides/repository";
 import { buildCollectionPageEntities } from "@/lib/seo/schema/collection-page";

@@ -1,10 +1,10 @@
-const AVAILABLE_SPECIES_IMAGES = new Set([
-  "angelfish",
-  "betta-splendens",
-  "corydoras-catfish",
-  "guppy",
-  "honey-gourami",
-]);
+import speciesImageAssets from "../../data/images/species-image-assets.json";
+
+const AVAILABLE_SPECIES_IMAGES = new Set(
+  Object.entries(speciesImageAssets)
+    .filter(([, asset]) => asset.status === "ready")
+    .map(([slug]) => slug),
+);
 
 export const SPECIES_PLACEHOLDER_IMAGE = "/species/placeholder.webp";
 

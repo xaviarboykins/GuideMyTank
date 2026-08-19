@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { useState } from "react";
 
 import type { Database } from "@/types/database.types";
-import { getSpeciesImage } from "@/lib/images";
+import { SpeciesImage } from "@/components/species/species-image";
 import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
 import { formatRecommendedTemperature } from "@/lib/species/temperature-label";
 
@@ -95,8 +94,9 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
                       }
                       onMouseLeave={() => setPreview(null)}
                     >
-                      <Image
-                        src={getSpeciesImage(item.slug)}
+                      <SpeciesImage
+                        slug={item.slug}
+                        commonName={item.common_name}
                         alt={`${item.common_name} aquarium species thumbnail`}
                         fill
                         className="object-contain p-1"
@@ -155,8 +155,9 @@ export function SpeciesTable({ species }: SpeciesTableProps) {
             }}
           >
             <div className="relative h-40 w-40">
-              <Image
-                src={getSpeciesImage(preview.slug)}
+              <SpeciesImage
+                slug={preview.slug}
+                commonName={preview.commonName}
                 alt={`${preview.commonName} aquarium species preview`}
                 fill
                 className="object-contain"

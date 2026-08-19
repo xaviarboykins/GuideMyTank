@@ -59,7 +59,7 @@ export function CareGuideCarousel({ guides }: { guides: FeaturedCareGuide[] }) {
           >
             <Link href={`/care-guides/${guide.slug}`} className="group block">
               <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                {guide.image ? <img src={guide.image} alt={guide.imageAlt} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" /> : null}
+                {guide.image ? <img src={guide.image} alt={guide.imageAlt} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" /> : null}
               </div>
 
               <div className="p-4">

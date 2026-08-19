@@ -1,12 +1,12 @@
 "use client";
 
 import { Minus, Plus, Search, Trash2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SpeciesImage } from "@/components/species/species-image";
 import { Input } from "@/components/ui/input";
 import type {
   AquariumBuild,
@@ -20,7 +20,6 @@ import {
   serializeAquariumBuild,
 } from "@/lib/aquarium-builder/storage";
 import { calculateCompatibility } from "@/lib/compatibility/engine";
-import { getSpeciesImage } from "@/lib/images";
 import { formatSpeciesGroupLabel } from "@/lib/species/group-label";
 import { formatRecommendedTemperature } from "@/lib/species/temperature-label";
 
@@ -172,8 +171,6 @@ function SpeciesThumbnail({
     x: number;
     y: number;
   } | null>(null);
-  const imageSrc = getSpeciesImage(slug);
-
   return (
     <>
       <div
@@ -192,8 +189,9 @@ function SpeciesThumbnail({
         }
         onMouseLeave={() => setPreview(null)}
       >
-        <Image
-          src={imageSrc}
+        <SpeciesImage
+          slug={slug}
+          commonName={commonName}
           alt={`${commonName} aquarium species thumbnail`}
           fill
           className="object-contain p-1"
@@ -210,8 +208,9 @@ function SpeciesThumbnail({
           }}
         >
           <div className="relative size-40">
-            <Image
-              src={imageSrc}
+            <SpeciesImage
+              slug={slug}
+              commonName={commonName}
               alt={`${commonName} aquarium species preview`}
               fill
               className="object-contain"

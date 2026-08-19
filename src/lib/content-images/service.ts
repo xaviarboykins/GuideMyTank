@@ -5,6 +5,7 @@ import { throwContentDatabaseError } from "@/lib/content/database";
 import { ContentServiceError } from "@/lib/content/errors";
 import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
+import { hasSpeciesImage, resolveSpeciesImage } from "@/lib/images";
 import type { Database } from "@/types/database.types";
 import sharp from "sharp";
 
@@ -109,9 +110,48 @@ export async function createContentImageSignedUrls(storagePaths: string[]) {
 }
 
 export async function createPublishedContentImageSignedUrls(storagePaths: string[]) {
-  if (storagePaths.length === 0) return new Map<string, string>();
+  return new Map(
+    storagePaths.map((storagePath) => [
+      storagePath,
+      `/media/content/${storagePath
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/")}`,
+    ]),
+  );
+}
+
+export async function createPublishedContentImageFetchUrl(storagePath: string) {
   const supabase = createStaticClient();
-  const { data, error } = await supabase.storage.from(CONTENT_IMAGE_BUCKET).createSignedUrls(storagePaths, 60 * 60);
+  const { data, error } = await supabase.storage
+    .from(CONTENT_IMAGE_BUCKET)
+    .createSignedUrl(storagePath, 60);
   if (error) throw new ContentServiceError("Published images could not be loaded.", "storage");
-  return new Map(data.map((item, index) => [storagePaths[index], item.signedUrl ?? ""]));
+  return data.signedUrl;
+}
+
+type SpeciesContentImage = {
+  speciesSlug: string;
+  storagePath: string;
+};
+
+export async function resolvePublishedSpeciesImageUrls(
+  images: SpeciesContentImage[],
+) {
+  const legacyStoragePaths = images
+    .filter((image) => !hasSpeciesImage(image.speciesSlug))
+    .map((image) => image.storagePath);
+  const legacyUrls = await createPublishedContentImageSignedUrls(
+    legacyStoragePaths,
+  );
+
+  return new Map(
+    images.map((image) => [
+      image.storagePath,
+      resolveSpeciesImage(
+        image.speciesSlug,
+        legacyUrls.get(image.storagePath),
+      ),
+    ]),
+  );
 }

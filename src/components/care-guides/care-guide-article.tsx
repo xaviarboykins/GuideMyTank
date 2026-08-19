@@ -32,12 +32,12 @@ function parseFaq(text: string) {
   return items;
 }
 
-function GuideImage({ assignment, url, className }: { assignment?: ImageAssignment; url?: string; className: string }) {
+function GuideImage({ assignment, url, className, loading = "lazy" }: { assignment?: ImageAssignment; url?: string; className: string; loading?: "eager" | "lazy" }) {
   if (!assignment || !url) return null;
   return (
     <figure>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt={assignment.content_images.alt_text ?? ""} className={className} />
+      <img src={url} alt={assignment.content_images.alt_text ?? ""} className={className} loading={loading} />
       {assignment.content_images.caption ? <figcaption className="mt-2 text-sm leading-5 text-muted-foreground">{assignment.content_images.caption}</figcaption> : null}
       <ImageCredit {...assignment.content_images} />
     </figure>
@@ -85,7 +85,7 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
 
       <section className={`mt-8 ${styles.topGrid}`}>
         <div className="min-w-0">
-          <GuideImage assignment={primary} url={primary ? imageUrls.get(primary.content_images.storage_path) : undefined} className={`${styles.primaryImage} border border-border bg-muted`} />
+          <GuideImage assignment={primary} url={primary ? imageUrls.get(primary.content_images.storage_path) : undefined} className={`${styles.primaryImage} border border-border bg-muted`} loading="eager" />
         </div>
         <aside className="min-w-0 border border-border bg-card p-5">
           <h2 className="text-xl font-semibold">Quick facts</h2>

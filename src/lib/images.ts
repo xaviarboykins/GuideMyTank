@@ -1,19 +1,33 @@
-const AVAILABLE_SPECIES_IMAGES = [
+const AVAILABLE_SPECIES_IMAGES = new Set([
   "angelfish",
   "betta-splendens",
   "corydoras-catfish",
   "guppy",
   "honey-gourami",
-];
+]);
 
-const SPECIES_PLACEHOLDER_IMAGE = "/species/placeholder.webp";
+export const SPECIES_PLACEHOLDER_IMAGE = "/species/placeholder.webp";
+
+export function normalizeSpeciesSlug(slug: string) {
+  return slug
+    .trim()
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/(^-|-$)/g, "");
+}
 
 export function getSpeciesImage(slug: string) {
-  return AVAILABLE_SPECIES_IMAGES.includes(slug)
-    ? `/species/${slug}.webp`
+  const normalizedSlug = normalizeSpeciesSlug(slug);
+  return AVAILABLE_SPECIES_IMAGES.has(normalizedSlug)
+    ? `/species/${normalizedSlug}.webp`
     : SPECIES_PLACEHOLDER_IMAGE;
 }
 
 export function hasSpeciesImage(slug: string) {
-  return AVAILABLE_SPECIES_IMAGES.includes(slug);
+  return AVAILABLE_SPECIES_IMAGES.has(normalizeSpeciesSlug(slug));
+}
+
+export function resolveSpeciesImage(slug: string, legacySource?: string | null) {
+  if (hasSpeciesImage(slug)) return getSpeciesImage(slug);
+  return legacySource || SPECIES_PLACEHOLDER_IMAGE;
 }

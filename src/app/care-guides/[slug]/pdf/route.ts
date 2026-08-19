@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPublishedCareGuideBySlug } from "@/lib/care-guides/service";
 import { createCareGuidePdf } from "@/lib/care-guides/pdf";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageFetchUrl } from "@/lib/content-images/service";
 import sharp from "sharp";
 
 export const runtime = "nodejs";
@@ -13,8 +13,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const primaryImage = result.images.find((image) => image.is_primary) ?? result.images[0];
   let pdfImage: { bytes: Uint8Array; caption: string | null } | undefined;
   if (primaryImage) {
-    const urls = await createPublishedContentImageSignedUrls([primaryImage.content_images.storage_path]);
-    const imageUrl = urls.get(primaryImage.content_images.storage_path);
+    const imageUrl = await createPublishedContentImageFetchUrl(primaryImage.content_images.storage_path);
     if (imageUrl) {
       const response = await fetch(imageUrl);
       if (response.ok) {

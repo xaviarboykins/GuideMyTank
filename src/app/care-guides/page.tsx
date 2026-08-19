@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { resolvePublishedSpeciesImageUrls } from "@/lib/content-images/service";
 import { parsePisciDexFilters, type PisciDexFilterSearchParams } from "@/lib/data/species";
 import { getSearchVariantRobots } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -54,8 +54,10 @@ export default async function CareGuidesPage({
     if (filters.beginnerFriendly && species.care_level !== "Easy") return false;
     return true;
   });
-  const primaryImages = allGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
-  const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
+  const imageUrls = await resolvePublishedSpeciesImageUrls(allGuides.flatMap((guide) => {
+    const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
+    return image ? [{ speciesSlug: guide.species.slug, storagePath: image.content_images.storage_path }] : [];
+  }));
   const temperamentOptions = getUniqueValues(
     allSpecies.map((item) => item.temperament),
   );
@@ -183,7 +185,7 @@ export default async function CareGuidesPage({
                       {imageUrl ? (
                         // Signed private-storage URLs are not stable Next Image optimization sources.
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imageUrl} alt={primaryImage?.content_images.alt_text ?? `${item.common_name} care guide`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+                        <img src={imageUrl} alt={primaryImage?.content_images.alt_text ?? `${item.common_name} care guide`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
                       ) : null}
                     </div>
                     <div className="flex flex-1 flex-col p-4">

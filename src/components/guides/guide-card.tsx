@@ -18,7 +18,7 @@ export function GuideCard({ guide, imageUrl, imageAlt }: GuideCardProps) {
   if (!guide.slug) return null;
   return <article className="overflow-hidden border border-border bg-card">
     <Link href={`/learning-center/guides/${guide.slug}`} className="group flex h-full flex-col">
-      {imageUrl ? <img src={imageUrl} alt={imageAlt ?? guide.title ?? "Aquarium Guide"} className="aspect-[16/9] w-full object-cover" /> : null}
+      {imageUrl ? <img src={imageUrl} alt={imageAlt ?? guide.title ?? "Aquarium Guide"} className="aspect-[16/9] w-full object-cover" loading="lazy" /> : null}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{guide.article_category_assignments.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div>
         <h3 className="mt-2 text-xl font-semibold group-hover:underline">{guide.title}</h3>

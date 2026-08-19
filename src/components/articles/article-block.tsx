@@ -21,7 +21,7 @@ export function ArticleBlock({ type, content, imageUrls }: { type: string; conte
   if (type === "faq_group" && Array.isArray(record.items)) return <section className="border border-border"><h2 className="border-b border-border p-4 text-2xl font-semibold">Frequently Asked Questions</h2>{record.items.map((item, index) => isJsonRecord(item) ? <div key={index} className="grid gap-2 border-t border-border p-4 first:border-t-0 md:grid-cols-[1fr_2fr]"><h3 className="font-semibold">{typeof item.question === "string" ? item.question : ""}</h3><p>{typeof item.answer === "string" ? item.answer : ""}</p></div> : null)}</section>;
   if (type === "image" && typeof record.imageId === "string") {
     const url = imageUrls.get(record.imageId);
-    return url ? <img src={url} alt={typeof record.alt === "string" ? record.alt : "Content image"} className="max-h-[32rem] w-full object-contain" /> : null;
+    return url ? <img src={url} alt={typeof record.alt === "string" ? record.alt : "Content image"} className="max-h-[32rem] w-full object-contain" loading="lazy" /> : null;
   }
   return null;
 }

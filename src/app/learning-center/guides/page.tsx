@@ -8,7 +8,7 @@ import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { listPublishedGuides } from "@/lib/guides/repository";
 import { getSearchVariantRobots, hasActiveSearchParams } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";

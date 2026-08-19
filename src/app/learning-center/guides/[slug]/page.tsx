@@ -9,7 +9,7 @@ import { BuilderCallToAction } from "@/components/internal-linking/builder-call-
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageContainer } from "@/components/site/page-container";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
 import { isJsonRecord } from "@/lib/content/structured-data";
 import { getPublishedGuideBySlug } from "@/lib/guides/repository";
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";

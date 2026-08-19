@@ -12,7 +12,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
-import { createPublishedContentImageSignedUrls } from "@/lib/content-images/service";
+import { resolvePublishedSpeciesImageUrls } from "@/lib/content-images/service";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { buildHomePageEntities } from "@/lib/seo/schema/home";
 
@@ -65,8 +65,10 @@ export default async function Home() {
     description: HOME_DESCRIPTION,
   });
   const publishedGuides = await listPublishedCareGuides();
-  const primaryImages = publishedGuides.map((guide) => guide.care_guide_images.find((image) => image.is_primary) ?? guide.care_guide_images[0]).filter(Boolean);
-  const imageUrls = await createPublishedContentImageSignedUrls(primaryImages.map((image) => image.content_images.storage_path));
+  const imageUrls = await resolvePublishedSpeciesImageUrls(publishedGuides.flatMap((guide) => {
+    const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
+    return image ? [{ speciesSlug: guide.species.slug, storagePath: image.content_images.storage_path }] : [];
+  }));
   const featuredCareGuides: FeaturedCareGuide[] = publishedGuides.map((guide) => {
     const image = guide.care_guide_images.find((item) => item.is_primary) ?? guide.care_guide_images[0];
     return {

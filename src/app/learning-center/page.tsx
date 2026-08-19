@@ -65,7 +65,7 @@ export default async function LearningCenterPage() {
         const imageUrl = image ? imageUrls.get(image.content_images.storage_path) : undefined;
         return <article key={article.id} className="overflow-hidden border border-border bg-card">
           <Link href={`/learning-center/${article.slug}`} className="group flex h-full flex-col">
-            {imageUrl ? <img src={imageUrl} alt={image?.content_images.alt_text ?? article.title ?? "Aquarium article"} className="aspect-[16/9] w-full object-cover" /> : null}
+            {imageUrl ? <img src={imageUrl} alt={image?.content_images.alt_text ?? article.title ?? "Aquarium article"} className="aspect-[16/9] w-full object-cover" loading="lazy" /> : null}
             <div className="flex flex-1 flex-col p-5">
               <div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{article.article_category_assignments.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div>
               <h3 className="mt-2 text-xl font-semibold group-hover:underline">{article.title}</h3>

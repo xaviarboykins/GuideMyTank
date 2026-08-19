@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -8,6 +7,7 @@ import { SpeciesCompatibilitySections } from "@/components/species/species-compa
 import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { SpeciesStatCard } from "@/components/species/species-stat-card";
+import { SpeciesImage } from "@/components/species/species-image";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
@@ -162,8 +162,6 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
   });
   const compatibilityTags = species.compatibility_tags ?? [];
   const careWarnings = species.care_warnings ?? [];
-  const speciesImage = getSpeciesImage(species.slug);
-
   return (
     <>
       <JsonLd entities={schemaEntities} />
@@ -184,13 +182,14 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
         <section className="mt-6">
           <div className="flex flex-col gap-4">
             <div className="relative aspect-[4/3] w-full max-w-sm sm:max-w-md lg:max-w-lg">
-              <Image
-                src={speciesImage}
+              <SpeciesImage
+                slug={species.slug}
+                commonName={species.common_name}
                 alt={`${species.common_name} aquarium species`}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 520px"
                 className="object-contain"
-                priority
+                preload
               />
             </div>
           </div>

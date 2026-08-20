@@ -20,6 +20,26 @@
         "brilliant-rummynose-tetra",
         "bristlenose-pleco"
       ]
+    },
+    {
+      "id": "e03a9304-0f7c-467b-aabc-8bd7ccd3fb88",
+      "startedAt": "2026-08-20T03:35:18.751Z",
+      "completedAt": "2026-08-20T03:35:46.963Z",
+      "dryRun": false,
+      "successfulCandidates": 10,
+      "status": "successful",
+      "slugs": [
+        "american-flagfish",
+        "angelfish",
+        "betta-splendens",
+        "black-moor-goldfish",
+        "brilliant-rummynose-tetra",
+        "bristlenose-pleco",
+        "bubble-eye-goldfish",
+        "buenos-aires-tetra",
+        "butterfly-splitfin",
+        "cardinal-tetra"
+      ]
     }
   ]
 }

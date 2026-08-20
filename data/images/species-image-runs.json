@@ -1,4 +1,18 @@
 {
   "schemaVersion": 1,
-  "runs": []
+  "runs": [
+    {
+      "id": "20c474c7-91b9-4a07-8477-cdf9c52f77e5",
+      "startedAt": "2026-08-20T01:20:40.754Z",
+      "completedAt": "2026-08-20T01:20:51.629Z",
+      "dryRun": false,
+      "successfulCandidates": 3,
+      "status": "successful",
+      "slugs": [
+        "amano-shrimp",
+        "american-flagfish",
+        "boesemani-rainbowfish"
+      ]
+    }
+  ]
 }

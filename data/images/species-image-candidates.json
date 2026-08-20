@@ -1,4 +1,62 @@
 {
   "schemaVersion": 1,
-  "candidates": []
+  "candidates": [
+    {
+      "id": "amano-shrimp-1b1504fa",
+      "slug": "amano-shrimp",
+      "status": "needs-editing",
+      "source": "Wikimedia Commons",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Caridina_multidentata_Stein.jpg",
+      "creator": "MdE",
+      "license": "CC BY-SA 3.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+      "attribution": "own photo",
+      "commercialUseReviewed": false,
+      "modificationsReviewed": false,
+      "rightsReviewer": "",
+      "rightsReviewedAt": null,
+      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "sourceAssetPath": "assets/species-candidates/amano-shrimp/source.jpg",
+      "preparedAssetPath": "",
+      "sourcedAt": "2026-08-20T01:20:41.184Z"
+    },
+    {
+      "id": "american-flagfish-d0cee415",
+      "slug": "american-flagfish",
+      "status": "needs-editing",
+      "source": "Wikimedia Commons",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:FMIB_37953_Jordanella_floridae_Goode_and_Bean.jpeg",
+      "creator": "Albert Jefferson Woolman",
+      "license": "Public domain",
+      "licenseUrl": "",
+      "attribution": "Woolman, Albert J. (1892)       Report Upon the Rivers of Central Florida Tributary to the Gulf of Mexico, with Lists of Fishes Inhabiting Them, Bulletin of the United States Fish Commission. vol.10 for 1890, Washington, D.C.:  Government Printing Office",
+      "commercialUseReviewed": false,
+      "modificationsReviewed": false,
+      "rightsReviewer": "",
+      "rightsReviewedAt": null,
+      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "sourceAssetPath": "assets/species-candidates/american-flagfish/source.jpeg",
+      "preparedAssetPath": "",
+      "sourcedAt": "2026-08-20T01:20:42.389Z"
+    },
+    {
+      "id": "boesemani-rainbowfish-313cb4c6",
+      "slug": "boesemani-rainbowfish",
+      "status": "needs-editing",
+      "source": "Wikimedia Commons",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Melanotaenia_boesemani_-_IMG_0448.jpg",
+      "creator": "Cangadoba",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "attribution": "Own work",
+      "commercialUseReviewed": false,
+      "modificationsReviewed": false,
+      "rightsReviewer": "",
+      "rightsReviewedAt": null,
+      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "sourceAssetPath": "assets/species-candidates/boesemani-rainbowfish/source.jpg",
+      "preparedAssetPath": "",
+      "sourcedAt": "2026-08-20T01:20:47.850Z"
+    }
+  ]
 }

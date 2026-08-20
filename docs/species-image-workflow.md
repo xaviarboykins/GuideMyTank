@@ -32,7 +32,7 @@ The scheduled workflow definition runs from GitHub's default branch, but it expl
 
 ## Image rules
 
-Production assets must be square WebP files no larger than 300 KB. Opaque photographs are cropped edge-to-edge with Sharp's attention strategy. Transparent sources retain transparent containment. Solid letterbox padding, text, watermarks, misleading reconstruction, bad anatomy, and poor crops are rejected. Natural aquarium and neutral backgrounds are allowed.
+Production assets must be square WebP files no larger than 300 KB. Opaque photographs preserve the complete source image within a safe margin over a subdued, blurred extension of that same photograph. Transparent sources retain transparent containment. Solid letterbox padding, text, watermarks, misleading reconstruction, bad anatomy, and poor framing are rejected. Natural aquarium and neutral backgrounds are allowed.
 
 ## Batch review
 

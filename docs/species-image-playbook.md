@@ -124,9 +124,9 @@ In **Settings -> Actions -> General**, confirm workflow read/write permission an
 
 Common causes are undecided or duplicate slugs, missing rejection reasons, incomplete license metadata, missing prepared files, solid padding, oversize output, or accidental replacement. Fix the same PR; never bypass validation by manually copying files.
 
-### Crop is poor
+### Framing is poor
 
-Reject it. Automated attention cropping is only a preparation aid.
+Reject it. Automated preparation preserves the full source over a blurred extension, but human review still decides whether the subject is framed clearly at every supported size.
 
 ### Bad production deployment
 

@@ -107,10 +107,10 @@ function detectOpposingSolidPadding(data: Buffer, width: number, height: number)
   const left = countBand(width, false, uniformColumn);
   const right = countBand(width, true, uniformColumn);
   const horizontal = top.color && bottom.color && similar(top.color, bottom.color, 10) &&
-    top.count >= height * 0.025 && bottom.count >= height * 0.025 &&
+    top.count >= height * 0.05 && bottom.count >= height * 0.05 &&
     top.count + bottom.count < height * 0.8;
   const vertical = left.color && right.color && similar(left.color, right.color, 10) &&
-    left.count >= width * 0.025 && right.count >= width * 0.025 &&
+    left.count >= width * 0.05 && right.count >= width * 0.05 &&
     left.count + right.count < width * 0.8;
   if (horizontal) return { axis: "horizontal", start: top.count, end: bottom.count, color: top.color };
   if (vertical) return { axis: "vertical", start: left.count, end: right.count, color: left.color };
@@ -172,14 +172,35 @@ async function prepareFile(inputPath: string, outputPath: string) {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   const sourceMetadata = await sharp(inputPath, { failOn: "error" }).metadata();
   const preserveTransparentCanvas = sourceMetadata.hasAlpha === true;
+  let preparedBase: Buffer;
+  if (preserveTransparentCanvas) {
+    preparedBase = await sharp(inputPath, { failOn: "error" })
+      .rotate()
+      .resize(1200, 1200, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toBuffer();
+  } else {
+    const background = await sharp(inputPath, { failOn: "error" })
+      .rotate()
+      .resize(1200, 1200, { fit: "cover", position: sharp.strategy.attention })
+      .blur(32)
+      .modulate({ brightness: 0.72, saturation: 0.75 })
+      .png()
+      .toBuffer();
+    const completeSource = await sharp(inputPath, { failOn: "error" })
+      .rotate()
+      .resize(1128, 1128, { fit: "inside" })
+      .png()
+      .toBuffer();
+    preparedBase = await sharp(background)
+      .composite([{ input: completeSource, gravity: "center" }])
+      .png()
+      .toBuffer();
+  }
   const qualities = [88, 82, 76, 70, 64];
   let result: Awaited<ReturnType<typeof inspectImage>> | null = null;
   for (const quality of qualities) {
-    await sharp(inputPath, { failOn: "error" })
-      .rotate()
-      .resize(1200, 1200, preserveTransparentCanvas
-        ? { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }
-        : { fit: "cover", position: sharp.strategy.attention })
+    await sharp(preparedBase, { failOn: "error" })
       .webp({ quality, effort: 6 })
       .toFile(outputPath);
     result = await inspectImage(outputPath);

@@ -1,1 +1,32 @@
-{}
+{
+  "amano-shrimp": {
+    "imageUrl": "/species/amano-shrimp.webp",
+    "alt": "amano shrimp freshwater aquarium species",
+    "status": "ready"
+  },
+  "angelfish": {
+    "imageUrl": "/species/angelfish.webp",
+    "alt": "angelfish freshwater aquarium species",
+    "status": "ready"
+  },
+  "black-ghost-knifefish": {
+    "imageUrl": "/species/black-ghost-knifefish.webp",
+    "alt": "black ghost knifefish freshwater aquarium species",
+    "status": "ready"
+  },
+  "bloodfin-tetra": {
+    "imageUrl": "/species/bloodfin-tetra.webp",
+    "alt": "bloodfin tetra freshwater aquarium species",
+    "status": "ready"
+  },
+  "boesemani-rainbowfish": {
+    "imageUrl": "/species/boesemani-rainbowfish.webp",
+    "alt": "boesemani rainbowfish freshwater aquarium species",
+    "status": "ready"
+  },
+  "bolivian-ram": {
+    "imageUrl": "/species/bolivian-ram.webp",
+    "alt": "bolivian ram freshwater aquarium species",
+    "status": "ready"
+  }
+}

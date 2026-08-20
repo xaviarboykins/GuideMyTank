@@ -40,6 +40,26 @@
         "butterfly-splitfin",
         "cardinal-tetra"
       ]
+    },
+    {
+      "id": "4bc93863-03a0-4e45-a5ad-9d73638010d5",
+      "startedAt": "2026-08-20T04:12:09.038Z",
+      "completedAt": "2026-08-20T04:12:26.941Z",
+      "dryRun": false,
+      "successfulCandidates": 10,
+      "status": "successful",
+      "slugs": [
+        "amano-shrimp",
+        "american-flagfish",
+        "angelfish",
+        "betta-splendens",
+        "black-ghost-knifefish",
+        "black-moor-goldfish",
+        "black-neon-tetra",
+        "bloodfin-tetra",
+        "boesemani-rainbowfish",
+        "bolivian-ram"
+      ]
     }
   ]
 }

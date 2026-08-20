@@ -1,1 +1,80 @@
-{}
+{
+  "amano-shrimp": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Caridina_multidentata_close.jpg",
+    "creator": "Richard Bartz, Munich Makro Freak",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "amano-shrimp-914f0306"
+  },
+  "angelfish": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pterophyllum_scalare_03.jpg",
+    "creator": "Versions111",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "angelfish-82d94031"
+  },
+  "black-ghost-knifefish": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apteronotus_albifrons_Aquarium_tropical_du_Palais_de_la_Porte_Dor%C3%A9e_10_04_2016_1.jpg",
+    "creator": "Vassil",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "black-ghost-knifefish-06ad4e3d"
+  },
+  "bloodfin-tetra": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aphyocharax_anisitsi_2.jpg",
+    "creator": "VGW2006 at en.wikipedia",
+    "license": "Public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Transferred from en.wikipedia",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "bloodfin-tetra-d456162b"
+  },
+  "boesemani-rainbowfish": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Melanotaenia_boesemani_-_IMG_0448.jpg",
+    "creator": "Cangadoba",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "boesemani-rainbowfish-924c0905"
+  },
+  "bolivian-ram": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_Bolivian_Ram_-_Mikrogeophagus_altispinosus.JPG",
+    "creator": "Corpse89",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
+    "candidateId": "bolivian-ram-9162c1ec"
+  }
+}

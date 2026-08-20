@@ -4,7 +4,7 @@
     {
       "id": "amano-shrimp-5551272c",
       "slug": "amano-shrimp",
-      "status": "needs-editing",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Caridina-multidentata-pregnant.png",
       "creator": "Katarzyna Motyka",
@@ -15,7 +15,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "Bad photo",
       "sourceAssetPath": "assets/species-candidates/amano-shrimp/source.png",
       "preparedAssetPath": "",
       "sourcedAt": "2026-08-20T01:42:55.959Z"
@@ -23,7 +23,7 @@
     {
       "id": "american-flagfish-eac5c78d",
       "slug": "american-flagfish",
-      "status": "needs-editing",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jordanella_floridae_mapa_wyst%C4%99powania.png",
       "creator": "KamJu",
@@ -34,7 +34,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "not a fish",
       "sourceAssetPath": "assets/species-candidates/american-flagfish/source.png",
       "preparedAssetPath": "",
       "sourcedAt": "2026-08-20T01:42:57.061Z"
@@ -61,7 +61,7 @@
     {
       "id": "black-moor-goldfish-27324ac9",
       "slug": "black-moor-goldfish",
-      "status": "needs-editing",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carassius_auratus_-_ilustraci%C3%B3n_gouache.jpg",
       "creator": "Elixabette Arroiabe Azurmendi",
@@ -72,7 +72,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "and illustration not a fish",
       "sourceAssetPath": "assets/species-candidates/black-moor-goldfish/source.jpg",
       "preparedAssetPath": "",
       "sourcedAt": "2026-08-20T01:43:00.044Z"
@@ -175,7 +175,7 @@
     {
       "id": "bristlenose-pleco-89009ed4",
       "slug": "bristlenose-pleco",
-      "status": "needs-editing",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ancistrus_cirrhosus_3.jpg",
       "creator": "Emőke Dénes",
@@ -186,7 +186,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "blurry",
       "sourceAssetPath": "assets/species-candidates/bristlenose-pleco/source.jpg",
       "preparedAssetPath": "",
       "sourcedAt": "2026-08-20T01:43:10.307Z"

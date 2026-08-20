@@ -116,3 +116,42 @@ export function hasCompleteRightsReview(candidate: Candidate) {
     candidate.modificationsReviewed && candidate.rightsReviewer && candidate.rightsReviewedAt,
   );
 }
+
+type RetryOptions = {
+  baseDelayMs?: number;
+  maxAttempts?: number;
+  sleep?: (milliseconds: number) => Promise<void>;
+};
+
+export async function fetchWithRetry(
+  input: string | URL,
+  init?: RequestInit,
+  options: RetryOptions = {},
+) {
+  const maxAttempts = options.maxAttempts ?? 4;
+  const baseDelayMs = options.baseDelayMs ?? 1_000;
+  const sleep = options.sleep ?? ((milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(input, init);
+      const retryable = response.status === 429 || response.status >= 500;
+      if (!retryable || attempt === maxAttempts) return response;
+
+      await response.body?.cancel();
+      const retryAfterSeconds = Number(response.headers.get("retry-after"));
+      const retryAfterMs = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+        ? retryAfterSeconds * 1_000
+        : 0;
+      const exponentialDelay = baseDelayMs * (2 ** (attempt - 1));
+      await sleep(Math.min(Math.max(retryAfterMs, exponentialDelay), 10_000));
+    } catch (error) {
+      lastError = error;
+      if (attempt === maxAttempts) throw error;
+      await sleep(Math.min(baseDelayMs * (2 ** (attempt - 1)), 10_000));
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Request failed after retries.");
+}

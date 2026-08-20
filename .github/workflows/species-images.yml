@@ -118,4 +118,4 @@ jobs:
           git add -f reports/species-images/review.html
           git commit -m "chore: prepare species image review batch"
           git push origin "$branch"
-          gh pr create --draft --base "${{ github.event.repository.default_branch }}" --head "$branch" --title "Review species image candidates $(date -u +%Y-%m-%d)" --body "Automated candidate batch for human review. Nothing in this PR is approved, and this workflow never writes to public/species. Review identity, anatomy, crop, transparency, provenance, attribution, license, and commercial/modification rights."
+          gh pr create --draft --base "${{ github.event.repository.default_branch }}" --head "$branch" --title "Review species image candidates $(date -u +%Y-%m-%d)" --body "Automated candidate batch for human review. Nothing in this PR is approved, and this workflow never writes to public/species. Natural aquarium or neutral backgrounds are allowed. Review identity, anatomy, crop, clarity, provenance, attribution, license, and commercial/modification rights."

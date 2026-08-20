@@ -10,13 +10,13 @@ Standardize all species images for GuideMyTank so every species uses a consisten
 
 All production images must follow:
 
-- Transparent background
 - WebP format
 - 1200x1200 resolution
 - Maximum 300KB file size
 - Species centered in frame
 - Consistent lighting and visual style
-- No aquarium backgrounds
+- Natural aquarium or neutral backgrounds are allowed
+- Backgrounds must not obscure the species or introduce distracting subjects
 - Production-ready for frontend rendering
 
 ---
@@ -69,31 +69,28 @@ Save original image to:
 assets/raw/
 
 Step 5  
-Remove background
+Crop and clean up the source where necessary
 
 Step 6  
-Perform manual cleanup using Photopea
+Confirm the background is relevant and does not obscure the species
 
 Step 7  
-Apply ChatGPT image polish / visual standardization
-
-Step 8  
-Perform final cleanup using Affinity Photo
-
-Step 9  
 Resize image to:
 
 1200x1200
 
-Step 10  
+Step 8
+
 Convert image to WebP
 
-Step 11  
+Step 9
+
 Compress image under:
 
 300KB
 
-Step 12  
+Step 10
+
 Save production asset to:
 
 public/species/

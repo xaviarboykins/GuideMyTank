@@ -12,6 +12,7 @@ const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "gmt-species-im
 const validPath = path.join(temporaryDirectory, "valid.webp");
 const opaquePath = path.join(temporaryDirectory, "opaque.webp");
 const nonSquarePath = path.join(temporaryDirectory, "non-square.webp");
+const oversizedDimensionsPath = path.join(temporaryDirectory, "oversized-dimensions.webp");
 const letterboxedPath = path.join(temporaryDirectory, "letterboxed.webp");
 
 beforeAll(async () => {
@@ -20,6 +21,7 @@ beforeAll(async () => {
     .webp().toFile(validPath);
   await sharp({ create: { width: 1200, height: 1200, channels: 3, background: { r: 255, g: 255, b: 255 } } }).webp().toFile(opaquePath);
   await sharp({ create: { width: 1200, height: 800, channels: 3, background: { r: 30, g: 80, b: 110 } } }).webp().toFile(nonSquarePath);
+  await sharp({ create: { width: 1600, height: 900, channels: 3, background: { r: 30, g: 80, b: 110 } } }).webp().toFile(oversizedDimensionsPath);
   await sharp({ create: { width: 1200, height: 1200, channels: 3, background: { r: 24, g: 32, b: 42 } } })
     .composite([{ input: { create: { width: 1200, height: 700, channels: 3, background: { r: 35, g: 150, b: 90 } } }, left: 0, top: 250 }])
     .webp().toFile(letterboxedPath);
@@ -39,10 +41,11 @@ function validate(filePath: string) {
 describe("species image validation integration", () => {
   it("accepts a representative compliant asset", () => expect(validate(validPath)).toBe(0));
   it("accepts an opaque square WebP with a background", () => expect(validate(opaquePath)).toBe(0));
-  it("rejects a non-square WebP", () => expect(validate(nonSquarePath)).not.toBe(0));
+  it("accepts an aspect-preserving non-square WebP", () => expect(validate(nonSquarePath)).toBe(0));
+  it("rejects a WebP whose dimensions exceed the production maximum", () => expect(validate(oversizedDimensionsPath)).not.toBe(0));
   it("rejects an opaque image with opposing solid letterbox bars", () => expect(validate(letterboxedPath)).not.toBe(0));
 
-  it("preserves both ends of a wide subject over a blurred square background", async () => {
+  it("preserves the natural aspect ratio and both ends of a wide subject", async () => {
     const fixture = path.join(temporaryDirectory, "prepare-landscape");
     fs.mkdirSync(fixture, { recursive: true });
     const source = path.join(fixture, "landscape.jpg");
@@ -64,7 +67,7 @@ describe("species image validation integration", () => {
     const prepared = path.join(fixture, "assets/species-candidates/landscape-fish/prepared.webp");
     const inspection = JSON.parse(output);
     expect(fs.existsSync(prepared)).toBe(true);
-    expect([inspection.width, inspection.height]).toEqual([1200, 1200]);
+    expect([inspection.width, inspection.height]).toEqual([1200, 450]);
     expect(inspection.solidPadding).toBeNull();
     const { data } = await sharp(prepared).raw().toBuffer({ resolveWithObject: true });
     let redPixels = 0; let bluePixels = 0;

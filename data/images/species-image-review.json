@@ -1,8 +1,19 @@
 {
   "schemaVersion": 1,
   "batchRunId": "4bc93863-03a0-4e45-a5ad-9d73638010d5",
-  "rightsConfirmed": false,
-  "approved": [],
-  "rejected": {},
+  "rightsConfirmed": true,
+  "approved": [
+    "amano-shrimp",
+    "angelfish",
+    "black-ghost-knifefish",
+    "boesemani-rainbowfish",
+    "bolivian-ram"
+  ],
+  "rejected": {
+    "american-flagfish": "Low quality image",
+    "betta-splendens": "Low quality image",
+    "black-moor-goldfish": "Image does not show the correct fish",
+    "black-neon-tetra": "Fish is not clearly visible",
+  },
   "replacements": []
 }

@@ -1,4 +1,25 @@
 {
   "schemaVersion": 1,
-  "runs": []
+  "runs": [
+    {
+      "id": "628d407a-9c19-4e2b-b4f5-35fff0999239",
+      "startedAt": "2026-08-20T02:13:08.664Z",
+      "completedAt": "2026-08-20T02:13:26.290Z",
+      "dryRun": false,
+      "successfulCandidates": 10,
+      "status": "successful",
+      "slugs": [
+        "amano-shrimp",
+        "american-flagfish",
+        "black-ghost-knifefish",
+        "black-moor-goldfish",
+        "black-neon-tetra",
+        "bloodfin-tetra",
+        "boesemani-rainbowfish",
+        "bolivian-ram",
+        "brilliant-rummynose-tetra",
+        "bristlenose-pleco"
+      ]
+    }
+  ]
 }

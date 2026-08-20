@@ -45,12 +45,16 @@ describe("Care Guide PDF route", () => {
     mocks.sharp.mockReset();
   });
 
-  it("returns a valid PDF without an image when the image pipeline fails", async () => {
+  it("returns a valid PDF without an image when Sharp cannot initialize", async () => {
     const pdfBytes = Uint8Array.from(Buffer.from("%PDF-fallback"));
     mocks.getPublishedCareGuideBySlug.mockResolvedValue(guideResult);
-    mocks.createPublishedContentImageFetchUrl.mockRejectedValue(new Error("Storage unavailable"));
+    mocks.createPublishedContentImageFetchUrl.mockResolvedValue("https://example.com/betta.webp");
+    mocks.sharp.mockImplementation(() => {
+      throw new Error("Sharp runtime unavailable");
+    });
     mocks.createCareGuidePdf.mockResolvedValue(pdfBytes);
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(Uint8Array.from([1, 2, 3]), { status: 200 })));
 
     const response = await GET(new Request("https://example.com/care-guides/betta-splendens/pdf"), {
       params: Promise.resolve({ slug: "betta-splendens" }),

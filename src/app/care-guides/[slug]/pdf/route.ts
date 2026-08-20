@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getPublishedCareGuideBySlug } from "@/lib/care-guides/service";
 import { createCareGuidePdf } from "@/lib/care-guides/pdf";
 import { createPublishedContentImageFetchUrl } from "@/lib/content-images/public";
-import sharp from "sharp";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +17,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
       if (imageUrl) {
         const response = await fetch(imageUrl);
         if (!response.ok) throw new Error(`Image request failed with status ${response.status}.`);
+        const { default: sharp } = await import("sharp");
         const png = await sharp(Buffer.from(await response.arrayBuffer()))
           .rotate()
           .resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })

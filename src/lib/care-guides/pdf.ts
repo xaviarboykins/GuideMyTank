@@ -8,7 +8,7 @@ type PdfGuide = {
 };
 type PdfSection = { heading: string | null; section_type: string; content: Json };
 type PdfSource = { sources: { title: string; url: string | null; author: string | null; publisher: string | null } };
-type PdfImage = { bytes: Uint8Array; caption?: string | null };
+type PdfImage = { bytes: Uint8Array; caption?: string | null; format: "jpeg" | "png" };
 
 const PAGE = { width: 612, height: 792, margin: 54 };
 
@@ -40,7 +40,7 @@ export async function createCareGuidePdf(guide: PdfGuide, sections: PdfSection[]
   const guideUrl = guide.slug ? getSiteUrl(`/care-guides/${guide.slug}`) : null;
   if (guideUrl) drawLines(`Guide URL: ${guideUrl}`, regular, 8.5, 12);
   if (mainImage) {
-    const embedded = await pdf.embedPng(mainImage.bytes);
+    const embedded = mainImage.format === "jpeg" ? await pdf.embedJpg(mainImage.bytes) : await pdf.embedPng(mainImage.bytes);
     const availableWidth = PAGE.width - PAGE.margin * 2;
     const scale = Math.min(availableWidth / embedded.width, 250 / embedded.height, 1);
     const width = embedded.width * scale; const height = embedded.height * scale;

@@ -1,0 +1,56 @@
+name: Apply species image review
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: write
+
+concurrency:
+  group: species-image-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply-review:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'automation/species-images-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply explicit batch decisions
+        run: npm run species-images:apply-review -- "${{ github.actor }}"
+      - name: Validate species image pipeline
+        run: |
+          npm test -- --run scripts/species-images/core.test.ts scripts/species-images/integration.test.ts
+          npm run species-images:audit
+      - name: Commit reviewed production changes to this PR
+        shell: bash
+        run: |
+          if git diff --quiet -- data/images/species-image-assets.json data/images/species-image-candidates.json data/images/species-image-sources.json public/species; then
+            echo "No reviewed production changes are ready to commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/images/species-image-assets.json data/images/species-image-candidates.json data/images/species-image-sources.json public/species
+          git commit -m "chore: apply approved species image review"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          echo "Approved species images and metadata were committed to this review PR." >> "$GITHUB_STEP_SUMMARY"
+          echo "Review the final Files changed diff before merging into dev." >> "$GITHUB_STEP_SUMMARY"

@@ -1,7 +1,13 @@
 import speciesImageAssets from "../../data/images/species-image-assets.json";
 
+type SpeciesImageAsset = {
+  imageUrl: string;
+  alt: string;
+  status: string;
+};
+
 const AVAILABLE_SPECIES_IMAGES = new Set(
-  Object.entries(speciesImageAssets)
+  Object.entries(speciesImageAssets as Record<string, SpeciesImageAsset>)
     .filter(([, asset]) => asset.status === "ready")
     .map(([slug]) => slug),
 );

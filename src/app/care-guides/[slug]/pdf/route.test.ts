@@ -103,7 +103,34 @@ describe("Care Guide PDF route", () => {
       guideResult.guide,
       [],
       [],
-      { bytes: optimizedBytes, caption: "Betta aquarium" },
+      { bytes: optimizedBytes, caption: "Betta aquarium", format: "png" },
+    );
+  });
+
+  it.each([
+    ["image/png", "care-guides/betta.png", "png"],
+    ["image/jpeg", "care-guides/betta.jpg", "jpeg"],
+  ] as const)("embeds %s storage bytes directly without Sharp", async (contentType, storagePath, format) => {
+    const sourceBytes = Uint8Array.from([1, 2, 3]);
+    const directImageResult = {
+      ...guideResult,
+      images: [{ ...guideResult.images[0], content_images: { ...guideResult.images[0].content_images, storage_path: storagePath } }],
+    };
+    mocks.getPublishedCareGuideBySlug.mockResolvedValue(directImageResult);
+    mocks.createPublishedContentImageFetchUrl.mockResolvedValue(`https://example.com/${storagePath}`);
+    mocks.createCareGuidePdf.mockResolvedValue(Uint8Array.from(Buffer.from("%PDF-direct")));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(sourceBytes, { status: 200, headers: { "Content-Type": contentType } })));
+
+    await GET(new Request("https://example.com/care-guides/betta-splendens/pdf"), {
+      params: Promise.resolve({ slug: "betta-splendens" }),
+    });
+
+    expect(mocks.sharp).not.toHaveBeenCalled();
+    expect(mocks.createCareGuidePdf).toHaveBeenCalledWith(
+      directImageResult.guide,
+      [],
+      [],
+      { bytes: sourceBytes, caption: "Betta aquarium", format },
     );
   });
 });

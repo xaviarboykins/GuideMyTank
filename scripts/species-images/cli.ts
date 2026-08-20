@@ -64,10 +64,10 @@ async function inspectImage(filePath: string) {
   const warnings: string[] = [];
   if (metadata.format !== "webp") warnings.push("not-webp");
   if (metadata.width !== metadata.height) warnings.push("not-square");
-  if (!metadata.hasAlpha || alphaMin === 255) warnings.push("not-transparent");
   if (stats.size > 300 * 1024) warnings.push("oversized");
-  if (margins && Math.min(...Object.values(margins)) < metadata.width! * 0.025) warnings.push("tight-margin");
-  if (margins && Math.max(...Object.values(margins)) > metadata.width! * 0.4) warnings.push("large-margin");
+  const hasTransparentCanvas = metadata.hasAlpha && alphaMin < 255;
+  if (hasTransparentCanvas && margins && Math.min(...Object.values(margins)) < metadata.width! * 0.025) warnings.push("tight-margin");
+  if (hasTransparentCanvas && margins && Math.max(...Object.values(margins)) > metadata.width! * 0.4) warnings.push("large-margin");
   return { path: filePath, bytes: stats.size, format: metadata.format, width: metadata.width, height: metadata.height, hasAlpha: metadata.hasAlpha, alphaMin, alphaMax, margins, foregroundCoverage: foreground / (info.width * info.height), warnings };
 }
 
@@ -124,8 +124,18 @@ async function validateCommand() {
 
 async function prepareFile(inputPath: string, outputPath: string) {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  await sharp(inputPath, { failOn: "error" }).ensureAlpha().resize(1200, 1200, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).webp({ quality: 88, effort: 6, alphaQuality: 100 }).toFile(outputPath);
-  return inspectImage(outputPath);
+  const qualities = [88, 82, 76, 70, 64];
+  let result: Awaited<ReturnType<typeof inspectImage>> | null = null;
+  for (const quality of qualities) {
+    await sharp(inputPath, { failOn: "error" })
+      .rotate()
+      .resize(1200, 1200, { fit: "contain", background: { r: 24, g: 32, b: 42, alpha: 1 } })
+      .webp({ quality, effort: 6 })
+      .toFile(outputPath);
+    result = await inspectImage(outputPath);
+    if (!result.warnings.includes("oversized")) break;
+  }
+  return result!;
 }
 
 async function prepareCommand() {
@@ -157,8 +167,7 @@ function commonsCandidateScore(title: string, species: SpeciesRecord) {
     .toLowerCase().split(/[^a-z0-9]+/).filter((term) => term.length > 2);
   const matchingTerms = identityTerms.filter((term) => normalizedTitle.includes(term)).length;
   const obviousNonPhoto = /\b(fmib|drawing|illustration|diagram|plate|stamp|icon|map)\b/.test(normalizedTitle);
-  const transparentFormat = /\.(png|webp|svg)$/i.test(title);
-  return (matchingTerms * 10) + (transparentFormat ? 2 : 0) - (obviousNonPhoto ? 100 : 0);
+  return (matchingTerms * 10) - (obviousNonPhoto ? 100 : 0);
 }
 
 async function sourceFromCommons(species: SpeciesRecord) {
@@ -184,16 +193,13 @@ async function sourceFromCommons(species: SpeciesRecord) {
   const imageResponse = await fetchWithRetry(downloadUrl, { headers: requestHeaders });
   if (!imageResponse.ok) throw new Error(`Image download returned ${imageResponse.status}`);
   fs.writeFileSync(sourceAssetPath, Buffer.from(await imageResponse.arrayBuffer()));
-  const metadata = await sharp(sourceAssetPath).metadata();
   let status: Candidate["status"] = "needs-editing";
   const preparedAssetPath = path.join(directory, "prepared.webp");
-  if (metadata.hasAlpha) {
-    const prepared = await prepareFile(sourceAssetPath, preparedAssetPath);
-    if (!prepared.warnings.length) {
-      status = "ready-for-review";
-    } else {
-      fs.rmSync(preparedAssetPath, { force: true });
-    }
+  const prepared = await prepareFile(sourceAssetPath, preparedAssetPath);
+  if (!prepared.warnings.length) {
+    status = "ready-for-review";
+  } else {
+    fs.rmSync(preparedAssetPath, { force: true });
   }
   return {
     id: `${species.slug}-${crypto.randomUUID().slice(0, 8)}`, slug: species.slug, status,
@@ -214,11 +220,11 @@ function writeReviewReport(candidates: Candidate[]) {
     const hasPreparedAsset = Boolean(item.preparedAssetPath);
     const image = `../../${escapeHtml(item.preparedAssetPath || item.sourceAssetPath)}`;
     const preview = hasPreparedAsset
-      ? `<h3>Prepared transparent candidate</h3><div class="previews"><div class="light"><img src="${image}"></div><div class="dark"><img src="${image}"></div><div class="checker"><img src="${image}"></div></div><h3>Representative layouts</h3><div class="layouts"><div class="detail"><img src="${image}"></div><div class="table"><img src="${image}"><span>Table thumbnail</span></div><div class="hover"><img src="${image}"></div><div class="builder"><img src="${image}"><span>Aquarium Builder row</span></div></div>`
-      : `<h3>Raw source only</h3><p class="warning">This source is opaque and requires manual background removal and preparation. It is not shown in production-layout previews and cannot be approved in its current form.</p><div class="raw"><img src="${image}"></div>`;
+      ? `<h3>Prepared candidate</h3><div class="previews"><div class="light"><img src="${image}"></div><div class="dark"><img src="${image}"></div><div class="checker"><img src="${image}"></div></div><h3>Representative layouts</h3><div class="layouts"><div class="detail"><img src="${image}"></div><div class="table"><img src="${image}"><span>Table thumbnail</span></div><div class="hover"><img src="${image}"></div><div class="builder"><img src="${image}"><span>Aquarium Builder row</span></div></div>`
+      : `<h3>Raw source only</h3><p class="warning">Automated preparation did not produce a valid square WebP under the size limit. Manual preparation is required before approval.</p><div class="raw"><img src="${image}"></div>`;
     return `<article><h2>${escapeHtml(item.slug)}</h2>${preview}<dl><dt>Status</dt><dd>${escapeHtml(item.status)}</dd><dt>Source</dt><dd><a href="${escapeHtml(item.sourceUrl)}">${escapeHtml(item.source)}</a></dd><dt>Creator</dt><dd>${escapeHtml(item.creator || "MISSING")}</dd><dt>License</dt><dd>${escapeHtml(item.license || "MISSING")}</dd></dl></article>`;
   }).join("\n");
-  fs.writeFileSync(path.join(reportDir, "review.html"), `<!doctype html><meta charset="utf-8"><title>Species image review</title><style>body{font:16px system-ui;max-width:1100px;margin:auto;padding:24px}article{border:1px solid #888;padding:16px;margin:20px 0}.warning{border-left:4px solid #b45309;background:#fffbeb;padding:12px}.raw{display:grid;place-items:center;background:#eee;min-height:20rem}.raw img{display:block;max-width:100%;max-height:38rem}.previews{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.previews div{aspect-ratio:1;display:grid;place-items:center}.previews img{width:90%;height:90%;object-fit:contain}.light{background:#fff}.dark{background:#18202a}.checker{background-color:#fff;background-image:linear-gradient(45deg,#bbb 25%,transparent 25%),linear-gradient(-45deg,#bbb 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#bbb 75%),linear-gradient(-45deg,transparent 75%,#bbb 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}.layouts{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.layouts img{object-fit:contain}.detail img{width:320px;height:240px}.table img{width:40px;height:40px}.hover img{width:160px;height:160px}.builder img{width:40px;height:40px}.table,.builder{display:flex;align-items:center;gap:8px}dl{display:grid;grid-template-columns:9rem 1fr}</style><h1>Species image candidate review</h1><p>Nothing shown here is approved or published. Prepared transparent candidates: ${preparedCount}. Raw sources requiring manual editing: ${candidates.length - preparedCount}.</p><p>Review anatomy, identity, crop, edges, provenance, attribution, license, and commercial/modification rights.</p>${cards}`);
+  fs.writeFileSync(path.join(reportDir, "review.html"), `<!doctype html><meta charset="utf-8"><title>Species image review</title><style>body{font:16px system-ui;max-width:1100px;margin:auto;padding:24px}article{border:1px solid #888;padding:16px;margin:20px 0}.warning{border-left:4px solid #b45309;background:#fffbeb;padding:12px}.raw{display:grid;place-items:center;background:#eee;min-height:20rem}.raw img{display:block;max-width:100%;max-height:38rem}.previews{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.previews div{aspect-ratio:1;display:grid;place-items:center}.previews img{width:90%;height:90%;object-fit:contain}.light{background:#fff}.dark{background:#18202a}.checker{background-color:#fff;background-image:linear-gradient(45deg,#bbb 25%,transparent 25%),linear-gradient(-45deg,#bbb 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#bbb 75%),linear-gradient(-45deg,transparent 75%,#bbb 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}.layouts{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.layouts img{object-fit:contain}.detail img{width:320px;height:240px}.table img{width:40px;height:40px}.hover img{width:160px;height:160px}.builder img{width:40px;height:40px}.table,.builder{display:flex;align-items:center;gap:8px}dl{display:grid;grid-template-columns:9rem 1fr}</style><h1>Species image candidate review</h1><p>Nothing shown here is approved or published. Prepared candidates: ${preparedCount}. Raw sources requiring manual preparation: ${candidates.length - preparedCount}.</p><p>Natural aquarium or neutral backgrounds are allowed. Review species identity, anatomy, crop, image clarity, provenance, attribution, license, and commercial/modification rights.</p>${cards}`);
 }
 
 async function sourceCommand() {

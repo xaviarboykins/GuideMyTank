@@ -20,18 +20,18 @@ npm run species-images:source -- dry-run 10
 npm run species-images:source -- 10
 ```
 
-Audit reports are written to the ignored `reports/species-images/` directory. Candidate sources and prepared files stay under `assets/species-candidates/{slug}/`, outside production. The HTML review report shows candidates on light, dark, and checkerboard backgrounds. Reviewers must additionally inspect the image in representative species-detail, table-thumbnail, hover-preview, and Aquarium Builder dimensions.
+Audit reports are written to the ignored `reports/species-images/` directory. Candidate sources and prepared files stay under `assets/species-candidates/{slug}/`, outside production. The HTML review report shows prepared candidates on light, dark, and checkerboard surfaces and in representative species-detail, table-thumbnail, hover-preview, and Aquarium Builder dimensions.
 
 ## Human review
 
 For every candidate, confirm:
 
 1. The species identity and visible anatomy are correct.
-2. One complete animal is shown where practical, with no text, watermark, aquarium background, or misleading reconstruction.
-3. Edges and transparency are clean on light, dark, and checkerboard backgrounds.
+2. One complete animal is shown where practical, with no text, watermark, misleading reconstruction, or distracting unrelated subjects.
+3. Natural aquarium and neutral backgrounds are allowed when they are clear, relevant, and do not obscure the species. Transparency is optional.
 4. The source URL, creator, license, license URL, and attribution are accurate.
 5. Commercial use and modification rights have been reviewed manually.
-6. The prepared image is square transparent WebP, at most 300 KB, with acceptable margins.
+6. The prepared image is a square WebP at most 300 KB, with a readable crop at every supported display size.
 
 Record the reviewer, timestamp, attribution, both rights-review booleans, and notes in `species-image-candidates.json`. Then change the candidate state to `approved`. Do not approve solely because Wikimedia metadata was imported.
 

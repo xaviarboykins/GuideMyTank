@@ -37,7 +37,7 @@ Only a real run that records at least one candidate counts toward the three-per-
 
 1. Open the draft automation PR and select **Files changed**.
 2. Read `reports/species-images/review.md` and open its provenance links.
-3. Inspect each `prepared.webp`; use `source.*` only to compare the original crop.
+3. Inspect each `prepared.webp`; use `source.*` to confirm preparation preserved the complete source and its natural aspect ratio.
 4. Confirm species identity, anatomy, crop, small-size clarity, and absence of text, watermark, or solid letterbox bars.
 5. Confirm source, creator, attribution, license, commercial use, and modification rights.
 
@@ -124,9 +124,9 @@ In **Settings -> Actions -> General**, confirm workflow read/write permission an
 
 Common causes are undecided or duplicate slugs, missing rejection reasons, incomplete license metadata, missing prepared files, solid padding, oversize output, or accidental replacement. Fix the same PR; never bypass validation by manually copying files.
 
-### Crop is poor
+### Framing is poor
 
-Reject it. Automated attention cropping is only a preparation aid.
+Reject it. Automated preparation preserves the complete source without cropping, padding, or generating a background, but human review still decides whether the subject is framed clearly at every supported size.
 
 ### Bad production deployment
 

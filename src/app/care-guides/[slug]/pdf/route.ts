@@ -13,13 +13,24 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const primaryImage = result.images.find((image) => image.is_primary) ?? result.images[0];
   let pdfImage: { bytes: Uint8Array; caption: string | null } | undefined;
   if (primaryImage) {
-    const imageUrl = await createPublishedContentImageFetchUrl(primaryImage.content_images.storage_path);
-    if (imageUrl) {
-      const response = await fetch(imageUrl);
-      if (response.ok) {
-        const png = await sharp(Buffer.from(await response.arrayBuffer())).rotate().png().toBuffer();
+    try {
+      const imageUrl = await createPublishedContentImageFetchUrl(primaryImage.content_images.storage_path);
+      if (imageUrl) {
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error(`Image request failed with status ${response.status}.`);
+        const png = await sharp(Buffer.from(await response.arrayBuffer()))
+          .rotate()
+          .resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })
+          .png({ compressionLevel: 9 })
+          .toBuffer();
         pdfImage = { bytes: png, caption: primaryImage.content_images.caption };
       }
+    } catch (error) {
+      console.error("Care Guide PDF image could not be embedded.", {
+        slug,
+        storagePath: primaryImage.content_images.storage_path,
+        error,
+      });
     }
   }
   const bytes = await createCareGuidePdf(result.guide, result.sections, result.sources, pdfImage);

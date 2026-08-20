@@ -23,7 +23,7 @@
     {
       "id": "american-flagfish-7ea716ad",
       "slug": "american-flagfish",
-      "status": "ready-for-review",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jordanella_floridae_182122551.jpg",
       "creator": "nat_t",
@@ -34,7 +34,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "bad image",
       "sourceAssetPath": "assets/species-candidates/american-flagfish/source.jpg",
       "preparedAssetPath": "assets/species-candidates/american-flagfish/prepared.webp",
       "sourcedAt": "2026-08-20T02:13:12.332Z"
@@ -61,7 +61,7 @@
     {
       "id": "black-moor-goldfish-1a22b017",
       "slug": "black-moor-goldfish",
-      "status": "ready-for-review",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carassius_auratus_-_ilustraci%C3%B3n_gouache.jpg",
       "creator": "Elixabette Arroiabe Azurmendi",
@@ -72,7 +72,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "not a fish",
       "sourceAssetPath": "assets/species-candidates/black-moor-goldfish/source.jpg",
       "preparedAssetPath": "assets/species-candidates/black-moor-goldfish/prepared.webp",
       "sourcedAt": "2026-08-20T02:13:15.744Z"
@@ -156,7 +156,7 @@
     {
       "id": "brilliant-rummynose-tetra-df6e4d54",
       "slug": "brilliant-rummynose-tetra",
-      "status": "ready-for-review",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aquarium_tropical_du_Palais_de_la_Porte_Dor%C3%A9e_-_Petitella_bleheri.jpg",
       "creator": "KoS",
@@ -167,7 +167,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "low visiblity of fish",
       "sourceAssetPath": "assets/species-candidates/brilliant-rummynose-tetra/source.jpg",
       "preparedAssetPath": "assets/species-candidates/brilliant-rummynose-tetra/prepared.webp",
       "sourcedAt": "2026-08-20T02:13:23.881Z"
@@ -175,7 +175,7 @@
     {
       "id": "bristlenose-pleco-4f1ab104",
       "slug": "bristlenose-pleco",
-      "status": "ready-for-review",
+      "status": "rejected",
       "source": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ancistrus_cirrhosus_3.jpg",
       "creator": "Emőke Dénes",
@@ -186,7 +186,7 @@
       "modificationsReviewed": false,
       "rightsReviewer": "",
       "rightsReviewedAt": null,
-      "reviewNotes": "Automated metadata import; human license and species review required.",
+      "reviewNotes": "blurry and low quality image",
       "sourceAssetPath": "assets/species-candidates/bristlenose-pleco/source.jpg",
       "preparedAssetPath": "assets/species-candidates/bristlenose-pleco/prepared.webp",
       "sourcedAt": "2026-08-20T02:13:25.538Z"

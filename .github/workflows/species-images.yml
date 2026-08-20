@@ -23,6 +23,9 @@ concurrency:
   group: species-image-sourcing
   cancel-in-progress: false
 
+env:
+  SPECIES_IMAGE_TARGET_BRANCH: dev
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -32,6 +35,8 @@ jobs:
       allowed: ${{ steps.gate.outputs.allowed }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SPECIES_IMAGE_TARGET_BRANCH }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -58,6 +63,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ env.SPECIES_IMAGE_TARGET_BRANCH }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -105,7 +111,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$branch"
-          git add data/images/species-image-candidates.json data/images/species-image-runs.json
+          git add data/images/species-image-candidates.json data/images/species-image-runs.json data/images/species-image-review.json
           mapfile -d '' candidate_files < <(
             find assets/species-candidates -type f \
               \( -name 'source.*' -o -name 'prepared.webp' \) -print0
@@ -115,7 +121,7 @@ jobs:
             exit 1
           fi
           git add -f -- "${candidate_files[@]}"
-          git add -f reports/species-images/review.html
+          git add -f reports/species-images/review.html reports/species-images/review.md
           git commit -m "chore: prepare species image review batch"
           git push origin "$branch"
-          gh pr create --draft --base "${{ github.event.repository.default_branch }}" --head "$branch" --title "Review species image candidates $(date -u +%Y-%m-%d)" --body "Automated candidate batch for human review. Nothing in this PR is approved, and this workflow never writes to public/species. Natural aquarium or neutral backgrounds are allowed. Review identity, anatomy, crop, clarity, provenance, attribution, license, and commercial/modification rights."
+          gh pr create --draft --base "$SPECIES_IMAGE_TARGET_BRANCH" --head "$branch" --title "Review species image candidates $(date -u +%Y-%m-%d)" --body "Automated candidate batch for human review. Nothing is approved yet. Review each image and its provenance, then edit data/images/species-image-review.json with every approval and rejection. Set rightsConfirmed only after checking commercial and modification rights. The review workflow will add approved production files to this PR; rejected images never enter public/species. Merge this PR into dev only after reviewing that final diff. Production deploys later through the normal dev-to-main PR."

@@ -12,6 +12,7 @@
     "species-image:validate": "node --no-warnings --experimental-strip-types scripts/species-images/cli.ts validate",
     "species-image:prepare": "node --no-warnings --experimental-strip-types scripts/species-images/cli.ts prepare",
     "species-images:source": "node --no-warnings --experimental-strip-types scripts/species-images/cli.ts source",
+    "species-images:apply-review": "node --no-warnings --experimental-strip-types scripts/species-images/cli.ts apply-review",
     "species-image:approve": "node --no-warnings --experimental-strip-types scripts/species-images/cli.ts approve",
     "seo:audit-links": "node --no-warnings --experimental-strip-types scripts/seo/audit-internal-links.mjs",
     "seo:validate-schema": "vitest run scripts/seo/schema-validation.test.ts",

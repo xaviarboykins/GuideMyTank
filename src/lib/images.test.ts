@@ -9,17 +9,15 @@ import {
 } from "./images";
 
 describe("species images", () => {
-  it("normalizes species slugs before resolving local assets", () => {
+  it("normalizes species slugs before resolving the controlled fallback", () => {
     expect(normalizeSpeciesSlug(" Betta Splendens ")).toBe("betta-splendens");
-    expect(getSpeciesImage(" Betta Splendens ")).toBe(
-      "/species/betta-splendens.webp",
-    );
-    expect(hasSpeciesImage("BETTA_SPLENDENS")).toBe(true);
+    expect(getSpeciesImage(" Betta Splendens ")).toBe(SPECIES_PLACEHOLDER_IMAGE);
+    expect(hasSpeciesImage("BETTA_SPLENDENS")).toBe(false);
   });
 
-  it("prefers an approved local image over a legacy source", () => {
+  it("retains a legacy source when the local production set is empty", () => {
     expect(resolveSpeciesImage("betta-splendens", "https://example.com/fish.png"))
-      .toBe("/species/betta-splendens.webp");
+      .toBe("https://example.com/fish.png");
   });
 
   it("retains an intentional legacy source when no local asset exists", () => {

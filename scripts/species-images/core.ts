@@ -52,6 +52,21 @@ export type SourcingRun = {
   slugs: string[];
 };
 
+export type BatchReviewDecision = {
+  schemaVersion: 1;
+  batchRunId: string;
+  rightsConfirmed: boolean;
+  approved: string[];
+  rejected: Record<string, string>;
+  replacements: string[];
+};
+
+export type BatchReviewPlan = {
+  approved: Candidate[];
+  rejected: Array<{ candidate: Candidate; reason: string }>;
+  replacements: Set<string>;
+};
+
 export function normalizeSpeciesSlug(value: string) {
   return value.trim().toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
 }
@@ -115,6 +130,76 @@ export function hasCompleteRightsReview(candidate: Candidate) {
     candidate.licenseUrl && candidate.attribution && candidate.commercialUseReviewed &&
     candidate.modificationsReviewed && candidate.rightsReviewer && candidate.rightsReviewedAt,
   );
+}
+
+export function hasCompleteProvenance(candidate: Candidate) {
+  return Boolean(
+    candidate.source && candidate.sourceUrl && candidate.creator && candidate.license &&
+    candidate.licenseUrl && candidate.attribution,
+  );
+}
+
+export function planBatchReview(input: {
+  decision: BatchReviewDecision;
+  run: SourcingRun;
+  candidates: Candidate[];
+}) : BatchReviewPlan {
+  const { decision, run, candidates } = input;
+  if (decision.schemaVersion !== 1) throw new Error("Unsupported batch review schema version.");
+  if (decision.batchRunId !== run.id) throw new Error("Batch review does not match the sourcing run.");
+  if (run.status !== "successful" || run.successfulCandidates < 1) throw new Error("Batch review must reference a successful sourcing run.");
+
+  const approvedSlugs = decision.approved.map((slug) => slug.trim());
+  const rejectedEntries = Object.entries(decision.rejected).map(([slug, reason]) => [slug.trim(), reason.trim()] as const);
+  const replacementSlugs = decision.replacements.map((slug) => slug.trim());
+  const ensureUnique = (values: string[], label: string) => {
+    if (new Set(values).size !== values.length) throw new Error(`${label} contains duplicate species slugs.`);
+  };
+  ensureUnique(approvedSlugs, "Approved list");
+  ensureUnique(rejectedEntries.map(([slug]) => slug), "Rejected list");
+  ensureUnique(replacementSlugs, "Replacement list");
+
+  const runSlugs = new Set(run.slugs);
+  const approvedSet = new Set(approvedSlugs);
+  const rejectedSet = new Set(rejectedEntries.map(([slug]) => slug));
+  for (const slug of [...approvedSlugs, ...rejectedSet, ...replacementSlugs]) {
+    if (!runSlugs.has(slug)) throw new Error(`Review decision contains species outside this batch: ${slug}`);
+  }
+  for (const slug of approvedSet) {
+    if (rejectedSet.has(slug)) throw new Error(`Species cannot be both approved and rejected: ${slug}`);
+  }
+  for (const slug of replacementSlugs) {
+    if (!approvedSet.has(slug)) throw new Error(`Replacement must also be approved: ${slug}`);
+  }
+
+  const decided = new Set([...approvedSet, ...rejectedSet]);
+  const undecided = run.slugs.filter((slug) => !decided.has(slug));
+  if (undecided.length) throw new Error(`Every candidate must be approved or rejected. Undecided: ${undecided.join(", ")}`);
+  if (approvedSlugs.length && !decision.rightsConfirmed) {
+    throw new Error("Approved candidates require explicit batch rights confirmation.");
+  }
+  for (const [slug, reason] of rejectedEntries) {
+    if (!reason) throw new Error(`Rejected candidate requires a reason: ${slug}`);
+  }
+
+  const bySlug = new Map(candidates.map((candidate) => [candidate.slug, candidate]));
+  const approved = approvedSlugs.map((slug) => {
+    const candidate = bySlug.get(slug);
+    if (!candidate) throw new Error(`Candidate manifest is missing batch species: ${slug}`);
+    if (!["ready-for-review", "approved", "published"].includes(candidate.status)) {
+      throw new Error(`Approved candidate is not ready for review: ${slug} (${candidate.status})`);
+    }
+    if (!candidate.preparedAssetPath) throw new Error(`Approved candidate has no prepared WebP: ${slug}`);
+    if (!hasCompleteProvenance(candidate)) throw new Error(`Approved candidate has incomplete provenance or licensing metadata: ${slug}`);
+    return candidate;
+  });
+  const rejected = rejectedEntries.map(([slug, reason]) => {
+    const candidate = bySlug.get(slug);
+    if (!candidate) throw new Error(`Candidate manifest is missing batch species: ${slug}`);
+    if (candidate.status === "published") throw new Error(`Published candidate cannot be rejected: ${slug}`);
+    return { candidate, reason };
+  });
+  return { approved, rejected, replacements: new Set(replacementSlugs) };
 }
 
 type RetryOptions = {

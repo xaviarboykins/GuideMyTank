@@ -1,50 +1,69 @@
 # Species image workflow
 
-GuideMyTank keeps approved species images at `public/species/{canonical-slug}.webp`. `placeholder.webp` is the controlled fallback. Candidates never enter that directory through automation.
+GuideMyTank keeps approved species images at `public/species/{canonical-slug}.webp`. `placeholder.webp` is the controlled fallback. Care Guide editorial images and `/media/content/...` delivery are separate systems and are not changed by this workflow.
 
-## Automation policy
+## Branch and publication flow
 
-The GitHub Actions workflow runs once each Tuesday. Every run audits the repository first. It exits after uploading the audit when no species need images or when three successful sourcing runs have already occurred in the current UTC calendar month.
+```text
+scheduled/manual Action on main
+  -> source from dev
+  -> automation/species-images-* review PR into dev
+  -> reviewer records one batch decision
+  -> Action stages approved production assets in that PR
+  -> human merges into dev
+  -> normal dev-to-main release PR
+  -> production deployment
+```
 
-A sourcing run counts only when at least one candidate is downloaded and recorded. Dry runs, failed runs, and zero-success attempts do not count. Each batch is deterministic by canonical slug and contains no more than ten species. A species with an active or unresolved candidate is excluded from later selection until a human changes its manifest state.
+The scheduled workflow definition runs from GitHub's default branch, but it explicitly checks out `dev`, creates its automation branch from `dev`, and targets the candidate PR to `dev`. Automation never commits directly to `dev` or `main`.
 
-Automated sourcing uses the Wikimedia Commons API. Imported creator and license metadata is evidence for review, not approval. The workflow opens a draft PR containing candidate material and provenance when practical. It never changes `public/species`.
+## Automation controls
+
+- The audit runs once each Tuesday and can also be dispatched manually.
+- The source job exits when no species need images.
+- At most three successful sourcing runs are allowed per UTC calendar month.
+- Dry runs, failures, and zero-success attempts do not count.
+- At most ten species are selected in deterministic canonical-slug order.
+- Active and unresolved candidates are not selected again.
+- One automated review PR may be open at a time.
+- Sourcing uses Wikimedia Commons and never approves copyright or species identity.
+- Candidate assets remain under `assets/species-candidates` until explicit batch approval.
+- Rejected and undecided candidates never enter `public/species`.
+
+## Image rules
+
+Production assets must be square WebP files no larger than 300 KB. Opaque photographs are cropped edge-to-edge with Sharp's attention strategy. Transparent sources retain transparent containment. Solid letterbox padding, text, watermarks, misleading reconstruction, bad anatomy, and poor crops are rejected. Natural aquarium and neutral backgrounds are allowed.
+
+## Batch review
+
+Every sourced PR contains `data/images/species-image-review.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "batchRunId": "generated-by-sourcing",
+  "rightsConfirmed": false,
+  "approved": [],
+  "rejected": {},
+  "replacements": []
+}
+```
+
+The reviewer inspects every image and license, then puts every slug in either `approved` or `rejected`. Every rejection requires a reason. `rightsConfirmed` may become `true` only after the reviewer confirms commercial-use and modification rights for all approved candidates. `replacements` is reserved for deliberate replacement of existing production assets.
+
+The PR review Action supplies the GitHub actor as reviewer, validates the entire decision, validates every approved WebP, records rights-review metadata, stages approved images and metadata in the same PR, and marks approved candidates published. It fails closed on incomplete or contradictory decisions.
 
 ## Commands
 
 ```bash
 npm run species-images:audit
 npm run species-image:validate -- path/to/image.webp
-npm run species-image:prepare -- path/to/source.png neon-tetra
+npm run species-image:prepare -- path/to/source.jpg canonical-slug
 npm run species-images:source -- dry-run 10
 npm run species-images:source -- 10
+npm run species-images:apply-review -- "Reviewer Name"
 ```
 
-Audit reports are written to the ignored `reports/species-images/` directory. Candidate sources and prepared files stay under `assets/species-candidates/{slug}/`, outside production. The HTML review report shows prepared candidates on light, dark, and checkerboard surfaces and in representative species-detail, table-thumbnail, hover-preview, and Aquarium Builder dimensions.
+The single-species `species-image:approve` command remains available as a recovery tool, but it is not part of normal operation.
 
-## Human review
-
-For every candidate, confirm:
-
-1. The species identity and visible anatomy are correct.
-2. One complete animal is shown where practical, with no text, watermark, misleading reconstruction, or distracting unrelated subjects.
-3. Natural aquarium and neutral backgrounds are allowed when they are clear, relevant, and do not obscure the species. Transparency is optional.
-4. The source URL, creator, license, license URL, and attribution are accurate.
-5. Commercial use and modification rights have been reviewed manually.
-6. The prepared image is a square WebP at most 300 KB, with a readable crop at every supported display size.
-
-Record the reviewer, timestamp, attribution, both rights-review booleans, and notes in `species-image-candidates.json`. Then change the candidate state to `approved`. Do not approve solely because Wikimedia metadata was imported.
-
-## Explicit publication or replacement
-
-After the manifest change has received human review, the same recorded reviewer runs:
-
-```bash
-npm run species-image:approve -- neon-tetra "Reviewer Name"
-```
-
-Replacing an existing asset additionally requires a final `replace` argument. The command validates the prepared file, checks the complete rights review, copies the file into production, updates production metadata, and marks the candidate published. Commit those publication changes in a separate human-controlled PR.
-
-If a candidate cannot be resolved, mark it `unresolved`; automation will not select that species again. To reconsider it, a human must deliberately change its state to `rejected` and document why.
-
-Care Guide and article editorial images remain database-assigned content images delivered through `/media/content/...`. They are outside this workflow. Supabase Storage is not used for species images.
+See [species-image-playbook.md](./species-image-playbook.md) for the operator and employee handoff process.

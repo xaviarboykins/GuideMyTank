@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
 import { Button } from "@/components/ui/button";
 import { getCareGuideEditorData } from "@/lib/care-guides/service";
-import { createContentImageSignedUrls } from "@/lib/content-images/service";
+import { createAdminContentImageUrls } from "@/lib/content-images/admin";
 
 export const metadata: Metadata = { title: "Care Guide Preview", robots: { index: false, follow: false, nocache: true } };
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function CareGuidePreviewPage({ params }: { params: Promise
   const editor = await getCareGuideEditorData(id);
   if (!editor) notFound();
   const { guide, sections, images, sources, relatedSpecies } = editor;
-  const imageUrls = await createContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
+  const imageUrls = createAdminContentImageUrls(images.map((image) => image.content_images.storage_path));
   const slug = guide.slug ?? guide.species.slug;
   const breadcrumbs = [
     { name: "Home", path: "/" },

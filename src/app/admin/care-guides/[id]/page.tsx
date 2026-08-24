@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCareGuideEditorData } from "@/lib/care-guides/service";
 import { REQUIRED_CARE_GUIDE_SECTIONS, REQUIRED_QUICK_FACTS } from "@/lib/care-guides/validation";
-import { createContentImageSignedUrls, listContentImages } from "@/lib/content-images/service";
+import { createAdminContentImageUrls } from "@/lib/content-images/admin";
+import { listContentImages } from "@/lib/content-images/service";
 import type { Json } from "@/types/database.types";
 
 import {
@@ -62,7 +63,7 @@ export default async function CareGuideEditorPage({ params, searchParams }: Care
   const speciesImages = await listContentImages(guide.species_id);
   const attachedIds = new Set(images.map((image) => image.image_id));
   const availableImages = speciesImages.filter((image) => !attachedIds.has(image.id));
-  const signedUrls = await createContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
+  const imageUrls = createAdminContentImageUrls(images.map((image) => image.content_images.storage_path));
   const relatedIds = new Set(relatedSpecies.map((item) => item.species_id));
   const availableSpecies = allSpecies.filter((item) => item.id !== guide.species_id && !relatedIds.has(item.id));
 
@@ -122,7 +123,7 @@ export default async function CareGuideEditorPage({ params, searchParams }: Care
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {images.map((assignment) => <article key={assignment.image_id} className="border border-border p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={signedUrls.get(assignment.content_images.storage_path)} alt={assignment.content_images.alt_text ?? ""} className="h-48 w-full bg-muted object-contain" />
+            <img src={imageUrls.get(assignment.content_images.storage_path)} alt={assignment.content_images.alt_text ?? ""} className="h-48 w-full bg-muted object-contain" />
             <p className="mt-2 text-sm font-medium">{assignment.content_images.alt_text ?? "Missing alt text"}</p><p className="text-xs text-muted-foreground">Order {assignment.display_order}{assignment.is_primary ? " · Primary" : ""}</p>
             {isEditable ? <div className="mt-3 flex flex-wrap gap-2">
               {!assignment.is_primary ? <form action={setPrimaryImageAction.bind(null, id)}><input type="hidden" name="imageId" value={assignment.image_id} /><Button size="sm" variant="outline">Set primary</Button></form> : null}

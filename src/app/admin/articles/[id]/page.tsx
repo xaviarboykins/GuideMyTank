@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getArticleEditorData } from "@/lib/articles/service";
 import { ARTICLE_BLOCK_TYPES } from "@/lib/articles/validation";
-import { createContentImageSignedUrls } from "@/lib/content-images/service";
+import { createAdminContentImageUrls } from "@/lib/content-images/admin";
 import { productCategories, productCategoryLabels } from "@/lib/products/types";
 
 import {
@@ -33,7 +33,7 @@ export default async function ArticleEditorPage({ params, searchParams }: { para
   if (!editor) notFound();
   const { article, sections, images, sources, categories, tags, allCategories, allTags } = editor;
   const isEditable = article.status !== "published";
-  const imageUrls = await createContentImageSignedUrls(images.map((image) => image.content_images.storage_path));
+  const imageUrls = createAdminContentImageUrls(images.map((image) => image.content_images.storage_path));
   const assignedCategoryIds = new Set(categories.map((item) => item.category_id));
   const assignedTagIds = new Set(tags.map((item) => item.tag_id));
 

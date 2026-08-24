@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
 import { getArticleEditorData } from "@/lib/articles/service";
-import { createContentImageSignedUrls } from "@/lib/content-images/service";
+import { createAdminContentImageUrls } from "@/lib/content-images/admin";
 import { isJsonRecord } from "@/lib/content/structured-data";
 import type { Json } from "@/types/database.types";
 
@@ -31,8 +31,8 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
   const editor = await getArticleEditorData(id);
   if (!editor) notFound();
   const { article, sections, images, sources, categories, tags } = editor;
-  const signed = await createContentImageSignedUrls(images.map((item) => item.content_images.storage_path));
-  const imageUrls = new Map(images.map((item) => [item.image_id, signed.get(item.content_images.storage_path) ?? ""]));
+  const urlsByStoragePath = createAdminContentImageUrls(images.map((item) => item.content_images.storage_path));
+  const imageUrls = new Map(images.map((item) => [item.image_id, urlsByStoragePath.get(item.content_images.storage_path) ?? ""]));
   const galleryImages = images.map((item) => ({ id: item.image_id, url: imageUrls.get(item.image_id) ?? "", alt: item.content_images.alt_text ?? "Article image", caption: item.content_images.caption }));
   const [introduction, ...remainingSections] = sections;
   return <div className="mx-auto max-w-4xl"><div className="mb-5 flex items-center justify-between border border-amber-700/40 bg-amber-500/10 p-3 text-sm"><strong>Protected article preview</strong><Button asChild size="sm" variant="outline"><Link href={`/admin/articles/${id}`}>Back to editor</Link></Button></div><article><header><div className="flex flex-wrap gap-2 text-xs uppercase text-muted-foreground">{categories.map((item) => <span key={item.category_id}>{item.article_categories.name}</span>)}</div><h1 className="mt-2 text-4xl font-bold tracking-tight">{article.title ?? "Untitled Article"}</h1>{article.summary ? <p className="mt-4 text-lg leading-8 text-muted-foreground">{article.summary}</p> : null}<div className="mt-3 flex flex-wrap gap-2">{tags.map((item) => <span key={item.tag_id} className="border border-border px-2 py-1 text-xs">{item.article_tags.name}</span>)}</div></header>{introduction ? <div className="mt-10"><Block type={introduction.block_type} content={introduction.content} imageUrls={imageUrls} /></div> : null}<div style={{ marginTop: "2rem", marginBottom: "4rem" }}><ArticleImageFlipbook images={galleryImages} /></div><div className="space-y-8">{remainingSections.map((section) => <Block key={section.id} type={section.block_type} content={section.content} imageUrls={imageUrls} />)}</div>{sources.length ? <section className="mt-12 border-t border-border pt-6"><h2 className="text-xl font-semibold">Sources</h2><ol className="mt-3 list-decimal space-y-2 pl-5 text-sm">{sources.map((item) => <li key={item.source_id}>{item.sources.url ? <a href={item.sources.url} target="_blank" rel="noreferrer" className="underline">{item.sources.title}</a> : item.sources.title}</li>)}</ol></section> : null}</article></div>;

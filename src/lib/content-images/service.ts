@@ -5,48 +5,10 @@ import { throwContentDatabaseError } from "@/lib/content/database";
 import { ContentServiceError } from "@/lib/content/errors";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
-import sharp from "sharp";
 
 const CONTENT_IMAGE_BUCKET = "content-images";
-const MAX_CONTENT_IMAGE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_CONTENT_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"]);
 
 type ContentImageUpdate = Database["public"]["Tables"]["content_images"]["Update"];
-
-function extensionFor(file: File) {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-  if (extension && /^[a-z0-9]+$/.test(extension)) return extension;
-  return file.type.split("/")[1] || "image";
-}
-
-export async function uploadContentImage(file: File, speciesId: string | null = null) {
-  await assertAdmin();
-  if (!ALLOWED_CONTENT_IMAGE_TYPES.has(file.type)) throw new ContentServiceError("Choose a JPEG, PNG, WebP, AVIF, or GIF image.", "validation");
-  if (file.size <= 0 || file.size > MAX_CONTENT_IMAGE_BYTES) throw new ContentServiceError("Content images must be between 1 byte and 10 MB.", "validation");
-  const metadata = await sharp(Buffer.from(await file.arrayBuffer())).metadata();
-  if (!metadata.width || !metadata.height) throw new ContentServiceError("The image dimensions could not be read.", "validation");
-
-  const supabase = await createClient();
-  const storagePath = `${speciesId ? `care-guides/${speciesId}` : "articles"}/${crypto.randomUUID()}.${extensionFor(file)}`;
-  const { error: uploadError } = await supabase.storage.from(CONTENT_IMAGE_BUCKET).upload(storagePath, file, {
-    contentType: file.type,
-    upsert: false,
-  });
-  if (uploadError) throw new ContentServiceError("The image upload failed.", "storage");
-
-  const { data, error } = await supabase
-    .from("content_images")
-    .insert({ storage_path: storagePath, species_id: speciesId, mime_type: file.type, file_size_bytes: file.size, width: metadata.width, height: metadata.height })
-    .select("*")
-    .single();
-
-  if (error) {
-    await supabase.storage.from(CONTENT_IMAGE_BUCKET).remove([storagePath]);
-    throwContentDatabaseError(error, "save image metadata");
-  }
-
-  return data;
-}
 
 export async function updateContentImage(id: string, update: ContentImageUpdate) {
   await assertAdmin();

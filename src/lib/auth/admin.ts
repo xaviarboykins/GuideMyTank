@@ -28,11 +28,5 @@ export async function requireAdmin() {
 }
 
 export async function assertAdmin() {
-  const user = await getAdminUser();
-
-  if (!user) {
-    throw new Error("Unauthorized admin operation.");
-  }
-
-  return user;
+  return requireAdmin();
 }

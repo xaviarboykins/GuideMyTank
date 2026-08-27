@@ -3,7 +3,9 @@ import type { MetadataRoute } from "next";
 import { listPublishedCareGuides } from "@/lib/care-guides/service";
 import { getSiteUrl } from "@/lib/seo/site-url";
 
-export const revalidate = 86_400; // CACHE_TTL.sitemap
+// Editorial inventory changes through the Admin portal. Generate this small
+// sitemap from the current published records instead of serving a stale build.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const guides = await listPublishedCareGuides();

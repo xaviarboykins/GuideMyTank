@@ -4,7 +4,9 @@ import { listPublishedArticles } from "@/lib/articles/service";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { listPublishedGuides } from "@/lib/guides/repository";
 
-export const revalidate = 86_400; // CACHE_TTL.sitemap
+// Editorial inventory changes through the Admin portal. Generate this small
+// sitemap from the current published records instead of serving a stale build.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [articles, guides] = await Promise.all([listPublishedArticles(), listPublishedGuides()]);

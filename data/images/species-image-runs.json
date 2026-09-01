@@ -60,6 +60,26 @@
         "boesemani-rainbowfish",
         "bolivian-ram"
       ]
+    },
+    {
+      "id": "957e1ca2-7d38-44a9-b61e-effef8d18355",
+      "startedAt": "2026-09-01T15:00:00.129Z",
+      "completedAt": "2026-09-01T15:00:27.771Z",
+      "dryRun": false,
+      "successfulCandidates": 10,
+      "status": "successful",
+      "slugs": [
+        "american-flagfish",
+        "betta-splendens",
+        "black-moor-goldfish",
+        "black-neon-tetra",
+        "brilliant-rummynose-tetra",
+        "bristlenose-pleco",
+        "bubble-eye-goldfish",
+        "buenos-aires-tetra",
+        "butterfly-splitfin",
+        "cardinal-tetra"
+      ]
     }
   ]
 }

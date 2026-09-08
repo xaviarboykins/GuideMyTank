@@ -60,6 +60,7 @@ export interface ArticlePageLinkInput {
   relatedArticles?: RelatedArticle[];
   clusterSpecies?: ArticleClusterSpecies[];
   generatedInternalLinks?: unknown[];
+  fallbackArticles?: InternalLinkItem[];
 }
 
 export interface ArticlePageLinks {
@@ -153,6 +154,7 @@ export function buildArticlePageLinks({
   relatedArticles = [],
   clusterSpecies = [],
   generatedInternalLinks = [],
+  fallbackArticles = [],
 }: ArticlePageLinkInput): ArticlePageLinks {
   const source = {
     entityType: article.contentType === "guide" ? "guide" as const : "article" as const,
@@ -344,7 +346,7 @@ export function buildArticlePageLinks({
       4,
     ),
     relatedArticles: filter(
-      [...articleLinks, ...generated.relatedArticles],
+      [...articleLinks, ...generated.relatedArticles, ...fallbackArticles],
       4,
     ),
     topicClusters: filter(topicClusters, 1),

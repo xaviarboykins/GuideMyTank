@@ -41,7 +41,8 @@ indexes, PDFs, previews, and short fallback pages.
 ## Component responsibilities
 
 - `AdPlacement` applies configuration, page-family, and content-length policy.
-- `AdSenseScript` loads the AdSense/CMP tag after primary rendering.
+- `AdSenseScript` loads the AdSense/CMP tag once from the root layout after
+  primary rendering when production advertising is enabled.
 - `AdSlot` initializes one responsive slot, guards duplicate initialization,
   reserves responsive loading space, and collapses unfilled or failed slots.
 

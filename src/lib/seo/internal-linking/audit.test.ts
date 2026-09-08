@@ -146,4 +146,20 @@ describe("internal link audit", () => {
     ).toEqual([]);
     expect(report.summary.pages).toBe(4);
   });
+
+  it("automatically connects published Learning Center content", () => {
+    const report = generateInternalLinkAudit({
+      species: [],
+      careGuides: [],
+      articles: [
+        { id: "article", slug: "article", status: "published", content_type: "article", published_at: "2026-09-02" },
+        { id: "guide", slug: "guide", status: "published", content_type: "guide", published_at: "2026-09-01" },
+      ],
+      careGuideRelatedSpecies: [],
+      articleRelatedCareGuides: [],
+      articleRelatedArticles: [],
+    });
+
+    expect(report.issues.filter((item) => item.category === "orphan_page")).toEqual([]);
+  });
 });

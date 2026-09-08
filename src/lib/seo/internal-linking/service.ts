@@ -2,7 +2,10 @@ import "server-only";
 
 import { getPublishedCareGuidesForSpeciesSlugs } from "../../care-guides/service";
 import { getSpeciesBySlugs, getSpeciesLinkCandidates } from "../../data/species";
-import { getPublishedArticlesBySlugs } from "../../articles/service";
+import {
+  getPublishedArticlesBySlugs,
+  listPublishedLearningCenterLinkCandidates,
+} from "../../articles/service";
 import { getPublishedGuidesBySlugs } from "../../guides/repository";
 import {
   buildCompatibilityPageLinks,
@@ -26,6 +29,7 @@ import {
   buildArticlePageLinks,
   type ArticlePageLinks,
 } from "./article-page-links";
+import { buildLearningCenterFallbackLinks } from "./learning-center-fallback";
 
 type PublishedCareGuide = NonNullable<
   Awaited<ReturnType<typeof import("../../care-guides/service").getPublishedCareGuideBySlug>>
@@ -151,8 +155,10 @@ export async function getArticlePageLinks(
       ),
     ),
   ];
-  const availableClusterSpecies =
-    await getSpeciesBySlugs(clusterSpeciesSlugs);
+  const [availableClusterSpecies, learningCenterCandidates] = await Promise.all([
+    getSpeciesBySlugs(clusterSpeciesSlugs),
+    listPublishedLearningCenterLinkCandidates(),
+  ]);
   const clusterSpeciesBySlug = new Map(
     availableClusterSpecies.map((species) => [species.slug, species]),
   );
@@ -173,5 +179,9 @@ export async function getArticlePageLinks(
     relatedArticles: content.relatedArticles,
     clusterSpecies,
     generatedInternalLinks: content.generatedInternalLinks,
+    fallbackArticles: buildLearningCenterFallbackLinks(
+      content.article.id,
+      learningCenterCandidates,
+    ),
   });
 }

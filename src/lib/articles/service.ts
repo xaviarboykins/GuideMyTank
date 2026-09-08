@@ -32,6 +32,18 @@ export async function listPublishedArticles() {
   return data ?? [];
 }
 
+export async function listPublishedLearningCenterLinkCandidates() {
+  const supabase = createStaticClient();
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id,title,slug,summary,content_type,published_at")
+    .eq("status", "published")
+    .in("content_type", ["article", "guide"])
+    .order("published_at", { ascending: false });
+  throwContentDatabaseError(error, "list published Learning Center links");
+  return data ?? [];
+}
+
 export async function getPublishedArticlesBySlugs(slugs: string[]) {
   if (slugs.length === 0) {
     return [];

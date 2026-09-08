@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import { PrivacySettingsButton } from "./privacy-settings-button";
+
 const footerLinks = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms" },
+  { href: "/terms", label: "Terms of Service" },
   { href: "/affiliate-disclosure", label: "Affiliate Disclosure" },
   { href: "/disclaimer", label: "Disclaimer" },
   { href: "/admin", label: "Admin Portal" },
@@ -30,6 +32,7 @@ export function Footer() {
               {link.label}
             </Link>
           ))}
+          <PrivacySettingsButton />
         </nav>
       </div>
     </footer>

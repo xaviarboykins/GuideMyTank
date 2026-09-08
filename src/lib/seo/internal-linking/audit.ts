@@ -18,6 +18,9 @@ export interface InternalLinkAuditArticle {
   include_products?: boolean;
   product_category?: string | null;
   generated_links?: string[];
+  title?: string | null;
+  summary?: string | null;
+  published_at?: string | null;
 }
 
 export interface InternalLinkAuditInput {
@@ -119,6 +122,14 @@ export function buildKnownInternalLinkPages(
     publishedGuides.map((guide) => [guide.species_id, guide]),
   );
   const pages: InternalLinkAuditPage[] = [];
+  const publishedLearningCenterContent = input.articles
+    .filter((item) => item.status === "published" && item.slug)
+    .toSorted((a, b) => {
+      const dateDifference = (b.published_at ?? "").localeCompare(
+        a.published_at ?? "",
+      );
+      return dateDifference || a.id.localeCompare(b.id);
+    });
 
   for (const current of input.species) {
     const links: string[] = ["/aquarium-builder"];
@@ -224,6 +235,23 @@ export function buildKnownInternalLinkPages(
       links.push(`/aquarium-builder/products/${article.product_category}`);
     }
     links.push(...(article.generated_links ?? []));
+    const currentIndex = publishedLearningCenterContent.findIndex(
+      (candidate) => candidate.id === article.id,
+    );
+    if (currentIndex !== -1 && publishedLearningCenterContent.length > 1) {
+      const offsets = publishedLearningCenterContent.length === 2 ? [1] : [-1, 1];
+      for (const offset of offsets) {
+        const candidate = publishedLearningCenterContent[
+          (currentIndex + offset + publishedLearningCenterContent.length) %
+            publishedLearningCenterContent.length
+        ];
+        if (!candidate.slug) continue;
+        const candidatePath = candidate.content_type === "guide"
+          ? `/learning-center/guides/${candidate.slug}`
+          : `/learning-center/${candidate.slug}`;
+        if (!links.includes(candidatePath)) links.push(candidatePath);
+      }
+    }
     const isGuide = article.content_type === "guide";
     pages.push({
       path: article.slug

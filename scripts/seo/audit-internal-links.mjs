@@ -40,7 +40,7 @@ const [
   supabase.from("care_guides").select("id,slug,status,species_id"),
   supabase
     .from("articles")
-    .select("id,slug,status,content_type,include_products,product_category"),
+    .select("id,slug,title,summary,status,content_type,include_products,product_category,published_at"),
   supabase
     .from("programmatic_guide_metadata")
     .select("article_id,generation_metadata"),

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { buildConsentModeDefaultsScript } from "@/components/analytics/consent-mode-defaults";
+import { CookieConsentBanner } from "@/components/analytics/cookie-consent-banner";
+import { AdSenseScript } from "@/components/advertising/AdSenseScript";
+import { advertisingConfig } from "@/config/advertising";
 import { getSiteOrigin } from "@/lib/seo/site-url";
 
 export const metadata: Metadata = {
@@ -23,6 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script id="google-consent-mode-defaults" strategy="beforeInteractive">
+          {buildConsentModeDefaultsScript()}
+        </Script>
+      </head>
       <body className="bg-background text-foreground antialiased">
         <div className="flex min-h-screen flex-col">
           <Navbar />
@@ -32,7 +42,11 @@ export default function RootLayout({
           <Footer />
         </div>
 
+        {advertisingConfig.enabled && advertisingConfig.clientId ? (
+          <AdSenseScript clientId={advertisingConfig.clientId} />
+        ) : null}
         <GoogleAnalytics />
+        <CookieConsentBanner />
       </body>
     </html>
   );

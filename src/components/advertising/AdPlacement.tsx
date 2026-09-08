@@ -5,7 +5,6 @@ import type {
   AdvertisingPlacement,
 } from "@/lib/advertising/types";
 
-import { AdSenseScript } from "./AdSenseScript";
 import { AdSlot } from "./AdSlot";
 
 export function AdPlacement({
@@ -45,14 +44,11 @@ export function AdPlacement({
   }
 
   return (
-    <>
-      <AdSenseScript clientId={advertisingConfig.clientId} />
-      <AdSlot
-        clientId={advertisingConfig.clientId}
-        pageFamily={pageFamily}
-        placement={placement}
-        slotId={placementConfig.slotId}
-      />
-    </>
+    <AdSlot
+      clientId={advertisingConfig.clientId}
+      pageFamily={pageFamily}
+      placement={placement}
+      slotId={placementConfig.slotId}
+    />
   );
 }

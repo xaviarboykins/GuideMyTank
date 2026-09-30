@@ -1,5 +1,8 @@
 import { validateContentSlug } from "../content/slug";
-import { validateArticleBlockContent } from "../content/structured-data";
+import {
+  countContentWords,
+  validateArticleBlockContent,
+} from "../content/structured-data";
 import type { ValidationIssue, ValidationResult } from "../content/types";
 import type { Json } from "../../types/database.types";
 
@@ -14,6 +17,8 @@ export const ARTICLE_BLOCK_TYPES = [
   "image",
   "related_content",
 ] as const;
+
+export const ARTICLE_MINIMUM_WORD_COUNT = 900;
 
 type ArticlePublicationData = {
   title: string | null;
@@ -37,6 +42,19 @@ export function validateArticleForPublication(data: ArticlePublicationData): Val
   });
 
   if (!meaningfulSection) issues.push({ field: "sections", code: "minimum", message: "Add at least one content section." });
+
+  const wordCount = countContentWords(
+    data.sections
+      .filter((section) => section.blockType !== "image")
+      .map((section) => section.content),
+  );
+  if (wordCount < ARTICLE_MINIMUM_WORD_COUNT) {
+    issues.push({
+      field: "sections",
+      code: "minimum_word_count",
+      message: `Editorial articles require at least ${ARTICLE_MINIMUM_WORD_COUNT} words of substantive content. Current count: ${wordCount}.`,
+    });
+  }
 
   return issues.length === 0 ? { valid: true, issues: [] } : { valid: false, issues };
 }

@@ -250,8 +250,12 @@ async function main() {
   );
   const correctedPairs = pairs.filter(
     (item) =>
-      item.computed.legacyScore !== item.computed.score ||
       item.computed.legacyCompatibility !== item.computed.compatibility,
+  );
+  const calibratedPairs = pairs.filter(
+    (item) =>
+      item.computed.legacyScore !== item.computed.score &&
+      item.computed.legacyCompatibility === item.computed.compatibility,
   );
   const effectiveDistribution = pairs.reduce(
     (counts, item) => {
@@ -316,6 +320,7 @@ async function main() {
       fileOverrides: fileOverrides.size,
       flaggedPairs: flaggedPairs.length,
       correctedPairs: correctedPairs.length,
+      calibratedPairs: calibratedPairs.length,
       classificationDistribution,
       effectiveDistribution,
       flagCounts,

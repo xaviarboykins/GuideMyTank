@@ -60,6 +60,52 @@ export type CompatibilityDiagnostics = {
   findings: CompatibilityFinding[];
 };
 
+export type CompatibilityResultSource = "computed" | "expert-override";
+
+export type CompatibilityVerdict =
+  | "recommended"
+  | "conditional"
+  | "not-recommended";
+
+export type CompatibilityDataConfidence = "high" | "moderate" | "limited";
+
+export type CompatibilityReportFactors = {
+  blockingRisks: CompatibilityFinding[];
+  conditions: CompatibilityFinding[];
+  supportingFactors: CompatibilityFinding[];
+};
+
+export type CompatibilityReportSource = {
+  id: string;
+  speciesId: string;
+  label: string | null;
+  url: string;
+  category: string;
+  confidence: string;
+  updatedAt: string;
+};
+
+export type CompatibilityPairAnalysis = {
+  version: string;
+  sourceDataUpdatedAt: string | null;
+  overview: string;
+  water: string;
+  space: string;
+  behavior: string;
+  husbandry: string;
+  keyFindings: string[];
+  checklist: string[];
+};
+
+export type CompatibilityReport = CompatibilityDiagnostics & {
+  computedResult: CompatibilityResult;
+  source: CompatibilityResultSource;
+  expertNotes: string | null;
+  factors: CompatibilityReportFactors;
+  sources: CompatibilityReportSource[];
+  analysis: CompatibilityPairAnalysis;
+};
+
 export type CompatibilityResult = {
   score: number;
   status: CompatibilityStatus;
@@ -69,6 +115,9 @@ export type CompatibilityResult = {
   confidence: number | null;
   notes: string | null;
   expertValidated: boolean;
+  verdict: CompatibilityVerdict;
+  recommendation: string;
+  dataConfidence: CompatibilityDataConfidence;
 
   species_a: CompatibilitySpecies;
   species_b: CompatibilitySpecies;

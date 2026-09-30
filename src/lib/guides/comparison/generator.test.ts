@@ -52,6 +52,9 @@ function comparisonData(): ComparisonGuideData {
       confidence: 0.88,
       notes: "Review the complete setup.",
       expertValidated: false,
+      verdict: "conditional",
+      recommendation: "Follow the compatibility recommendation.",
+      dataConfidence: "high",
       species_a: {
         slug: speciesA.slug,
         common_name: speciesA.common_name,

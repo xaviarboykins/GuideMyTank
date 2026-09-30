@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getCompatibility } from "@/lib/compatibility/service";
+import { getCompatibilityReport } from "@/lib/compatibility/service";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const compatibility = await getCompatibility(speciesA, speciesB);
+  const compatibility = await getCompatibilityReport(speciesA, speciesB);
 
   if (!compatibility) {
     return NextResponse.json(

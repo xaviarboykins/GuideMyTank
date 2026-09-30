@@ -54,10 +54,15 @@ describe("freshwater habitat and setup constraints", () => {
     );
   });
 
-  it("caps cool-water and warm-water categories at caution", () => {
-    expectCautionFor(
-      { temperature_category: "cool" },
-      { temperature_category: "warm" },
+  it("rejects opposing cool-water and warm-water requirements", () => {
+    const diagnostics = calculateCompatibilityDiagnostics(
+      species("cool", { temperature_category: "cool" }),
+      species("warm", { temperature_category: "warm" }),
+    );
+
+    expect(diagnostics.result.compatibility).toBe("incompatible");
+    expect(diagnostics.result.score).toBe(40);
+    expect(diagnostics.result.reasons).toContain(
       "Cool-water and warm-water preferences conflict.",
     );
   });

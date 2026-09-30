@@ -14,6 +14,26 @@ export function isJsonRecord(value: Json): value is { [key: string]: Json | unde
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+export function extractContentText(value: Json): string[] {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(extractContentText);
+  if (!isJsonRecord(value)) return [];
+
+  return Object.entries(value).flatMap(([key, item]) =>
+    ["imageId", "contentId", "href", "url", "sourceUrl"].includes(key) ||
+    item === undefined
+      ? []
+      : extractContentText(item),
+  );
+}
+
+export function countContentWords(values: Json[]) {
+  return values
+    .flatMap(extractContentText)
+    .join(" ")
+    .match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu)?.length ?? 0;
+}
+
 function nonBlank(value: Json | undefined): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }

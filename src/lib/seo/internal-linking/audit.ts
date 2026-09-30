@@ -99,6 +99,13 @@ const VALID_PRODUCT_CATEGORIES = new Set([
   "decor",
 ]);
 
+function learningCenterPath(article: InternalLinkAuditArticle) {
+  if (!article.slug) return null;
+  return article.content_type === "guide"
+    ? `/learning-center/guides/${article.slug}`
+    : `/learning-center/${article.slug}`;
+}
+
 function pairPath(slugA: string, slugB: string) {
   const [speciesA, speciesB] = [slugA, slugB].sort();
   return `/compatibility/${speciesA}/${speciesB}`;
@@ -191,7 +198,10 @@ export function buildKnownInternalLinkPages(
     for (const relation of input.articleRelatedCareGuides) {
       if (relation.care_guide_id !== guide.id) continue;
       const article = articlesById.get(relation.article_id);
-      if (article?.slug) links.push(`/learning-center/${article.slug}`);
+      if (article) {
+        const path = learningCenterPath(article);
+        if (path) links.push(path);
+      }
     }
     pages.push({
       path: guide.slug ? `/care-guides/${guide.slug}` : `/care-guides/id/${guide.id}`,
@@ -224,7 +234,10 @@ export function buildKnownInternalLinkPages(
     for (const relation of input.articleRelatedArticles) {
       if (relation.article_id !== article.id) continue;
       const related = articlesById.get(relation.related_article_id);
-      if (related?.slug) links.push(`/learning-center/${related.slug}`);
+      if (related) {
+        const path = learningCenterPath(related);
+        if (path) links.push(path);
+      }
     }
     if (relatedSpecies.length) links.push("/aquarium-builder");
     if (

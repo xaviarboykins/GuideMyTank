@@ -66,8 +66,8 @@ function CompatibilityList({
                   {relatedSpecies.common_name}
                 </Link>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Score: {rule.score} - {rule.status}
+                <p className="mt-2 text-sm capitalize text-muted-foreground">
+                  Verdict: {rule.verdict.replaceAll("-", " ")} · Data confidence: {rule.dataConfidence}
                 </p>
                 <div className="mt-2">
                   <ExpertValidationBadge

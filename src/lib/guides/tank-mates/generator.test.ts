@@ -42,6 +42,9 @@ function compatibility(
     confidence,
     notes: null,
     expertValidated: false,
+    verdict: classification === "compatible" ? "recommended" : classification === "caution" ? "conditional" : "not-recommended",
+    recommendation: "Follow the compatibility recommendation.",
+    dataConfidence: "high",
     species_a: {
       slug: target.slug,
       common_name: target.common_name,

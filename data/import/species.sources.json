@@ -61,7 +61,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Cardinal_tetra",
         "https://en.wikipedia.org/wiki/Paracheirodon",
-        "https://www.thesprucepets.com/cardinal-tetra-1378417"
+        "https://www.thesprucepets.com/cardinal-tetra-1378417",
+        "https://www.fishbase.se/summary/paracheirodon-axelrodi.html"
       ]
     },
     "ember-tetra": {
@@ -69,7 +70,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Ember_tetra",
         "https://fr.wikipedia.org/wiki/Hyphessobrycon_amandae",
-        "https://www.thesprucepets.com/ember-tetra-fish-species-profile-6826226"
+        "https://www.thesprucepets.com/ember-tetra-fish-species-profile-6826226",
+        "https://www.fishbase.se/summary/12376"
       ]
     },
     "harlequin-rasbora": {
@@ -77,7 +79,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Harlequin_rasbora",
         "https://en.wikipedia.org/wiki/Trigonostigma",
-        "https://www.thesprucepets.com/harlequin-rasbora-1378462"
+        "https://www.thesprucepets.com/harlequin-rasbora-1378462",
+        "https://fishbase.se/summary/10881"
       ]
     },
     "zebra-danio": {
@@ -85,7 +88,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Zebrafish",
         "https://en.wikipedia.org/wiki/Danio",
-        "https://www.thesprucepets.com/zebra-danio-1378473"
+        "https://www.thesprucepets.com/zebra-danio-1378473",
+        "https://www.fishbase.se/summary/4653"
       ]
     },
     "white-cloud-mountain-minnow": {
@@ -93,14 +97,16 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Tanichthys",
         "https://es.wikipedia.org/wiki/Tanichthys_albonubes",
-        "https://www.thesprucepets.com/white-cloud-mountain-minnow-1380870"
+        "https://www.thesprucepets.com/white-cloud-mountain-minnow-1380870",
+        "https://www.fishbase.se/summary/4758"
       ]
     },
     "glowlight-tetra": {
       "category_batch": "schooling",
       "sources": [
         "https://en.wikipedia.org/wiki/Hemigrammus_erythrozonus",
-        "https://www.thesprucepets.com/glowlight-tetra-1381833"
+        "https://www.thesprucepets.com/glowlight-tetra-1381833",
+        "https://fishbase.se/Fieldguide/FieldGuideSummary.php?c_code=328&genusname=Hemigrammus&speciesname=erythrozonus"
       ]
     },
     "chili-rasbora": {
@@ -155,7 +161,8 @@
     "bristlenose-pleco": {
       "category_batch": "bottom_dwellers",
       "sources": [
-        "https://www.thesprucepets.com/bristlenose-catfish-1380837"
+        "https://www.thesprucepets.com/bristlenose-catfish-1380837",
+        "https://www.fishbase.se/summary/23347"
       ]
     },
     "otocinclus-catfish": {
@@ -177,7 +184,8 @@
       "category_batch": "bottom_dwellers",
       "sources": [
         "https://en.wikipedia.org/wiki/Yoyo_loach",
-        "https://www.thesprucepets.com/loach-species-1381078"
+        "https://www.thesprucepets.com/loach-species-1381078",
+        "https://www.fishbase.se/summary/Botia-almorhae"
       ]
     },
     "dwarf-gourami": {
@@ -185,21 +193,24 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Dwarf_gourami",
         "https://es.wikipedia.org/wiki/Trichogaster_lalius",
-        "https://www.thesprucepets.com/dwarf-gourami-1378310"
+        "https://www.thesprucepets.com/dwarf-gourami-1378310",
+        "https://fishbase.se/summary/Colisa_lalia.html"
       ]
     },
     "pearl-gourami": {
       "category_batch": "centerpiece_fish",
       "sources": [
         "https://en.wikipedia.org/wiki/Pearl_gourami",
-        "https://www.thesprucepets.com/pearl-gourami-1381025"
+        "https://www.thesprucepets.com/pearl-gourami-1381025",
+        "https://www.fishbase.se/summary/4674"
       ]
     },
     "sparkling-gourami": {
       "category_batch": "centerpiece_fish",
       "sources": [
         "https://en.wikipedia.org/wiki/Pygmy_gourami",
-        "https://www.thesprucepets.com/gourami-species-1381077"
+        "https://www.thesprucepets.com/gourami-species-1381077",
+        "https://www.fishbase.se/summary/trichopsis-pumila.html"
       ]
     },
     "paradise-fish": {
@@ -207,7 +218,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Paradise_fish",
         "https://es.wikipedia.org/wiki/Macropodus_opercularis",
-        "https://www.thesprucepets.com/paradise-fish-macropodus-4022898"
+        "https://www.thesprucepets.com/paradise-fish-macropodus-4022898",
+        "https://www.fishbase.se/summary/Macropodus-opercularis"
       ]
     },
     "three-spot-gourami": {
@@ -215,7 +227,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Three_spot_gourami",
         "https://es.wikipedia.org/wiki/Trichogaster_trichopterus",
-        "https://www.thesprucepets.com/gourami-species-1381077"
+        "https://www.thesprucepets.com/gourami-species-1381077",
+        "https://www.fishbase.se/summary/Trichopodus-trichopterus"
       ]
     },
     "peacock-gudgeon": {
@@ -230,7 +243,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Boeseman%27s_rainbowfish",
         "https://es.wikipedia.org/wiki/Melanotaenia_boesemani",
-        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300",
+        "https://www.fishbase.se/summary/Melanotaenia-boesemani"
       ]
     },
     "dwarf-neon-rainbowfish": {
@@ -238,7 +252,8 @@
       "sources": [
         "https://en.wikipedia.org/wiki/Dwarf_rainbowfish",
         "https://es.wikipedia.org/wiki/Melanotaenia_praecox",
-        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300",
+        "https://www.fishbase.se/summary/Melanotaenia_praecox.html"
       ]
     },
     "endler-livebearer": {
@@ -290,7 +305,8 @@
       "sources": [
         "https://my-fish.org/my-fishothek/dermogenys-pusilla-halbschnabelhecht/",
         "https://en.wikipedia.org/wiki/Wrestling_halfbeak",
-        "https://en.wikipedia.org/wiki/Dermogenys"
+        "https://en.wikipedia.org/wiki/Dermogenys",
+        "https://www.fishbase.se/summary/11298"
       ]
     },
     "butterfly-splitfin": {
@@ -335,7 +351,8 @@
       "category_batch": "invertebrates",
       "sources": [
         "https://en.wikipedia.org/wiki/Caridina_multidentata",
-        "https://www.zooplus.de/magazin/aquaristik/fischarten-portraits/amanogarnelen-caridina-multidentata"
+        "https://www.zooplus.de/magazin/aquaristik/fischarten-portraits/amanogarnelen-caridina-multidentata",
+        "https://www.marinespecies.org/aphia.php?p=taxdetails&id=586329"
       ]
     },
     "crystal-red-shrimp": {
@@ -343,7 +360,8 @@
       "sources": [
         "https://my-fish.org/my-fishothek/caridina-cf-cantonensis-kristallrote-bienengarnele/",
         "https://en.wikipedia.org/wiki/Caridina_cantonensis",
-        "https://en.wikipedia.org/wiki/Golden_bee_shrimp"
+        "https://en.wikipedia.org/wiki/Golden_bee_shrimp",
+        "https://www.marinespecies.org/aphia.php?p=taxdetails&id=877335"
       ]
     },
     "german-blue-ram": {
@@ -411,7 +429,8 @@
       "category_batch": "advanced",
       "sources": [
         "https://en.wikipedia.org/wiki/Ranchu",
-        "https://www.thesprucepets.com/what-size-is-best-for-a-goldfish-tank-5210885"
+        "https://www.thesprucepets.com/what-size-is-best-for-a-goldfish-tank-5210885",
+        "https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-coldwater-fish/how-to-look-after-fancy-goldfish/"
       ]
     },
     "bubble-eye-goldfish": {
@@ -442,7 +461,8 @@
       "category_batch": "advanced",
       "sources": [
         "https://en.wikipedia.org/wiki/Silver_dollar_%28fish%29",
-        "https://www.thesprucepets.com/silver-dollar-1381267"
+        "https://www.thesprucepets.com/silver-dollar-1381267",
+        "https://fishbase.se/summary/25518"
       ]
     },
     "peters-elephantnose-fish": {
@@ -473,7 +493,8 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Black_neon_tetra",
-        "https://www.thesprucepets.com/black-neon-tetra-1378291"
+        "https://www.thesprucepets.com/black-neon-tetra-1378291",
+        "https://www.fishbase.se/summary/SpeciesSummary.php?AT=Neon&ID=10654"
       ]
     },
     "lemon-tetra": {
@@ -496,7 +517,8 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Congo_tetra",
-        "https://www.thesprucepets.com/congo-tetra-1380990"
+        "https://www.thesprucepets.com/congo-tetra-1380990",
+        "https://www.fishbase.se/summary/10660"
       ]
     },
     "x-ray-tetra": {
@@ -540,7 +562,8 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Rasbora_trilineata",
-        "https://www.thesprucepets.com/scissortail-rasbora-1380865"
+        "https://www.thesprucepets.com/scissortail-rasbora-1380865",
+        "https://fishbase.se/summary/Rasbora-trilineata"
       ]
     },
     "glass-catfish": {
@@ -562,7 +585,8 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Zebra_loach",
-        "https://www.thesprucepets.com/zebra-loach-1381072"
+        "https://www.thesprucepets.com/zebra-loach-1381072",
+        "https://www.fishbase.se/summary/12255"
       ]
     },
     "dwarf-chain-loach": {
@@ -672,21 +696,24 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Threadfin_rainbowfish",
-        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300",
+        "https://www.fishbase.se/Fieldguide/FieldGuideSummary.php?c_code=360&genusname=Iriatherina&speciesname=werneri"
       ]
     },
     "celebes-rainbowfish": {
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Celebes_rainbowfish",
-        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300",
+        "https://www.fishbase.se/summary/Marosatherina-ladigesi"
       ]
     },
     "lake-kutubu-rainbowfish": {
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Melanotaenia_lacustris",
-        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300"
+        "https://www.thesprucepets.com/types-of-rainbow-fish-5272300",
+        "https://www.fishbase.se/summary/10497"
       ]
     },
     "common-goldfish": {
@@ -701,14 +728,16 @@
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Oranda",
-        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
+        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001",
+        "https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-coldwater-fish/how-to-look-after-fancy-goldfish/"
       ]
     },
     "black-moor-goldfish": {
       "category_batch": "final_100",
       "sources": [
         "https://en.wikipedia.org/wiki/Telescope_eye",
-        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001"
+        "https://www.thesprucepets.com/how-to-take-care-of-goldfish-5188001",
+        "https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-coldwater-fish/how-to-look-after-fancy-goldfish/"
       ]
     },
     "kissing-gourami": {

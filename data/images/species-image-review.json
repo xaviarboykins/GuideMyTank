@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "batchRunId": "4bc93863-03a0-4e45-a5ad-9d73638010d5",
+  "batchRunId": "957e1ca2-7d38-44a9-b61e-effef8d18355",
   "rightsConfirmed": true,
   "approved": [
-    "amano-shrimp",
-    "angelfish",
-    "black-ghost-knifefish",
-    "bloodfin-tetra",
-    "boesemani-rainbowfish",
-    "bolivian-ram"
+    "black-neon-tetra",
+    "buenos-aires-tetra",
+    "butterfly-splitfin",
+    "cardinal-tetra"
   ],
   "rejected": {
-    "american-flagfish": "Low quality image",
-    "betta-splendens": "Low quality image",
-    "black-moor-goldfish": "Image does not show the correct fish",
-    "black-neon-tetra": "Fish is not clearly visible"
+    "american-flagfish": "low quality image",
+    "betta-splendens": "poor quality image",
+    "black-moor-goldfish": "not an image of a fish",
+    "brilliant-rummynose-tetra": "low quality imagae",
+    "bristlenose-pleco": "low quality image",
+    "bubble-eye-goldfish": "not an image of a fish"
   },
   "replacements": []
 }

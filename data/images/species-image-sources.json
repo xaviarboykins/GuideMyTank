@@ -76,5 +76,57 @@
     "rightsReviewer": "xaviarboykins",
     "rightsReviewedAt": "2026-08-20T04:45:18.063Z",
     "candidateId": "bolivian-ram-9162c1ec"
+  },
+  "black-neon-tetra": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:03.Hyphessobrycon_herbertaxelrodi.JPG",
+    "creator": "Juan R. Lascorz",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-09-30T03:03:00.244Z",
+    "candidateId": "black-neon-tetra-23746ea0"
+  },
+  "buenos-aires-tetra": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Psalidodon_anisitsi_Natural_History_Museum_University_of_Pisa_(cropped_and_bright).jpg",
+    "creator": "Mattia Nocciola",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution": "File:Psalidodon_anisitsi_Natural_History_Museum_University_of_Pisa.jpg",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-09-30T03:03:00.244Z",
+    "candidateId": "buenos-aires-tetra-f5c1a598"
+  },
+  "butterfly-splitfin": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ameca_splendens_Jungtier_2016-12-11.JPG",
+    "creator": "Usien",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-09-30T03:03:00.244Z",
+    "candidateId": "butterfly-splitfin-8c8bb5b4"
+  },
+  "cardinal-tetra": {
+    "source": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cardinal_Paracheirodon_axelrodi_(1).jpg",
+    "creator": "CHUCAO",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "attribution": "Own work",
+    "commercialUseReviewed": true,
+    "modificationsReviewed": true,
+    "rightsReviewer": "xaviarboykins",
+    "rightsReviewedAt": "2026-09-30T03:03:00.244Z",
+    "candidateId": "cardinal-tetra-8fc888b1"
   }
 }

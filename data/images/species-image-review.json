@@ -2,7 +2,16 @@
   "schemaVersion": 1,
   "batchRunId": "957e1ca2-7d38-44a9-b61e-effef8d18355",
   "rightsConfirmed": false,
-  "approved": [],
-  "rejected": {},
+  "approved": [
+    "black-neon-tetra",
+    "buenos-aires-tetra",
+    "butterfly-splitfin",
+    "cardinal-tetra"
+  ],
+  "rejected": {
+    "brilliant-rummynose-tetra": "low quality imagae",
+    "bristlenose-pleco": "low quality image",
+    "bubble-eye-goldfish": "not an image of a fish"
+  },
   "replacements": []
 }

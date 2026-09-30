@@ -36,7 +36,7 @@ export const compatibilityValidator: AquariumValidator = {
             severity: "warning",
             title: `${pairLabel} require caution`,
             message:
-              result.notes ??
+              result.recommendation ??
               `${pairLabel} may work together only with careful planning.`,
             recommendation:
               "Review the compatibility reasons and provide enough space, cover, and monitoring.",
@@ -46,6 +46,8 @@ export const compatibilityValidator: AquariumValidator = {
               status: result.status,
               confidence: result.confidence,
               expertValidated: result.expertValidated,
+              verdict: result.verdict,
+              dataConfidence: result.dataConfidence,
             },
           }),
         );
@@ -60,7 +62,7 @@ export const compatibilityValidator: AquariumValidator = {
             severity: "error",
             title: `${pairLabel} are incompatible`,
             message:
-              result.notes ??
+              result.recommendation ??
               `${pairLabel} should not be kept together in this aquarium.`,
             recommendation:
               "Remove one of these species or plan separate aquariums.",
@@ -70,6 +72,8 @@ export const compatibilityValidator: AquariumValidator = {
               status: result.status,
               confidence: result.confidence,
               expertValidated: result.expertValidated,
+              verdict: result.verdict,
+              dataConfidence: result.dataConfidence,
             },
           }),
         );

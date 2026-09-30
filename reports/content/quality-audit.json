@@ -1,0 +1,223 @@
+{
+  "generatedAt": "2026-09-30T00:15:15.751Z",
+  "thresholdsAreEditorialStandardsNotGooglePolicy": true,
+  "summary": {
+    "publishedCareGuides": 5,
+    "publishedArticles": 5,
+    "publishedGuides": 2,
+    "auditedPages": 12,
+    "totalWords": 15600,
+    "canonicalCompatibilityPairs": 4950,
+    "highPriorityIssues": 1,
+    "mediumPriorityIssues": 7,
+    "lowPriorityIssues": 4
+  },
+  "pages": [
+    {
+      "id": "183cb434-0068-4816-b4e1-bf9527f78441",
+      "route": "/care-guides/betta-splendens",
+      "family": "care-guide",
+      "title": "Betta Splendens Care Guide",
+      "wordCount": 1285,
+      "sectionCount": 19,
+      "sourceCount": 4,
+      "imageCount": 2,
+      "relatedCount": 0
+    },
+    {
+      "id": "d2a98745-7f46-405a-9172-7fedc1df2d24",
+      "route": "/care-guides/amano-shrimp",
+      "family": "care-guide",
+      "title": "Amano Shrimp Care Guide",
+      "wordCount": 1843,
+      "sectionCount": 19,
+      "sourceCount": 3,
+      "imageCount": 2,
+      "relatedCount": 1
+    },
+    {
+      "id": "73ed045f-dbf7-4609-b351-1b5739099fc8",
+      "route": "/care-guides/guppy",
+      "family": "care-guide",
+      "title": "Guppy Care Guide",
+      "wordCount": 1365,
+      "sectionCount": 19,
+      "sourceCount": 2,
+      "imageCount": 2,
+      "relatedCount": 3
+    },
+    {
+      "id": "c93b9073-6669-4fbe-8e86-94df189c0cb1",
+      "route": "/care-guides/celestial-pearl-danio",
+      "family": "care-guide",
+      "title": "Celestial Pearl Danio Care Guide",
+      "wordCount": 1604,
+      "sectionCount": 19,
+      "sourceCount": 2,
+      "imageCount": 2,
+      "relatedCount": 0
+    },
+    {
+      "id": "269adb0b-a759-4593-87ca-da05b28f1f31",
+      "route": "/care-guides/bristlenose-pleco",
+      "family": "care-guide",
+      "title": "Bristlenose Pleco Care Guide",
+      "wordCount": 2183,
+      "sectionCount": 19,
+      "sourceCount": 2,
+      "imageCount": 2,
+      "relatedCount": 4
+    },
+    {
+      "id": "1bfc53ec-690c-46da-bac7-60d209631798",
+      "route": "/learning-center/most-popular-freshwater-aquarium-fish-2026",
+      "family": "article",
+      "title": "Most Popular Freshwater Aquarium Fish in 2026",
+      "wordCount": 1151,
+      "sectionCount": 21,
+      "sourceCount": 4,
+      "imageCount": 10,
+      "relatedCount": 0
+    },
+    {
+      "id": "87d15289-4a6e-4762-a373-516d443da5aa",
+      "route": "/learning-center/guides/amano-shrimp-vs-bristlenose-pleco",
+      "family": "guide",
+      "title": "Amano Shrimp vs Bristlenose Pleco: An Algae Eater King?",
+      "wordCount": 852,
+      "sectionCount": 23,
+      "sourceCount": 2,
+      "imageCount": 2,
+      "relatedCount": 0
+    },
+    {
+      "id": "ac69c3c7-838a-4d15-89c0-cb19c34b3dea",
+      "route": "/learning-center/the-best-tank-cleaning-crew-2026",
+      "family": "article",
+      "title": "Algae Attack Team: The Best Tank Cleaning Crew 2026",
+      "wordCount": 1030,
+      "sectionCount": 18,
+      "sourceCount": 0,
+      "imageCount": 1,
+      "relatedCount": 0
+    },
+    {
+      "id": "f2736963-76b0-427b-981d-9a4722f92ba1",
+      "route": "/learning-center/how-to-cycle-a-freshwater-aquarium",
+      "family": "article",
+      "title": "How to Cycle a Freshwater Aquarium Without Sacrificing Fish",
+      "wordCount": 1050,
+      "sectionCount": 18,
+      "sourceCount": 4,
+      "imageCount": 1,
+      "relatedCount": 3
+    },
+    {
+      "id": "bddd8c05-b3b5-44d0-89cd-13f52fe0903e",
+      "route": "/learning-center/how-to-plan-a-freshwater-community-tank",
+      "family": "article",
+      "title": "How to Plan a Freshwater Community Tank Before Buying Fish",
+      "wordCount": 1027,
+      "sectionCount": 20,
+      "sourceCount": 3,
+      "imageCount": 1,
+      "relatedCount": 3
+    },
+    {
+      "id": "abbb5e1f-56cc-40c0-abae-797085198092",
+      "route": "/learning-center/freshwater-fish-quarantine-routine",
+      "family": "article",
+      "title": "A Practical Quarantine Routine for New Freshwater Fish",
+      "wordCount": 1118,
+      "sectionCount": 23,
+      "sourceCount": 3,
+      "imageCount": 1,
+      "relatedCount": 3
+    },
+    {
+      "id": "6586fba7-2bb9-4e31-a61c-2803692efc87",
+      "route": "/learning-center/guides/betta-splendens-vs-guppy",
+      "family": "guide",
+      "title": "Betta vs Guppy: Care, Tank Setup, and Compatibility Compared",
+      "wordCount": 1092,
+      "sectionCount": 21,
+      "sourceCount": 3,
+      "imageCount": 2,
+      "relatedCount": 2
+    }
+  ],
+  "issues": [
+    {
+      "severity": "medium",
+      "category": "missing_structured_relationship",
+      "path": "/care-guides/betta-splendens",
+      "message": "No related-species relationship is stored."
+    },
+    {
+      "severity": "low",
+      "category": "missing_open_graph_image",
+      "path": "/care-guides/amano-shrimp",
+      "message": "No explicit Open Graph image."
+    },
+    {
+      "severity": "low",
+      "category": "missing_open_graph_image",
+      "path": "/care-guides/guppy",
+      "message": "No explicit Open Graph image."
+    },
+    {
+      "severity": "low",
+      "category": "missing_open_graph_image",
+      "path": "/care-guides/celestial-pearl-danio",
+      "message": "No explicit Open Graph image."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_structured_relationship",
+      "path": "/care-guides/celestial-pearl-danio",
+      "message": "No related-species relationship is stored."
+    },
+    {
+      "severity": "low",
+      "category": "missing_open_graph_image",
+      "path": "/care-guides/bristlenose-pleco",
+      "message": "No explicit Open Graph image."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_structured_relationship",
+      "path": "/learning-center/most-popular-freshwater-aquarium-fish-2026",
+      "message": "No related article or care-guide relationship is stored."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_category",
+      "path": "/learning-center/most-popular-freshwater-aquarium-fish-2026",
+      "message": "No category is assigned."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_structured_relationship",
+      "path": "/learning-center/guides/amano-shrimp-vs-bristlenose-pleco",
+      "message": "No related article or care-guide relationship is stored."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_sources",
+      "path": "/learning-center/the-best-tank-cleaning-crew-2026",
+      "message": "No source is attached."
+    },
+    {
+      "severity": "medium",
+      "category": "missing_structured_relationship",
+      "path": "/learning-center/the-best-tank-cleaning-crew-2026",
+      "message": "No related article or care-guide relationship is stored."
+    },
+    {
+      "severity": "high",
+      "category": "programmatic_surface_dominance",
+      "path": "/compatibility",
+      "message": "4950 canonical compatibility URLs versus 12 published editorial and care pages. Review indexability using demonstrated demand and editorial validation before treating the entire pair set as an acquisition surface."
+    }
+  ]
+}

@@ -55,6 +55,9 @@ function compatibility(
     confidence: 0.9,
     notes: null,
     expertValidated: false,
+    verdict: "recommended",
+    recommendation: "Suitable with normal care requirements.",
+    dataConfidence: "high",
     species_a: { slug: speciesASlug, common_name: speciesASlug },
     species_b: { slug: speciesBSlug, common_name: speciesBSlug },
   };

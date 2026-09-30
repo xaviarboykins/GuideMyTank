@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { validateArticleForPublication } from "./validation";
 
 describe("article publication validation", () => {
-  it("publishes without any image data", () => {
+  it("publishes a substantial article without any image data", () => {
     expect(validateArticleForPublication({
       title: "Cycling an Aquarium",
       slug: "cycling-an-aquarium",
       summary: "How to establish a biological filter.",
-      sections: [{ blockType: "paragraph", content: { text: "Start with patience." } }],
+      sections: [{ blockType: "paragraph", content: { text: Array.from({ length: 900 }, () => "aquarium").join(" ") } }],
       slugAvailable: true,
     })).toEqual({ valid: true, issues: [] });
   });
@@ -21,7 +21,24 @@ describe("article publication validation", () => {
       sections: [],
       slugAvailable: true,
     });
-    expect(result.issues).toEqual([expect.objectContaining({ field: "sections" })]);
+    expect(result.issues).toEqual([
+      expect.objectContaining({ field: "sections", code: "minimum" }),
+      expect.objectContaining({ field: "sections", code: "minimum_word_count" }),
+    ]);
+  });
+
+  it("rejects a thin editorial", () => {
+    const result = validateArticleForPublication({
+      title: "Short Aquarium Note",
+      slug: "short-aquarium-note",
+      summary: "A valid but undersized editorial draft.",
+      sections: [{ blockType: "paragraph", content: { text: "Useful but short." } }],
+      slugAvailable: true,
+    });
+
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ code: "minimum_word_count" }),
+    );
   });
 });
 

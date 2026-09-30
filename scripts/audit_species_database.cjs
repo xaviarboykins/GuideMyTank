@@ -44,6 +44,34 @@ function sourceCategoryForUrl(url) {
   return url.includes("wikipedia.org/wiki/") ? "taxonomy" : "care";
 }
 
+const STRONG_REFERENCE_HOSTS = new Set([
+  "ask.ifas.ufl.edu",
+  "fishbase.org",
+  "fishbase.se",
+  "fishdb.sinica.edu.tw",
+  "nas.er.usgs.gov",
+  "ornamentalfish.org",
+  "sib.gob.ar",
+  "www.dcceew.gov.au",
+  "www.fishbase.se",
+  "www.floridamuseum.ufl.edu",
+  "www.fws.gov",
+  "www.marinespecies.org",
+  "www.molluscabase.org",
+  "www.ornamentalfish.org",
+  "www.seriouslyfish.com",
+]);
+
+function hasStrongReference(urls) {
+  return urls.some((url) => {
+    try {
+      return STRONG_REFERENCE_HOSTS.has(new URL(url).hostname);
+    } catch {
+      return false;
+    }
+  });
+}
+
 function issue(slug, field, severity, code, message, localValue, databaseValue) {
   return {
     slug,
@@ -248,6 +276,23 @@ async function main() {
     }
     return [];
   });
+  const sourceUpgradeQueue = localSpecies.flatMap((item) => {
+    const sources = sourceEntries[item.slug]?.sources;
+    if (!Array.isArray(sources) || sources.length === 0 || hasStrongReference(sources)) {
+      return [];
+    }
+
+    return [
+      issue(
+        item.slug,
+        "sources",
+        "medium",
+        "tertiary_sources_only",
+        "Existing references provide coverage, but an institutional, scientific database, or specialist husbandry source should be added before promoting this record to high confidence.",
+        sources,
+      ),
+    ];
+  });
   const structural = [
     ...localSpecies.flatMap((item) => structuralIssues(item, "local")),
     ...(databaseSpecies || []).flatMap((item) =>
@@ -274,10 +319,12 @@ async function main() {
       aliasMismatches: aliasIssues.length,
       sourceReferenceMismatches: sourceParityIssues.length,
       databaseSourceReferences: databaseSources.length,
+      speciesNeedingSourceUpgrade: sourceUpgradeQueue.length,
     },
     inventory: { localOnly, databaseOnly },
     mismatchesByField,
     sourceIssues,
+    sourceUpgradeQueue,
     aliasIssues,
     sourceParityIssues,
     structuralIssues: structural,
@@ -301,6 +348,9 @@ async function main() {
   );
   console.log(
     `Database source references: ${report.summary.databaseSourceReferences}`,
+  );
+  console.log(
+    `Species needing stronger sources: ${report.summary.speciesNeedingSourceUpgrade}`,
   );
   console.log(`JSON report: ${outputPath}`);
 }

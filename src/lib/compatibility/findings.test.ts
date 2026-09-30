@@ -190,7 +190,7 @@ describe("structured compatibility findings", () => {
     expect(first.result.score).toBe(second.result.score);
   });
 
-  it("caps related territorial rivals without checking named Species", () => {
+  it("rejects related territorial rivals without checking named Species", () => {
     const territorial = {
       family: "Exampleidae",
       compatibility_tags: ["territorial", "solitary", "top_water"],
@@ -212,15 +212,15 @@ describe("structured compatibility findings", () => {
       species("different-two", tankmate),
     );
 
-    expect(first.result.compatibility).toBe("caution");
-    expect(first.result.score).toBe(60);
+    expect(first.result.compatibility).toBe("incompatible");
+    expect(first.result.score).toBe(40);
     expect(second.result.compatibility).toBe(first.result.compatibility);
     expect(second.result.score).toBe(first.result.score);
     expect(first.findings).toContainEqual(
       expect.objectContaining({
         code: "behavior_risk_caps.constraint.1",
         category: "temperament",
-        severity: "warning",
+        severity: "error",
       }),
     );
   });

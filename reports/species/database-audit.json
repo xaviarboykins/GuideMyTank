@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-25T05:42:13.560Z",
+  "generatedAt": "2026-09-29T23:33:18.513Z",
   "readOnly": true,
   "summary": {
     "localSpecies": 100,
@@ -12,7 +12,8 @@
     "missingSourceSpecies": 0,
     "aliasMismatches": 0,
     "sourceReferenceMismatches": 0,
-    "databaseSourceReferences": 245
+    "databaseSourceReferences": 274,
+    "speciesNeedingSourceUpgrade": 0
   },
   "inventory": {
     "localOnly": [],
@@ -20,6 +21,7 @@
   },
   "mismatchesByField": {},
   "sourceIssues": [],
+  "sourceUpgradeQueue": [],
   "aliasIssues": [],
   "sourceParityIssues": [],
   "structuralIssues": [],

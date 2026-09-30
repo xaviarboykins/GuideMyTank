@@ -6,6 +6,7 @@ import type {
   CompatibilityFindingCategory,
   CompatibilitySpecies,
   CompatibilityStatus,
+  CompatibilityVerdict,
   EvaluationResult,
   SpeciesRow,
 } from "@/lib/compatibility/types";
@@ -81,6 +82,9 @@ const requiredPairFields = [
 const SEVERE_AGGRESSION_LEVEL = 7;
 const INCOMPATIBLE_SCORE_CEILING = 49;
 const CAUTION_SCORE = 60;
+const SAFE_COMPATIBLE_SCORE_CEILING = 90;
+const CAUTION_SCORE_CEILING = 65;
+const INCOMPATIBLE_PUBLIC_SCORE_CEILING = 40;
 const CORE_CONFIDENCE_WEIGHT = 0.75;
 
 const confidenceCoreFields = [
@@ -162,6 +166,32 @@ function buildCompatibilitySummary(
   }
 
   return "Structured species data supports this pairing when normal tank size, group size, and husbandry requirements are met.";
+}
+
+export function getCompatibilityVerdict(
+  compatibility: CompatibilityResult["compatibility"],
+): CompatibilityVerdict {
+  if (compatibility === "compatible") return "recommended";
+  if (compatibility === "caution") return "conditional";
+  return "not-recommended";
+}
+
+export function getCompatibilityRecommendation(
+  compatibility: CompatibilityResult["compatibility"],
+) {
+  if (compatibility === "compatible") {
+    return "This pair is a reasonable starting point when both species receive their required tank size, group size, water conditions, and routine care.";
+  }
+  if (compatibility === "caution") {
+    return "Only plan this pair if every listed condition can be met, and have a separation plan if stress or aggression appears.";
+  }
+  return "Do not plan a shared aquarium for this pair. Choose a different tank mate or maintain separate aquariums.";
+}
+
+export function getCompatibilityDataConfidence(confidence: number | null) {
+  if (confidence != null && confidence >= 0.85) return "high" as const;
+  if (confidence != null && confidence >= 0.65) return "moderate" as const;
+  return "limited" as const;
 }
 
 function getFindingState(
@@ -324,6 +354,8 @@ export function resolveCompatibilityFromFindings(
     score,
     status: determineStatus(score),
     compatibility,
+    verdict: getCompatibilityVerdict(compatibility),
+    recommendation: getCompatibilityRecommendation(compatibility),
     reasons,
     notes: buildCompatibilitySummary(compatibility),
   };
@@ -448,6 +480,18 @@ export function legacyCompatibilityToScore(
   return 0;
 }
 
+export function compatibilityToPublicScore(
+  compatibility: CompatibilityResult["compatibility"],
+) {
+  if (compatibility === "compatible") return SAFE_COMPATIBLE_SCORE_CEILING;
+  if (compatibility === "caution") return CAUTION_SCORE;
+  if (compatibility === "incompatible") {
+    return INCOMPATIBLE_PUBLIC_SCORE_CEILING;
+  }
+
+  return 0;
+}
+
 function createEvaluation(
   points: number,
   ...reasons: string[]
@@ -488,8 +532,23 @@ function evaluateTemperatureCompatibility(
 
   const overlap = getRangeOverlap(minA, maxA, minB, maxB);
 
-  if (overlap < 0)
+  if (overlap < 0) {
+    const absoluteOverlap = getRangeOverlap(
+      speciesA.min_temp_f ?? minA,
+      speciesA.max_temp_f ?? maxA,
+      speciesB.min_temp_f ?? minB,
+      speciesB.max_temp_f ?? maxB,
+    );
+
+    if (absoluteOverlap >= 0) {
+      return createScoreCap(
+        60,
+        "Preferred temperature ranges differ, but the broader care ranges allow a narrow managed compromise.",
+      );
+    }
+
     return createScoreCap(45, "Temperature requirements conflict.");
+  }
   if (overlap <= 2)
     return createScoreCap(60, "Temperature ranges have limited overlap.");
 
@@ -848,7 +907,7 @@ function evaluateTraitRiskCaps(
   }
 
   if (hasTemperatureCategoryConflict(speciesA, speciesB)) {
-    caps.push(60);
+    caps.push(45);
     reasons.push("Cool-water and warm-water preferences conflict.");
   }
 
@@ -1007,7 +1066,7 @@ function evaluateBehaviorRiskCaps(
     (isLikelyFinNipper(speciesA) && isLongFinnedOrSlow(speciesB)) ||
     (isLikelyFinNipper(speciesB) && isLongFinnedOrSlow(speciesA))
   ) {
-    caps.push(60);
+    caps.push(40);
     reasons.push(
       "Fin-nipping risk is high with long-finned or slow-moving tankmates.",
     );
@@ -1018,7 +1077,7 @@ function evaluateBehaviorRiskCaps(
     isTerritorialSpecies(speciesB) &&
     (speciesA.aggression_level ?? 0) + (speciesB.aggression_level ?? 0) >= 10
   ) {
-    caps.push(60);
+    caps.push(40);
     reasons.push(
       "Both species defend territory aggressively and are likely to stress or injure each other.",
     );
@@ -1039,7 +1098,7 @@ function evaluateBehaviorRiskCaps(
   }
 
   if (hasRelatedTerritorialConflict(speciesA, speciesB)) {
-    caps.push(60);
+    caps.push(45);
     reasons.push(
       "Closely related fish sharing a swimming zone may recognize each other as territorial rivals.",
     );
@@ -1197,6 +1256,11 @@ export function calculateCompatibilityDiagnostics(
     confidence: calculateCompatibilityConfidence(speciesA, speciesB),
     notes,
     expertValidated: false,
+    verdict: getCompatibilityVerdict(compatibility),
+    recommendation: getCompatibilityRecommendation(compatibility),
+    dataConfidence: getCompatibilityDataConfidence(
+      calculateCompatibilityConfidence(speciesA, speciesB),
+    ),
     species_a: toCompatibilitySpecies(speciesA),
     species_b: toCompatibilitySpecies(speciesB),
   };
@@ -1205,10 +1269,11 @@ export function calculateCompatibilityDiagnostics(
     speciesB,
     evaluations,
   );
-  const result = resolveCompatibilityFromFindings(
+  const resolvedResult = resolveCompatibilityFromFindings(
     legacyResult,
     findings,
   );
+  const result = calibratePublicCompatibilityScore(resolvedResult);
 
   return {
     result,
@@ -1217,5 +1282,27 @@ export function calculateCompatibilityDiagnostics(
     scoreCap,
     evaluations,
     findings,
+  };
+}
+
+function calibratePublicCompatibilityScore(
+  result: CompatibilityResult,
+): CompatibilityResult {
+  const ceiling =
+    result.compatibility === "compatible"
+      ? SAFE_COMPATIBLE_SCORE_CEILING
+      : result.compatibility === "caution"
+        ? CAUTION_SCORE_CEILING
+        : INCOMPATIBLE_PUBLIC_SCORE_CEILING;
+  const score = Math.min(result.score, ceiling);
+
+  if (score === result.score) {
+    return result;
+  }
+
+  return {
+    ...result,
+    score,
+    status: determineStatus(score),
   };
 }

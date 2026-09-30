@@ -6,8 +6,6 @@ import {
   CareGuideCarousel,
   type FeaturedCareGuide,
 } from "@/components/home/care-guide-carousel";
-import { BetaBadge } from "@/components/site/beta-badge";
-import { DevelopmentBadge } from "@/components/site/development-badge";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,28 +24,24 @@ const utilities = [
     description:
       "Build your freshwater aquarium and receive stocking, compatibility, equipment, temperature, and setup guidance in one place.",
     href: "/aquarium-builder",
-    status: "beta",
   },
   {
     title: "Compatibility Checker",
     description:
       "Quickly compare species using temperament, aggression, water parameters, schooling behavior, and tank requirements.",
     href: "/compatibility",
-    status: "beta",
   },
   {
     title: "Care Guides",
     description:
       "Browse practical species profiles covering care, behavior, habitat, feeding, water needs, and aquarium requirements.",
     href: "/care-guides",
-    status: null,
   },
   {
     title: "Products",
     description:
       "Explore a structured catalog of tanks, filters, heaters, lighting, substrate, decor, and other aquarium equipment.",
     href: "/products",
-    status: null,
   },
 ];
 
@@ -92,12 +86,9 @@ export default async function Home() {
       <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Main Utility Header */}
       <section className="border border-border bg-card p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm font-medium text-muted-foreground">
-            Freshwater Aquarium Utility Platform
-          </p>
-          <DevelopmentBadge />
-        </div>
+        <p className="text-sm font-medium text-muted-foreground">
+          Freshwater Aquarium Utility Platform
+        </p>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight">
           Aquarium compatibility and tank planning tools.
@@ -150,12 +141,9 @@ export default async function Home() {
       <section className="mt-6 overflow-hidden rounded-lg border border-sky-200 bg-sky-950 text-white dark:border-sky-900">
         <div className="grid items-center gap-8 p-6 md:grid-cols-[1fr_1.2fr] md:p-10">
           <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
-                Featured Planning Tool
-              </p>
-              <BetaBadge />
-            </div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
+              Featured Planning Tool
+            </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight">
               Build your aquarium before you buy.
             </h2>
@@ -233,12 +221,9 @@ export default async function Home() {
             href={utility.href}
             className="group border border-border bg-card p-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-semibold group-hover:underline">
-                {utility.title}
-              </h2>
-              {utility.status === "beta" ? <BetaBadge /> : null}
-            </div>
+            <h2 className="font-semibold group-hover:underline">
+              {utility.title}
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {utility.description}
             </p>

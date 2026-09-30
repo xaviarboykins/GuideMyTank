@@ -7,6 +7,7 @@ import { CompatibilityBadge } from "@/components/compatibility/compatibility-bad
 import { ExpertValidationBadge } from "@/components/compatibility/expert-validation-badge";
 import { Button } from "@/components/ui/button";
 import type {
+  CompatibilityReport,
   CompatibilityResult,
   CompatibilitySpecies,
 } from "@/lib/compatibility/types";
@@ -37,7 +38,7 @@ export function CompatibilityChecker({
 }: CompatibilityCheckerProps) {
   const [speciesA, setSpeciesA] = useState(initialSpeciesA);
   const [speciesB, setSpeciesB] = useState(initialSpeciesB);
-  const [result, setResult] = useState<CompatibilityResult | null>(null);
+  const [result, setResult] = useState<CompatibilityReport | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -218,37 +219,32 @@ export function CompatibilityChecker({
                   Compatibility Result
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <h2 className="text-3xl font-bold tracking-tight">
-                    {visibleResult.status}
+                  <h2 className="text-3xl font-bold tracking-tight capitalize">
+                    {visibleResult.result.verdict.replaceAll("-", " ")}
                   </h2>
                   <ExpertValidationBadge
-                    expertValidated={visibleResult.expertValidated}
+                    expertValidated={visibleResult.result.expertValidated}
                   />
                 </div>
               </div>
 
               <CompatibilityBadge
-                compatibility={getSimplifiedCompatibility(visibleResult.status)}
+                compatibility={getSimplifiedCompatibility(visibleResult.result.status)}
               />
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border bg-background p-4">
-                <p className="text-sm text-muted-foreground">Score</p>
-                <p className="mt-2 text-3xl font-bold">{visibleResult.score}</p>
-              </div>
-
-              <div className="rounded-lg border bg-background p-4">
-                <p className="text-sm text-muted-foreground">Status</p>
-                <p className="mt-2 font-semibold">{visibleResult.status}</p>
+                <p className="text-sm text-muted-foreground">Assessment source</p>
+                <p className="mt-2 font-semibold">
+                  {visibleResult.source === "expert-override" ? "Expert override" : "Structured data model"}
+                </p>
               </div>
 
               <div className="rounded-lg border bg-background p-4">
                 <p className="text-sm text-muted-foreground">Confidence</p>
                 <p className="mt-2 font-semibold">
-                  {visibleResult.confidence === null
-                    ? "Not available"
-                    : `${Math.round(visibleResult.confidence * 100)}%`}
+                  <span className="capitalize">{visibleResult.result.dataConfidence}</span>
                 </p>
               </div>
             </div>
@@ -257,7 +253,7 @@ export function CompatibilityChecker({
               <h3 className="font-semibold">Why this result?</h3>
 
               <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
-                {visibleResult.reasons.map((reason) => (
+                {visibleResult.result.reasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
               </ul>

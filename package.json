@@ -20,6 +20,7 @@
     "audit:species-database": "node scripts/audit_species_database.cjs",
     "backup:species-database": "node scripts/backup_species_database.cjs",
     "audit:compatibility": "node scripts/audit_compatibility.cjs",
+    "audit:content-quality": "node scripts/audit_content_quality.cjs",
     "repair:content-image-dimensions": "node scripts/repair_content_image_dimensions.cjs",
     "lint": "eslint",
     "validate:compatibility": "node scripts/check_compatibility_matrix.cjs",

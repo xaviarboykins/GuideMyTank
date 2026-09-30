@@ -465,7 +465,7 @@
       "origin": "South America",
       "region": "Upper Orinoco and Rio Negro basins",
       "min_temp_f": 73,
-      "max_temp_f": 81,
+      "max_temp_f": 84,
       "min_ph": 5,
       "max_ph": 7,
       "tank_size_gal": 20,
@@ -526,9 +526,9 @@
       "data_confidence": "medium",
       "temp_source_notes": "Recommended and tolerated temperature ranges currently match the primary care profile.",
       "recommended_min_temp_f": 73,
-      "recommended_max_temp_f": 81,
+      "recommended_max_temp_f": 84,
       "tolerated_min_temp_f": 73,
-      "tolerated_max_temp_f": 81,
+      "tolerated_max_temp_f": 84,
       "care_warnings": []
     },
     {
@@ -1620,7 +1620,7 @@
         "bottom_dweller",
         "rockwork_preferred"
       ],
-      "max_size_inches": 5,
+      "max_size_inches": 6.1,
       "image_url": "/species/yoyo-loach.webp",
       "summary": "Active social loach for larger aquariums, useful with robust tankmates but too boisterous for tiny or timid fish.",
       "aliases": [
@@ -1697,7 +1697,7 @@
         "invert_safe",
         "softwater"
       ],
-      "max_size_inches": 3,
+      "max_size_inches": 3.75,
       "image_url": "/species/dwarf-gourami.webp",
       "summary": "Small colorful labyrinth fish that works as a calm focal species in planted tanks with gentle tankmates.",
       "aliases": [
@@ -5230,7 +5230,7 @@
         "beginner_friendly",
         "softwater"
       ],
-      "max_size_inches": 4,
+      "max_size_inches": 5.1,
       "image_url": "/species/scissortail-rasbora.webp",
       "summary": "Peaceful active rasbora with a forked tail pattern, requiring groups and open swimming space.",
       "aliases": [

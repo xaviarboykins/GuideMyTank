@@ -47,6 +47,9 @@ function compatibilityResult(
     confidence: 0.9,
     notes: null,
     expertValidated: false,
+    verdict: compatibility === "compatible" ? "recommended" : compatibility === "caution" ? "conditional" : "not-recommended",
+    recommendation: "Follow the compatibility recommendation.",
+    dataConfidence: "high",
     species_a: { slug: "slug-a", common_name: "Species a" },
     species_b: { slug: "slug-b", common_name: "Species b" },
   };

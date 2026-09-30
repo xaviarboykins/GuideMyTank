@@ -28,5 +28,25 @@
     "imageUrl": "/species/bolivian-ram.webp",
     "alt": "bolivian ram freshwater aquarium species",
     "status": "ready"
+  },
+  "black-neon-tetra": {
+    "imageUrl": "/species/black-neon-tetra.webp",
+    "alt": "black neon tetra freshwater aquarium species",
+    "status": "ready"
+  },
+  "buenos-aires-tetra": {
+    "imageUrl": "/species/buenos-aires-tetra.webp",
+    "alt": "buenos aires tetra freshwater aquarium species",
+    "status": "ready"
+  },
+  "butterfly-splitfin": {
+    "imageUrl": "/species/butterfly-splitfin.webp",
+    "alt": "butterfly splitfin freshwater aquarium species",
+    "status": "ready"
+  },
+  "cardinal-tetra": {
+    "imageUrl": "/species/cardinal-tetra.webp",
+    "alt": "cardinal tetra freshwater aquarium species",
+    "status": "ready"
   }
 }

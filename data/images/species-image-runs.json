@@ -80,6 +80,26 @@
         "butterfly-splitfin",
         "cardinal-tetra"
       ]
+    },
+    {
+      "id": "7ff4b8f8-db3e-46de-8bf0-58dabfb4e280",
+      "startedAt": "2026-10-06T16:52:24.185Z",
+      "completedAt": "2026-10-06T16:52:47.383Z",
+      "dryRun": false,
+      "successfulCandidates": 10,
+      "status": "successful",
+      "slugs": [
+        "american-flagfish",
+        "betta-splendens",
+        "black-moor-goldfish",
+        "brilliant-rummynose-tetra",
+        "bristlenose-pleco",
+        "bubble-eye-goldfish",
+        "celebes-rainbowfish",
+        "celestial-pearl-danio",
+        "cherry-barb",
+        "cherry-shrimp"
+      ]
     }
   ]
 }

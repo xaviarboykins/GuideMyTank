@@ -1,20 +1,8 @@
 {
   "schemaVersion": 1,
-  "batchRunId": "957e1ca2-7d38-44a9-b61e-effef8d18355",
-  "rightsConfirmed": true,
-  "approved": [
-    "black-neon-tetra",
-    "buenos-aires-tetra",
-    "butterfly-splitfin",
-    "cardinal-tetra"
-  ],
-  "rejected": {
-    "american-flagfish": "low quality image",
-    "betta-splendens": "poor quality image",
-    "black-moor-goldfish": "not an image of a fish",
-    "brilliant-rummynose-tetra": "low quality imagae",
-    "bristlenose-pleco": "low quality image",
-    "bubble-eye-goldfish": "not an image of a fish"
-  },
+  "batchRunId": "7ff4b8f8-db3e-46de-8bf0-58dabfb4e280",
+  "rightsConfirmed": false,
+  "approved": [],
+  "rejected": {},
   "replacements": []
 }

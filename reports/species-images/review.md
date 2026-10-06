@@ -36,16 +36,6 @@ After reviewing every candidate, edit `data/images/species-image-review.json`. P
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
 - Attribution: Own work
 
-## black-neon-tetra
-
-![black-neon-tetra candidate](../../assets/species-candidates/black-neon-tetra/prepared.webp)
-
-- Preparation: Prepared aspect-preserving WebP
-- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:03.Hyphessobrycon_herbertaxelrodi.JPG)
-- Creator: Juan R. Lascorz
-- License: [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0)
-- Attribution: Own work
-
 ## brilliant-rummynose-tetra
 
 ![brilliant-rummynose-tetra candidate](../../assets/species-candidates/brilliant-rummynose-tetra/prepared.webp)
@@ -76,32 +66,42 @@ After reviewing every candidate, edit `data/images/species-image-review.json`. P
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
 - Attribution: Own work
 
-## buenos-aires-tetra
+## celebes-rainbowfish
 
-![buenos-aires-tetra candidate](../../assets/species-candidates/buenos-aires-tetra/prepared.webp)
+![celebes-rainbowfish candidate](../../assets/species-candidates/celebes-rainbowfish/prepared.webp)
 
 - Preparation: Prepared aspect-preserving WebP
-- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Psalidodon_anisitsi_Natural_History_Museum_University_of_Pisa_(cropped_and_bright).jpg)
-- Creator: Mattia Nocciola
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Adult_male_of_a_CELEBES_RAINBOWFISH_Telmaterina_Ladigesi_MAROSATHERINA_LADIGESI_(51636246566).jpg)
+- Creator: Carlos Eduardo Joos
+- License: [CC BY 2.0](https://creativecommons.org/licenses/by/2.0)
+- Attribution: Adult male of a CELEBES RAINBOWFISH Telmaterina Ladigesi MAROSATHERINA LADIGESI
+
+## celestial-pearl-danio
+
+![celestial-pearl-danio candidate](../../assets/species-candidates/celestial-pearl-danio/prepared.webp)
+
+- Preparation: Prepared aspect-preserving WebP
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Cyprinidae_Danio_margaritatus_1.jpg)
+- Creator: NasserHalaweh
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
-- Attribution: File:Psalidodon_anisitsi_Natural_History_Museum_University_of_Pisa.jpg
-
-## butterfly-splitfin
-
-![butterfly-splitfin candidate](../../assets/species-candidates/butterfly-splitfin/prepared.webp)
-
-- Preparation: Prepared aspect-preserving WebP
-- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Ameca_splendens_Jungtier_2016-12-11.JPG)
-- Creator: Usien
-- License: [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en)
 - Attribution: Own work
 
-## cardinal-tetra
+## cherry-barb
 
-![cardinal-tetra candidate](../../assets/species-candidates/cardinal-tetra/prepared.webp)
+![cherry-barb candidate](../../assets/species-candidates/cherry-barb/prepared.webp)
 
 - Preparation: Prepared aspect-preserving WebP
-- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Cardinal_Paracheirodon_axelrodi_(1).jpg)
-- Creator: CHUCAO
-- License: [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0)
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Cherry_barb,_Puntius_titteya.jpg)
+- Creator: Brian Gratwicke
+- License: [CC BY 2.0](https://creativecommons.org/licenses/by/2.0)
+- Attribution: Flickr: Cherry barb, Puntius titteya
+
+## cherry-shrimp
+
+![cherry-shrimp candidate](../../assets/species-candidates/cherry-shrimp/prepared.webp)
+
+- Preparation: Prepared aspect-preserving WebP
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Blue_dream_Neocaridina_davidi.jpg)
+- Creator: Roth 1312
+- License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0)
 - Attribution: Own work

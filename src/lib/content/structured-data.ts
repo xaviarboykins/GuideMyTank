@@ -45,6 +45,32 @@ function validateTextBlock(content: Json) {
 export function validateCareGuideSectionContent(sectionType: string, content: Json): ValidationResult {
   const issues: ValidationIssue[] = [];
 
+  if (sectionType === "frequently_asked_questions") {
+    const record = isJsonRecord(content) ? content : null;
+    const valid = Boolean(
+      record &&
+        Array.isArray(record.items) &&
+        record.items.length > 0 &&
+        record.items.every(
+          (item) =>
+            isJsonRecord(item) &&
+            nonBlank(item.question) &&
+            item.question.trim().endsWith("?") &&
+            nonBlank(item.answer),
+        ),
+    );
+
+    if (!valid) {
+      issues.push({
+        field: `sections.${sectionType}.content`,
+        code: "format",
+        message: "FAQs require complete question-and-answer pairs, with each question ending in a question mark.",
+      });
+    }
+
+    return issues.length === 0 ? { valid: true, issues: [] } : { valid: false, issues };
+  }
+
   if (!validateTextBlock(content)) {
     issues.push({
       field: `sections.${sectionType}.content`,

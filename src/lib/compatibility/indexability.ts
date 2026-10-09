@@ -5,6 +5,7 @@ import { getCompatibilityPairKey } from "./overrides";
 
 export type CompatibilityIndexability = {
   indexable: boolean;
+  tier: "reviewed" | "supported" | "provisional";
   reason:
     | "expert-reviewed"
     | "reviewed-regression"
@@ -31,22 +32,34 @@ export function getCompatibilityIndexability(
   input: CompatibilityIndexabilityInput,
 ): CompatibilityIndexability {
   if (input.expertValidated) {
-    return { indexable: true, reason: "expert-reviewed" };
+    return { indexable: true, tier: "reviewed", reason: "expert-reviewed" };
   }
 
   if (input.reviewedResult) {
-    return { indexable: true, reason: "reviewed-regression" };
+    return { indexable: true, tier: "reviewed", reason: "reviewed-regression" };
   }
 
   if (input.dataConfidence === "limited") {
-    return { indexable: false, reason: "limited-data-confidence" };
+    return {
+      indexable: false,
+      tier: "provisional",
+      reason: "limited-data-confidence",
+    };
   }
 
   if (input.sourcedSpeciesCount < 2) {
-    return { indexable: false, reason: "incomplete-source-coverage" };
+    return {
+      indexable: false,
+      tier: "provisional",
+      reason: "incomplete-source-coverage",
+    };
   }
 
-  return { indexable: true, reason: "supported-computed-report" };
+  return {
+    indexable: true,
+    tier: "supported",
+    reason: "supported-computed-report",
+  };
 }
 
 export function getCompatibilityReportIndexability(

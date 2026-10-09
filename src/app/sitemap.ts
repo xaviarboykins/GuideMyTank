@@ -17,6 +17,7 @@ const STATIC_PATHS = [
   "/learning-center/articles",
   "/learning-center/guides",
   "/about",
+  "/editorial-policy",
   "/contact",
   "/privacy",
   "/terms",

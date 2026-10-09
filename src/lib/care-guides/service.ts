@@ -216,7 +216,8 @@ export async function saveCareGuideSections(id: string, sections: Omit<CareGuide
     "species_to_avoid", "breeding", "frequently_asked_questions",
   ]);
   for (const section of sections) {
-    if (!allowedSectionTypes.has(section.section_type)) throw new ContentServiceError("Unknown Care Guide section type.", "validation");
+    const isCustomSection = /^custom_[a-z0-9]+(?:_[a-z0-9]+)*$/.test(section.section_type);
+    if (!allowedSectionTypes.has(section.section_type) && !isCustomSection) throw new ContentServiceError("Unknown Care Guide section type.", "validation");
     const validation = validateCareGuideSectionContent(section.section_type, section.content ?? {});
     if (!validation.valid) throw new ContentServiceError(validation.issues[0].message, "validation");
   }

@@ -32,6 +32,17 @@ function compareItems(a: InternalLinkItem, b: InternalLinkItem) {
   return titleDifference !== 0 ? titleDifference : a.href.localeCompare(b.href);
 }
 
+function compareDuplicateQuality(a: InternalLinkItem, b: InternalLinkItem) {
+  const scoreDifference = (b.score ?? 0) - (a.score ?? 0);
+  if (scoreDifference !== 0) return scoreDifference;
+
+  const descriptionDifference = (b.description?.trim().length ?? 0) -
+    (a.description?.trim().length ?? 0);
+  if (descriptionDifference !== 0) return descriptionDifference;
+
+  return compareItems(a, b);
+}
+
 export function filterInternalLinkItems(
   items: InternalLinkItem[],
   options: InternalLinkFilterOptions = {},
@@ -57,7 +68,7 @@ export function filterInternalLinkItems(
     const canonicalItem = { ...item, href: canonicalPath };
     const existingItem = itemsByPath.get(canonicalPath);
 
-    if (!existingItem || compareItems(canonicalItem, existingItem) < 0) {
+    if (!existingItem || compareDuplicateQuality(canonicalItem, existingItem) < 0) {
       itemsByPath.set(canonicalPath, canonicalItem);
     }
   }

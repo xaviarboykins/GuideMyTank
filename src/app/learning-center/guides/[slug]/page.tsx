@@ -5,7 +5,6 @@ import { cache } from "react";
 import { ArticleBlock } from "@/components/articles/article-block";
 import { ArticleImageFlipbook } from "@/components/articles/article-image-grid";
 import { ContentBreadcrumbs, ContentByline, ShareLinks, SourcesList } from "@/components/content/public-content";
-import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageContainer } from "@/components/site/page-container";
@@ -68,12 +67,19 @@ export default async function PublishedGuidePage({ params }: Props) {
     {galleryImages.length ? <div className="my-8"><ArticleImageFlipbook images={galleryImages} /></div> : null}
     <div className="mt-10 space-y-8">{sections.map((section) => <section id={`section-${section.id}`} key={section.id} className="scroll-mt-24"><ArticleBlock type={section.block_type} content={section.content} imageUrls={imageUrls} /></section>)}</div>
     <SourcesList sources={sources} />
-    <InternalLinksSection title="Relevant Species" items={internalLinks.species} limit={4} />
-    <InternalLinksSection title="Related Care Guides" items={internalLinks.careGuides} limit={4} />
-    <InternalLinksSection title="Compatibility Research" items={internalLinks.compatibilityReports} limit={4} />
-    <InternalLinksSection title="Related Learning Center Content" items={internalLinks.relatedArticles} limit={4} />
-    <BuilderCallToAction item={internalLinks.builder[0]} />
-    <InternalLinksSection title="Product Resources" items={internalLinks.productCategories} limit={1} />
+    <InternalLinksSection
+      title="Related resources"
+      description="Continue with the most relevant care guides and supporting aquarium research."
+      items={[
+        ...internalLinks.relatedArticles,
+        ...internalLinks.careGuides,
+        ...internalLinks.species,
+        ...internalLinks.topicClusters,
+        ...internalLinks.productCategories,
+        ...internalLinks.builder,
+      ]}
+      limit={4}
+    />
     <ShareLinks title={article.title ?? "GuideMyTank Guide"} url={canonical} />
   </article></PageContainer>;
 }

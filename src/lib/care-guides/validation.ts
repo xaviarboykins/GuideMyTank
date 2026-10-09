@@ -1,28 +1,20 @@
 import { validateContentSlug } from "../content/slug";
-import { validateCareGuideSectionContent } from "../content/structured-data";
+import { countContentWords, validateCareGuideSectionContent } from "../content/structured-data";
 import type { ValidationIssue, ValidationResult } from "../content/types";
 import type { Json } from "../../types/database.types";
 
 export const REQUIRED_CARE_GUIDE_SECTIONS = [
   "overview",
-  "natural_habitat",
-  "adult_size_and_lifespan",
   "aquarium_requirements",
   "water_parameters",
-  "filtration_and_flow",
-  "heating_requirements",
-  "lighting",
-  "substrate",
-  "plants_and_decor",
   "behavior_and_temperament",
-  "social_requirements",
-  "tank_mates",
-  "species_to_avoid",
   "diet_and_feeding",
   "common_health_concerns",
-  "breeding",
   "beginner_guidance",
 ] as const;
+
+export const MINIMUM_CARE_GUIDE_SECTIONS = 9;
+export const MINIMUM_CARE_GUIDE_WORDS = 900;
 
 export const REQUIRED_QUICK_FACTS = [
   "scientific_name",
@@ -81,6 +73,40 @@ export function validateCareGuideForPublication(data: CareGuidePublicationData):
     if (!sectionValidation.valid) {
       issues.push(...sectionValidation.issues);
     }
+  }
+
+  const substantiveSections = data.sections.filter(
+    (section) => section.sectionType !== "frequently_asked_questions",
+  );
+  if (substantiveSections.length < MINIMUM_CARE_GUIDE_SECTIONS) {
+    issues.push({
+      field: "sections",
+      code: "minimum",
+      message: `Add at least ${MINIMUM_CARE_GUIDE_SECTIONS} substantive sections, including species-specific guidance where appropriate.`,
+    });
+  }
+
+  const wordCount = countContentWords([
+    data.summary ?? "",
+    ...substantiveSections.map((section) => section.content),
+  ]);
+  if (wordCount < MINIMUM_CARE_GUIDE_WORDS) {
+    issues.push({
+      field: "sections",
+      code: "minimum_words",
+      message: `Add more substantive care information before publishing (${wordCount}/${MINIMUM_CARE_GUIDE_WORDS} words).`,
+    });
+  }
+
+  const faqSection = data.sections.find(
+    (item) => item.sectionType === "frequently_asked_questions",
+  );
+  if (faqSection) {
+    const faqValidation = validateCareGuideSectionContent(
+      faqSection.sectionType,
+      faqSection.content,
+    );
+    if (!faqValidation.valid) issues.push(...faqValidation.issues);
   }
 
   if (data.images.length < 2) issues.push({ field: "images", code: "minimum", message: "Add at least two uploaded Care Guide images." });

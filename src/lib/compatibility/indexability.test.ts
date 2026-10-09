@@ -11,7 +11,7 @@ describe("compatibility indexability", () => {
         sourcedSpeciesCount: 0,
         reviewedResult: false,
       }),
-    ).toEqual({ indexable: true, reason: "expert-reviewed" });
+    ).toEqual({ indexable: true, tier: "reviewed", reason: "expert-reviewed" });
   });
 
   it("indexes computed reports only when both species are sourced", () => {
@@ -22,7 +22,11 @@ describe("compatibility indexability", () => {
         sourcedSpeciesCount: 2,
         reviewedResult: false,
       }),
-    ).toEqual({ indexable: true, reason: "supported-computed-report" });
+    ).toEqual({
+      indexable: true,
+      tier: "supported",
+      reason: "supported-computed-report",
+    });
   });
 
   it("keeps limited-confidence computed reports out of the index", () => {
@@ -33,7 +37,11 @@ describe("compatibility indexability", () => {
         sourcedSpeciesCount: 2,
         reviewedResult: false,
       }),
-    ).toEqual({ indexable: false, reason: "limited-data-confidence" });
+    ).toEqual({
+      indexable: false,
+      tier: "provisional",
+      reason: "limited-data-confidence",
+    });
   });
 
   it("requires source coverage for both species", () => {
@@ -44,7 +52,11 @@ describe("compatibility indexability", () => {
         sourcedSpeciesCount: 1,
         reviewedResult: false,
       }),
-    ).toEqual({ indexable: false, reason: "incomplete-source-coverage" });
+    ).toEqual({
+      indexable: false,
+      tier: "provisional",
+      reason: "incomplete-source-coverage",
+    });
   });
 
   it("indexes manually reviewed regression pairs", () => {
@@ -55,6 +67,6 @@ describe("compatibility indexability", () => {
         sourcedSpeciesCount: 0,
         reviewedResult: true,
       }),
-    ).toEqual({ indexable: true, reason: "reviewed-regression" });
+    ).toEqual({ indexable: true, tier: "reviewed", reason: "reviewed-regression" });
   });
 });

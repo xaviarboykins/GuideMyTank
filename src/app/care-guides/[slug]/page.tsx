@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { PageContainer } from "@/components/site/page-container";
-import { PageHeader } from "@/components/site/page-header";
-import { Button } from "@/components/ui/button";
 import { CareGuideArticle } from "@/components/care-guides/care-guide-article";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getPublishedCareGuideBySlug, listPublishedCareGuides } from "@/lib/care-guides/service";
 import { createPublishedContentImageSignedUrls } from "@/lib/content-images/public";
-import { getSpeciesBySlug, getSpeciesSlugs } from "@/lib/data/species";
-import { getSiteUrl } from "@/lib/seo/site-url";
-import { NOINDEX_FOLLOW, NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/indexability";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCareGuidePageLinks } from "@/lib/seo/internal-linking/service";
 import { buildArticlePageEntities } from "@/lib/seo/schema/article-page";
@@ -24,15 +19,13 @@ type CareGuidePageProps = {
 };
 
 const getCachedPublishedCareGuideBySlug = cache(getPublishedCareGuideBySlug);
-const getCachedSpeciesBySlug = cache(getSpeciesBySlug);
 
 export const revalidate = 604_800; // CACHE_TTL.careGuides
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const [species, guides] = await Promise.all([getSpeciesSlugs(), listPublishedCareGuides()]);
-
-  return [...new Set([...species.map((item) => item.slug), ...guides.map((item) => item.slug)])].map((slug) => ({ slug }));
+  const guides = await listPublishedCareGuides();
+  return guides.map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -55,23 +48,7 @@ export async function generateMetadata({
     });
   }
 
-  const species = await getCachedSpeciesBySlug(slug);
-
-  if (!species) {
-    return buildPageMetadata({ title: "Care Guide Not Found", description: "The requested aquarium Care Guide could not be found.", path: `/care-guides/${slug}`, robots: NOINDEX_NOFOLLOW });
-  }
-
-  const title = `${species.common_name} Care Guide | GuideMyTank`;
-  const description = `A complete ${species.common_name} aquarium care guide is coming soon to GuideMyTank.`;
-  const canonical = getSiteUrl(`/care-guides/${species.slug}`);
-
-  return buildPageMetadata({
-    title,
-    description,
-    path: new URL(canonical).pathname,
-    type: "article",
-    robots: NOINDEX_FOLLOW,
-  });
+  return buildPageMetadata({ title: "Care Guide Not Found", description: "The requested aquarium Care Guide could not be found.", path: `/care-guides/${slug}`, robots: NOINDEX_NOFOLLOW });
 }
 
 export default async function CareGuidePage({ params }: CareGuidePageProps) {
@@ -100,46 +77,5 @@ export default async function CareGuidePage({ params }: CareGuidePageProps) {
     return <PageContainer><JsonLd entities={schemaEntities} /><CareGuideArticle {...publishedGuide} imageUrls={imageUrls} breadcrumbs={breadcrumbs} internalLinks={internalLinks} /></PageContainer>;
   }
 
-  const species = await getCachedSpeciesBySlug(slug);
-
-  if (!species) {
-    notFound();
-  }
-
-  return (
-    <PageContainer>
-      <PageHeader
-        eyebrow="Aquarium Care Guide"
-        title={`${species.common_name} Care Guide`}
-        description={species.scientific_name}
-      />
-
-      <article className="mt-6 border border-border bg-card p-6 md:p-10">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Article coming soon
-          </p>
-          <h2 className="mt-3 text-2xl font-bold tracking-tight">
-            We&apos;re preparing this care guide.
-          </h2>
-          <p className="mt-4 leading-7 text-muted-foreground">
-            The complete {species.common_name} guide will cover habitat setup,
-            water parameters, feeding, behavior, common health concerns, and
-            long-term care.
-          </p>
-
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button asChild>
-              <Link href={`/species/${species.slug}`}>
-                View Species Data
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/care-guides">Back to Care Guides</Link>
-            </Button>
-          </div>
-        </div>
-      </article>
-    </PageContainer>
-  );
+  notFound();
 }

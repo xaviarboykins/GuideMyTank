@@ -23,6 +23,8 @@ import { createSource } from "@/lib/content-sources/service";
 import type { ValidationIssue } from "@/lib/content/types";
 import type { Json } from "@/types/database.types";
 import { revalidateEditorialContent } from "@/lib/cache/revalidation";
+import { parseLegacyCareGuideFaq } from "@/lib/care-guides/faq";
+import { normalizeContentSlug } from "@/lib/content/slug";
 
 type PublishState = { ok: boolean; message: string; issues: ValidationIssue[] };
 
@@ -67,9 +69,24 @@ export async function saveSectionsAction(id: string, formData: FormData) {
   const sectionTypes = formData.getAll("sectionType").map(String);
   const rows = sectionTypes.flatMap((sectionType, displayOrder) => {
     const text = String(formData.get(`content_${sectionType}`) ?? "").trim();
-    return text ? [{ section_type: sectionType, heading: value(formData, `heading_${sectionType}`), content: { text }, display_order: displayOrder }] : [];
+    const content = sectionType === "frequently_asked_questions"
+      ? { items: parseLegacyCareGuideFaq(text) }
+      : { text };
+    return text ? [{ section_type: sectionType, heading: value(formData, `heading_${sectionType}`), content, display_order: displayOrder }] : [];
   });
   return runGuideAction(id, "Structured sections saved.", () => saveCareGuideSections(id, rows));
+}
+
+export async function addCustomSectionAction(id: string, displayOrder: number, formData: FormData) {
+  const heading = String(formData.get("heading") ?? "").trim();
+  const text = String(formData.get("content") ?? "").trim();
+  const sectionType = `custom_${normalizeContentSlug(heading).replaceAll("-", "_")}`;
+  return runGuideAction(id, "Species-specific section added.", () => saveCareGuideSections(id, [{
+    section_type: sectionType,
+    heading,
+    content: { text },
+    display_order: displayOrder,
+  }]));
 }
 
 export async function attachExistingImageAction(id: string, nextOrder: number, formData: FormData) {

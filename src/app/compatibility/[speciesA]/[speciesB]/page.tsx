@@ -4,7 +4,6 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 
 import { CompatibilitySummary } from "@/components/compatibility/compatibility-summary";
-import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
@@ -90,6 +89,7 @@ export default async function CompatibilityDetailPage({
 
   const compatibility = report.result;
   const analysis = report.analysis;
+  const quality = getCompatibilityReportIndexability(report);
 
   const internalLinks = await getCompatibilityPageLinks(compatibility);
   const speciesAName = compatibility.species_a.common_name;
@@ -186,6 +186,19 @@ export default async function CompatibilityDetailPage({
       </section>
 
       <section className="mt-6 border-y py-6">
+        <h2 className="text-xl font-semibold">What Would Change the Decision?</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Use these pair-specific boundaries before treating the verdict as an
+          acceptable stocking plan.
+        </p>
+        <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
+          {analysis.decisionGuide.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-6 border-y py-6">
         <h2 className="text-xl font-semibold">Aquarium Planning Checklist</h2>
         <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
           {analysis.checklist.map((item) => (
@@ -240,6 +253,10 @@ export default async function CompatibilityDetailPage({
 
         <dl className="mt-5 grid gap-3 border-t pt-4 text-xs text-muted-foreground sm:grid-cols-3">
           <div>
+            <dt className="font-medium text-foreground">Report quality</dt>
+            <dd className="mt-1 capitalize">{quality.tier}</dd>
+          </div>
+          <div>
             <dt className="font-medium text-foreground">Analysis version</dt>
             <dd className="mt-1">{analysis.version}</dd>
           </div>
@@ -265,25 +282,16 @@ export default async function CompatibilityDetailPage({
       </section>
 
       <InternalLinksSection
-        title="Species Care Guides"
-        description="Use the complete care requirements alongside this compatibility result."
-        items={internalLinks.careGuides}
-        limit={2}
+        title="Related Resources"
+        description={`Continue with the most relevant care and compatibility resources for ${speciesAName} and ${speciesBName}.`}
+        items={[
+          ...internalLinks.careGuides,
+          ...internalLinks.topicClusters,
+          ...internalLinks.relatedCompatibility,
+          ...internalLinks.builder,
+        ]}
+        limit={5}
       />
-
-      <InternalLinksSection
-        title="Related Compatibility Reports"
-        description={`Continue researching tank mates for ${speciesAName} and ${speciesBName}.`}
-        items={internalLinks.relatedCompatibility}
-        limit={6}
-      />
-
-      <InternalLinksSection
-        title="Explore This Topic"
-        items={internalLinks.topicClusters}
-      />
-
-      <BuilderCallToAction item={internalLinks.builder[0]} />
     </PageContainer>
   );
 }

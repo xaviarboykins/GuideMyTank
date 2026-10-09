@@ -48,6 +48,11 @@ describe("shared Article-page composition", () => {
       getBreadcrumbId(path),
       getFaqId(path),
     ]);
+    expect(
+      result.graph?.["@graph"].find(
+        (entity) => entity["@type"] === "Article",
+      ),
+    ).toMatchObject({ author: { "@id": ORGANIZATION_ID } });
   });
 
   it("omits FAQPage when no visible FAQs are supplied", () => {

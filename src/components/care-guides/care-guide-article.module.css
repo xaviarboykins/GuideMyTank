@@ -35,15 +35,3 @@
 .fact:nth-child(even) {
   padding-left: 0.5rem;
 }
-
-.contentGrid {
-  display: grid;
-  row-gap: 2rem;
-}
-
-@media (min-width: 768px) {
-  .contentGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 5rem;
-  }
-}

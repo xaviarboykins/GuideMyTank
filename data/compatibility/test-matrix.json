@@ -49,13 +49,13 @@
     },
     {
       "species": ["betta-splendens", "moonlight-gourami"],
-      "expected": ["caution"],
-      "note": "Related surface-oriented labyrinth fish can treat one another as territorial rivals."
+      "expected": ["caution", "incompatible"],
+      "note": "Related surface-oriented labyrinth fish can treat one another as territorial rivals; a conservative general-purpose engine may reject the pairing."
     },
     {
       "species": ["tiger-barb", "betta-splendens"],
-      "expected": ["caution"],
-      "note": "Fin-nipping risk should cap at caution rather than being treated as predation."
+      "expected": ["incompatible"],
+      "note": "Tiger Barb fin-nipping and activity create an unacceptable general pairing with a long-finned Betta."
     },
     {
       "species": ["discus", "clown-loach"],
@@ -64,8 +64,8 @@
     },
     {
       "species": ["serpae-tetra", "angelfish"],
-      "expected": ["caution"],
-      "note": "Fin-nipping risk with slow, long-finned angelfish."
+      "expected": ["caution", "incompatible"],
+      "note": "Fin-nipping risk with slow, long-finned Angelfish justifies either strong caution or a conservative rejection."
     },
     {
       "species": ["rainbow-shark", "corydoras-catfish"],
@@ -123,8 +123,8 @@
   "controversial_context_dependent": [
     {
       "species": ["red-tail-shark", "rainbow-shark"],
-      "expected": ["caution"],
-      "note": "Territory and footprint conflict; not automatic predation."
+      "expected": ["incompatible"],
+      "note": "Closely related territorial bottom dwellers have a high conflict and injury risk even without predation."
     },
     {
       "species": ["ranchu-goldfish", "rosy-barb"],

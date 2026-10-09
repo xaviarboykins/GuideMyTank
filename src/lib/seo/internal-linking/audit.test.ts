@@ -147,6 +147,42 @@ describe("internal link audit", () => {
     expect(report.summary.pages).toBe(4);
   });
 
+  it("models the de-duplicated links produced by public content renderers", () => {
+    const report = generateInternalLinkAudit({
+      species: [{ id: "betta", slug: "betta-splendens" }],
+      careGuides: [
+        {
+          id: "care-guide",
+          slug: "betta-splendens",
+          status: "published",
+          species_id: "betta",
+        },
+      ],
+      articles: [
+        {
+          id: "guide",
+          slug: "betta-guide",
+          status: "published",
+          content_type: "guide",
+          generated_links: [
+            "/care-guides/betta-splendens",
+            "/species/betta-splendens",
+            "/aquarium-builder",
+          ],
+        },
+      ],
+      careGuideRelatedSpecies: [],
+      articleRelatedCareGuides: [
+        { article_id: "guide", care_guide_id: "care-guide" },
+      ],
+      articleRelatedArticles: [],
+    });
+
+    expect(
+      report.issues.filter((item) => item.category === "duplicate_target"),
+    ).toEqual([]);
+  });
+
   it("automatically connects published Learning Center content", () => {
     const report = generateInternalLinkAudit({
       species: [],

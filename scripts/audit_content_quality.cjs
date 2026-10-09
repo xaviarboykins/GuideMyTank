@@ -67,6 +67,17 @@ function issue(severity, category, pathName, message) {
   return { severity, category, path: pathName, message };
 }
 
+const DRAFTING_ARTIFACTS = [
+  /one thing i would not do in this guide/i,
+  /as an ai(?: language model)?/i,
+  /(?:prompt|instruction)s? (?:say|said|asked|require)/i,
+  /write (?:an?|the) (?:article|guide) (?:about|with|but)/i,
+];
+
+function findDraftingArtifact(value) {
+  return DRAFTING_ARTIFACTS.find((pattern) => pattern.test(value));
+}
+
 function assertResults(results) {
   const failed = results.find((result) => result.error);
   if (failed) throw new Error(`Unable to audit content: ${failed.error.message}`);
@@ -112,6 +123,7 @@ async function main() {
     if (!guide.meta_description?.trim()) issues.push(issue("medium", "missing_meta_description", route, "No dedicated meta description."));
     if (!guide.open_graph_image_id) issues.push(issue("low", "missing_open_graph_image", route, "No explicit Open Graph image."));
     if (related.length === 0) issues.push(issue("medium", "missing_structured_relationship", route, "No related-species relationship is stored."));
+    if (findDraftingArtifact(body)) issues.push(issue("high", "drafting_artifact", route, "Published copy contains language that resembles an authoring instruction or drafting note."));
   }
 
   for (const article of publishedArticles) {
@@ -135,6 +147,7 @@ async function main() {
     if (!article.open_graph_image_id) issues.push(issue("low", "missing_open_graph_image", route, "No explicit Open Graph image."));
     if (relatedArticles.length + relatedGuides.length === 0) issues.push(issue("medium", "missing_structured_relationship", route, "No related article or care-guide relationship is stored."));
     if (categories.length === 0) issues.push(issue("medium", "missing_category", route, "No category is assigned."));
+    if (findDraftingArtifact(body)) issues.push(issue("high", "drafting_artifact", route, "Published copy contains language that resembles an authoring instruction or drafting note."));
   }
 
   for (let left = 0; left < records.length; left += 1) {

@@ -8,6 +8,15 @@ describe("structured content validation", () => {
     expect(validateCareGuideSectionContent("overview", { text: " " }).valid).toBe(false);
   });
 
+  it("requires structured, complete Care Guide FAQ pairs", () => {
+    expect(validateCareGuideSectionContent("frequently_asked_questions", {
+      items: [{ question: "Does this fish need a heater?", answer: "Usually, yes." }],
+    }).valid).toBe(true);
+    expect(validateCareGuideSectionContent("frequently_asked_questions", {
+      items: [{ question: "Missing punctuation", answer: "Incomplete structure." }],
+    }).valid).toBe(false);
+  });
+
   it("validates controlled article block shapes", () => {
     expect(validateArticleBlockContent("heading", { text: "Setup", level: 2 }).valid).toBe(true);
     expect(validateArticleBlockContent("list", { items: ["Tank", "Filter"] }).valid).toBe(true);

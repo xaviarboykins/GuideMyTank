@@ -4,6 +4,7 @@ import { PrivacySettingsButton } from "./privacy-settings-button";
 
 const footerLinks = [
   { href: "/about", label: "About" },
+  { href: "/editorial-policy", label: "Editorial Policy" },
   { href: "/contact", label: "Contact" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms of Service" },

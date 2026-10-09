@@ -4,13 +4,23 @@ import { REQUIRED_CARE_GUIDE_SECTIONS, REQUIRED_QUICK_FACTS, validateCareGuideFo
 
 function validGuide() {
   const speciesId = "species-1";
+  const sectionTypes = [
+    ...REQUIRED_CARE_GUIDE_SECTIONS,
+    "natural_habitat",
+    "tank_mates",
+  ];
   return {
     speciesId,
     title: "Betta Care Guide",
     slug: "betta-care-guide",
     summary: "Practical Betta care information.",
     quickFacts: Object.fromEntries(REQUIRED_QUICK_FACTS.map((fact) => [fact, "complete"])),
-    sections: REQUIRED_CARE_GUIDE_SECTIONS.map((sectionType) => ({ sectionType, content: { text: "Complete" } })),
+    sections: sectionTypes.map((sectionType) => ({
+      sectionType,
+      content: {
+        text: "Complete species-specific husbandry guidance with practical aquarium planning details. ".repeat(12),
+      },
+    })),
     images: [
       { imageId: "image-1", speciesId, isPrimary: true, altText: "Blue Betta" },
       { imageId: "image-2", speciesId, isPrimary: false, altText: "Red Betta" },
@@ -40,6 +50,26 @@ describe("Care Guide publication validation", () => {
     guide.images = [guide.images[0]];
     const result = validateCareGuideForPublication(guide);
     expect(result.issues).toEqual(expect.arrayContaining([expect.objectContaining({ field: "images", code: "minimum" })]));
+  });
+
+  it("rejects a malformed optional FAQ section", () => {
+    const guide = validGuide();
+    const result = validateCareGuideForPublication({
+      ...guide,
+      sections: [
+        ...guide.sections,
+        {
+          sectionType: "frequently_asked_questions",
+          content: { items: [{ question: "Incomplete question", answer: "Answer" }] },
+        },
+      ],
+    });
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        field: "sections.frequently_asked_questions.content",
+        code: "format",
+      }),
+    ]));
   });
 });
 

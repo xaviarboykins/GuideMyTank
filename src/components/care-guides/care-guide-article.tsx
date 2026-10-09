@@ -1,11 +1,12 @@
 import type { Json } from "@/types/database.types";
 import Link from "next/link";
 import { ContentBreadcrumbs, ContentByline, ImageCredit, RelatedLinks, ShareLinks, SourcesList } from "@/components/content/public-content";
-import { BuilderCallToAction } from "@/components/internal-linking/builder-call-to-action";
 import { InternalLinksSection } from "@/components/internal-linking/internal-links-section";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import type { BreadcrumbItem } from "@/lib/seo/breadcrumbs";
 import type { CareGuidePageLinks } from "@/lib/seo/internal-linking/care-guide-page-links";
+import { getCareGuideFaqItems } from "@/lib/care-guides/faq";
+import { buildCareGuideChapters } from "@/lib/care-guides/chapters";
 import styles from "./care-guide-article.module.css";
 
 type ImageAssignment = {
@@ -19,17 +20,6 @@ type SourceAssignment = { source_id: string; sources: { title: string; url: stri
 
 function record(value: Json) {
   return typeof value === "object" && value !== null && !Array.isArray(value) ? value : {};
-}
-
-function parseFaq(text: string) {
-  const items: { question: string; answer: string }[] = [];
-  const pattern = /([^?]+\?)\s*([^?]*?)(?=\s+(?:Can|Does|Why|How|What|When|Where|Is|Are|Should|Will)\b[^?]*\?|$)/g;
-  for (const match of text.matchAll(pattern)) {
-    const question = match[1].trim();
-    const answer = match[2].trim();
-    if (question && answer) items.push({ question, answer });
-  }
-  return items;
 }
 
 function GuideImage({ assignment, url, className, loading = "lazy" }: { assignment?: ImageAssignment; url?: string; className: string; loading?: "eager" | "lazy" }) {
@@ -60,10 +50,8 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
   const secondary = images.find((image) => image.image_id !== primary?.image_id);
   const faqSection = sections.find((section) => section.section_type === "frequently_asked_questions");
   const articleSections = sections.filter((section) => section.id !== faqSection?.id);
-  const midpoint = Math.ceil(articleSections.length / 2);
-  const columns = [articleSections.slice(0, midpoint), articleSections.slice(midpoint)];
-  const faqContent = faqSection ? record(faqSection.content) : {};
-  const faqItems = parseFaq(typeof faqContent.text === "string" ? faqContent.text : "");
+  const chapters = buildCareGuideChapters(articleSections);
+  const faqItems = faqSection ? getCareGuideFaqItems(faqSection.content) : [];
   const slug = guide.slug ?? guide.species.common_name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
   const canonical = getSiteUrl(`/care-guides/${slug}`);
 
@@ -93,18 +81,21 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
         </aside>
       </section>
 
-      <section className={`mt-10 items-start px-5 sm:px-8 lg:px-10 ${styles.contentGrid}`}>
-        {columns.map((column, columnIndex) => <div key={columnIndex} className="space-y-8">
-          {column.map((section, sectionIndex) => {
+      <div className="mx-auto mt-12 max-w-3xl space-y-12 px-5 sm:px-8 lg:px-10">
+        {chapters.map((chapter, chapterIndex) => <section key={chapter.id} id={`chapter-${chapter.id}`} className="scroll-mt-24">
+          {chapterIndex === 2 ? <div className="mb-10"><GuideImage assignment={secondary} url={secondary ? imageUrls.get(secondary.content_images.storage_path) : undefined} className="aspect-[4/3] w-full border border-border bg-muted object-cover" /></div> : null}
+          <h2 className="border-b border-border pb-3 text-2xl font-semibold">{chapter.title}</h2>
+          <div className="mt-6 space-y-8">
+          {chapter.sections.map((section) => {
             const content = record(section.content);
             return <section key={section.id} id={`section-${section.id}`} className="scroll-mt-24">
-              {columnIndex === 1 && sectionIndex === 2 ? <div className="mb-8"><GuideImage assignment={secondary} url={secondary ? imageUrls.get(secondary.content_images.storage_path) : undefined} className="aspect-[4/3] w-full border border-border bg-muted object-cover" /></div> : null}
-              <h2 className="text-2xl font-semibold capitalize">{section.heading ?? section.section_type.replaceAll("_", " ")}</h2>
+              <h3 className="text-xl font-semibold capitalize">{section.heading ?? section.section_type.replaceAll("_", " ")}</h3>
               <p className="mt-3 whitespace-pre-wrap leading-7">{typeof content.text === "string" ? content.text : ""}</p>
             </section>;
           })}
-        </div>)}
-      </section>
+          </div>
+        </section>)}
+      </div>
 
       {faqSection ? <section id="frequently-asked-questions" className="mx-5 mt-12 scroll-mt-24 sm:mx-8 lg:mx-10">
         <h2 className="text-2xl font-semibold">{faqSection.heading ?? "Frequently Asked Questions"}</h2>
@@ -112,21 +103,25 @@ export function CareGuideArticle({ guide, sections, images, sources, imageUrls, 
           {faqItems.length ? faqItems.map((item) => <div key={item.question} className="grid gap-2 border-t border-border p-4 first:border-t-0 md:grid-cols-[minmax(12rem,0.8fr)_minmax(0,1.7fr)] md:gap-6">
             <h3 className="font-semibold leading-6">{item.question}</h3>
             <p className="leading-6 text-muted-foreground">{item.answer}</p>
-          </div>) : <p className="p-4 leading-7">{typeof faqContent.text === "string" ? faqContent.text : ""}</p>}
+          </div>) : <p className="p-4 leading-7">This FAQ section needs complete question-and-answer pairs.</p>}
         </div>
       </section> : null}
 
       <div className="mx-5 sm:mx-8 lg:mx-10">
         <SourcesList sources={sources} />
         {internalLinks ? (
-          <>
-            <InternalLinksSection title="Species Profile" items={internalLinks.speciesProfile} limit={1} />
-            <InternalLinksSection title="Related Species" items={internalLinks.relatedSpecies} limit={4} />
-            <InternalLinksSection title="Compatibility Research" description="Review these pair reports before planning a shared aquarium." items={internalLinks.compatibilityReports} limit={4} />
-            <InternalLinksSection title="Related Care Guides" items={internalLinks.relatedCareGuides} limit={4} />
-            <InternalLinksSection title="Related Articles" items={internalLinks.articles} limit={4} />
-            <BuilderCallToAction item={internalLinks.builder[0]} />
-          </>
+          <InternalLinksSection
+            title="Related resources"
+            description={`Continue researching ${guide.species.common_name} care and aquarium planning.`}
+            items={[
+              ...internalLinks.articles,
+              ...internalLinks.speciesProfile,
+              ...internalLinks.relatedCareGuides,
+              ...internalLinks.relatedSpecies,
+              ...internalLinks.builder,
+            ]}
+            limit={4}
+          />
         ) : (
           <>
             <RelatedLinks title="Related species" items={relatedSpecies.map((item) => ({ href: `/species/${item.species.slug}`, title: item.species.common_name, description: item.relationship_label ?? item.species.scientific_name }))} />

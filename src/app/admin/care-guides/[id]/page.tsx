@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCareGuideEditorData } from "@/lib/care-guides/service";
 import { REQUIRED_CARE_GUIDE_SECTIONS, REQUIRED_QUICK_FACTS } from "@/lib/care-guides/validation";
+import { formatCareGuideFaqForEditing } from "@/lib/care-guides/faq";
 import { createAdminContentImageUrls } from "@/lib/content-images/admin";
 import { listContentImages } from "@/lib/content-images/service";
 import type { Json } from "@/types/database.types";
 
 import {
-  addRelatedSpeciesAction, addSourceAction, archiveCareGuideAction, attachExistingImageAction,
+  addCustomSectionAction, addRelatedSpeciesAction, addSourceAction, archiveCareGuideAction, attachExistingImageAction,
   publishCareGuideAction, removeImageAction, removeRelatedSpeciesAction, removeSourceAction,
   reorderImageAction, saveCareGuideFieldsAction, saveQuickFactsAction, saveSectionsAction,
   setPrimaryImageAction,
@@ -31,6 +32,10 @@ const SECTION_DEFINITIONS = [
   ["beginner_guidance", "Beginner guidance"], ["frequently_asked_questions", "Frequently asked questions"],
 ] as const;
 
+const STANDARD_SECTION_TYPES = new Set<string>(
+  SECTION_DEFINITIONS.map(([sectionType]) => sectionType),
+);
+
 const QUICK_FACT_LABELS: Record<(typeof REQUIRED_QUICK_FACTS)[number], string> = {
   scientific_name: "Scientific name", adult_size: "Adult size", lifespan: "Lifespan",
   minimum_tank_size: "Minimum tank size", care_level: "Care level", temperament: "Temperament",
@@ -44,6 +49,12 @@ function jsonRecord(value: Json): Record<string, Json | undefined> {
 function sectionText(content: Json) {
   const record = jsonRecord(content);
   return typeof record.text === "string" ? record.text : "";
+}
+
+function sectionEditorValue(sectionType: string, content: Json) {
+  return sectionType === "frequently_asked_questions"
+    ? formatCareGuideFaqForEditing(content)
+    : sectionText(content);
 }
 
 type CareGuideEditorPageProps = {
@@ -60,6 +71,13 @@ export default async function CareGuideEditorPage({ params, searchParams }: Care
   const isEditable = guide.status !== "published";
   const quickFacts = jsonRecord(guide.quick_facts);
   const sectionMap = new Map(sections.map((section) => [section.section_type, section]));
+  const customSectionDefinitions = sections
+    .filter((section) => !STANDARD_SECTION_TYPES.has(section.section_type))
+    .map((section) => [
+      section.section_type,
+      section.heading ?? section.section_type.replaceAll("_", " "),
+    ] as const);
+  const editorSectionDefinitions = [...SECTION_DEFINITIONS, ...customSectionDefinitions];
   const speciesImages = await listContentImages(guide.species_id);
   const attachedIds = new Set(images.map((image) => image.image_id));
   const availableImages = speciesImages.filter((image) => !attachedIds.has(image.id));
@@ -103,17 +121,28 @@ export default async function CareGuideEditorPage({ params, searchParams }: Care
       <form action={saveSectionsAction.bind(null, id)} className="border border-border bg-card p-5">
         <fieldset disabled={!isEditable} className="space-y-4">
           <legend className="mb-4 text-lg font-semibold">Structured sections</legend>
-          {SECTION_DEFINITIONS.map(([sectionType, label]) => {
+          {editorSectionDefinitions.map(([sectionType, label]) => {
             const section = sectionMap.get(sectionType);
             const required = REQUIRED_CARE_GUIDE_SECTIONS.includes(sectionType as (typeof REQUIRED_CARE_GUIDE_SECTIONS)[number]);
             return <details key={sectionType} className="border border-border p-4" open={required && !section}>
               <summary className="cursor-pointer font-medium">{label}{required ? " *" : ""}</summary>
               <input type="hidden" name="sectionType" value={sectionType} />
               <label className="mt-3 block space-y-1"><span className="text-sm font-medium">Heading</span><Input name={`heading_${sectionType}`} defaultValue={section?.heading ?? label} /></label>
-              <label className="mt-3 block space-y-1"><span className="text-sm font-medium">Content</span><textarea name={`content_${sectionType}`} defaultValue={section ? sectionText(section.content) : ""} rows={6} className="w-full rounded-lg border border-input bg-background p-2.5 text-sm" /></label>
+              <label className="mt-3 block space-y-1"><span className="text-sm font-medium">Content</span><textarea name={`content_${sectionType}`} defaultValue={section ? sectionEditorValue(sectionType, section.content) : ""} rows={6} className="w-full rounded-lg border border-input bg-background p-2.5 text-sm" /></label>
+              {sectionType === "frequently_asked_questions" ? <p className="mt-2 text-xs text-muted-foreground">Enter each question on its own line, followed by its answer. Separate question-and-answer pairs with a blank line.</p> : null}
             </details>;
           })}
           <Button type="submit">Save structured sections</Button>
+        </fieldset>
+      </form>
+
+      <form action={addCustomSectionAction.bind(null, id, sections.length)} className="border border-border bg-card p-5">
+        <fieldset disabled={!isEditable} className="grid gap-3 md:grid-cols-2">
+          <legend className="mb-2 text-lg font-semibold">Add species-specific section</legend>
+          <p className="text-sm text-muted-foreground md:col-span-2">Use this for material that is genuinely distinctive to this species, such as shell-dwelling behavior, molting problems, shyness, specialized feeding, or cave requirements.</p>
+          <label className="space-y-1"><span className="text-sm font-medium">Section heading</span><Input name="heading" required /></label>
+          <label className="space-y-1 md:col-span-2"><span className="text-sm font-medium">Content</span><textarea name="content" required rows={6} className="w-full rounded-lg border border-input bg-background p-2.5 text-sm" /></label>
+          <div className="md:col-span-2"><Button type="submit">Add species-specific section</Button></div>
         </fieldset>
       </form>
 

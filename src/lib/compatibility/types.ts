@@ -94,6 +94,7 @@ export type CompatibilityPairAnalysis = {
   behavior: string;
   husbandry: string;
   keyFindings: string[];
+  decisionGuide: string[];
   checklist: string[];
 };
 

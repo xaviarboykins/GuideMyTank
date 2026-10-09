@@ -21,7 +21,12 @@ export default function ContactPage() {
       <ContentSection title="Contact Information">
         <p>
           For now, please contact GuideMyTank at:{" "}
-          <span className="font-medium">contact@guidemytank.com</span>
+          <a
+            href="mailto:contact@guidemytank.com"
+            className="font-medium underline underline-offset-4"
+          >
+            contact@guidemytank.com
+          </a>
         </p>
       </ContentSection>
 

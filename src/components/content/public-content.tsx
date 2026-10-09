@@ -8,7 +8,7 @@ export function ContentBreadcrumbs({ items }: { items: readonly BreadcrumbItem[]
 
 export function ContentByline({ publishedAt, updatedAt }: { publishedAt: string | null; updatedAt: string }) {
   const format = (value: string) => new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
-  return <p className="mt-4 text-sm text-muted-foreground">By GuideMyTank Editorial Team{publishedAt ? <> · Published <time dateTime={publishedAt}>{format(publishedAt)}</time></> : null}{updatedAt && updatedAt !== publishedAt ? <> · Updated <time dateTime={updatedAt}>{format(updatedAt)}</time></> : null}</p>;
+  return <p className="mt-4 text-sm text-muted-foreground">By <Link href="/editorial-policy" rel="author" className="underline underline-offset-4 hover:text-foreground">GuideMyTank Editorial Team</Link>{publishedAt ? <> · Published <time dateTime={publishedAt}>{format(publishedAt)}</time></> : null}{updatedAt && updatedAt !== publishedAt ? <> · Updated <time dateTime={updatedAt}>{format(updatedAt)}</time></> : null}</p>;
 }
 
 export function ImageCredit({ attribution, sourceUrl, licenseName, licenseUrl }: { attribution?: string | null; sourceUrl?: string | null; licenseName?: string | null; licenseUrl?: string | null }) {

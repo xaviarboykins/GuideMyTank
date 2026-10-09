@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { ContentSection } from "@/components/site/content-section";
 import { PageContainer } from "@/components/site/page-container";
 import { PageHeader } from "@/components/site/page-header";
@@ -19,11 +21,23 @@ export default function AboutPage() {
       />
 
       <ContentSection title="Why GuideMyTank Exists">
-        <p>
-          GuideMyTank was built from a passion for the aquarium hobby and a
-          desire to make fishkeeping planning easier, clearer, and more
-          data-driven.
-        </p>
+        <div className="space-y-4">
+          <p>
+            GuideMyTank is an independently operated freshwater aquarium
+            reference and planning service. It was created to make species
+            research, stocking decisions, and compatibility risks easier to
+            evaluate before livestock is added to an aquarium.
+          </p>
+          <p>
+            The site is operated under the GuideMyTank name. The operator does
+            not publish a personal name or home address for privacy. Questions,
+            corrections, and business inquiries can be sent through the{" "}
+            <Link href="/contact" className="underline underline-offset-4">
+              Contact page
+            </Link>
+            .
+          </p>
+        </div>
       </ContentSection>
 
       <ContentSection title="Data-Driven Stocking Guidance">
@@ -43,11 +57,29 @@ export default function AboutPage() {
       </ContentSection>
 
       <ContentSection title="Building Trust">
-        <p>
-          GuideMyTank aims to provide useful, transparent, and practical
-          freshwater aquarium information while encouraging users to verify
-          important decisions through multiple trusted sources.
-        </p>
+        <div className="space-y-4">
+          <p>
+            GuideMyTank separates human-reviewed educational content from
+            automated compatibility analysis. Care guides and learning-center
+            articles are edited before publication and list references when
+            outside sources support the material. Compatibility reports are
+            calculated from structured species records and documented safety
+            rules; they are planning aids, not guarantees about individual fish.
+          </p>
+          <p>
+            Read the{" "}
+            <Link href="/editorial-policy" className="underline underline-offset-4">
+              Editorial Policy
+            </Link>{" "}
+            for the research, review, sourcing, image, and correction process.
+            The{" "}
+            <Link href="/compatibility/disclaimer" className="underline underline-offset-4">
+              compatibility methodology
+            </Link>{" "}
+            explains how automated reports are produced and where their limits
+            apply.
+          </p>
+        </div>
       </ContentSection>
     </PageContainer>
   );

@@ -265,6 +265,10 @@ export function buildKnownInternalLinkPages(
         if (!links.includes(candidatePath)) links.push(candidatePath);
       }
     }
+    // Public renderers canonicalize and de-duplicate these sources before
+    // displaying them. Model that final link surface rather than reporting
+    // duplicate records that never reach the page.
+    const renderedLinks = [...new Set(links)];
     const isGuide = article.content_type === "guide";
     pages.push({
       path: article.slug
@@ -275,7 +279,7 @@ export function buildKnownInternalLinkPages(
       entityType: isGuide ? "guide" : "article",
       entityId: article.id,
       indexable: article.status === "published" && Boolean(article.slug),
-      links,
+      links: renderedLinks,
     });
   }
 

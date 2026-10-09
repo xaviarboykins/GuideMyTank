@@ -69,6 +69,53 @@ function findingSummary(findings: CompatibilityFinding[]) {
   return meaningful.slice(0, 4).map((finding) => finding.message);
 }
 
+function decisionGuide(
+  speciesA: SpeciesRow,
+  speciesB: SpeciesRow,
+  result: CompatibilityResult,
+  findings: CompatibilityFinding[],
+) {
+  const categories = new Set(
+    findings
+      .filter((finding) => finding.category !== "data-quality")
+      .map((finding) => finding.category),
+  );
+  const guidance: string[] = [];
+
+  if (categories.has("water-parameters")) {
+    guidance.push(
+      `Do not proceed unless one stable temperature and pH range can be maintained for both ${speciesA.common_name} and ${speciesB.common_name}; acclimation does not correct an incompatible long-term range.`,
+    );
+  }
+  if (categories.has("predation") || categories.has("fin-risk")) {
+    guidance.push(
+      `Treat size, predation, and fin-damage warnings as stop conditions. Extra plants cannot reliably make an unsafe predator-to-prey or fin-target pairing safe.`,
+    );
+  }
+  if (categories.has("temperament") || categories.has("territory")) {
+    guidance.push(
+      `Use broken sight lines and multiple retreats, then separate the pair if either species shows persistent chasing, hiding, clamped fins, or loss of feeding access.`,
+    );
+  }
+  if (categories.has("space") || categories.has("grouping")) {
+    guidance.push(
+      `Recalculate space using the full adult group sizes—not one specimen of each species—and reject the plan if either species must be understocked socially to fit.`,
+    );
+  }
+  if (guidance.length === 0) {
+    guidance.push(
+      `The structured checks did not find a pair-specific blocker, but the result still depends on adequate adult space, complete social groups, stable water, and observation after introduction.`,
+    );
+  }
+  guidance.push(
+    result.verdict === "not-recommended"
+      ? `A different tank mate is the preferred decision for this pair. Attempting the combination transfers the identified risk to the animals rather than resolving it.`
+      : `Prepare a cycled backup or separation option before introduction; individual behavior can be less predictable than species-level records.`,
+  );
+
+  return guidance;
+}
+
 export function buildCompatibilityPairAnalysis(
   speciesA: SpeciesRow,
   speciesB: SpeciesRow,
@@ -112,6 +159,7 @@ export function buildCompatibilityPairAnalysis(
     behavior: `${speciesA.common_name} is a ${label(speciesA.activity_level).toLowerCase()} species associated with the ${label(speciesA.territory_zone, "unspecified").toLowerCase()} zone and ${label(speciesA.flow_preference).toLowerCase()} flow. ${speciesB.common_name} is ${label(speciesB.activity_level).toLowerCase()}, uses the ${label(speciesB.territory_zone, "unspecified").toLowerCase()} zone, and has a ${label(speciesB.flow_preference).toLowerCase()} flow preference. ${groupRequirement(speciesA)}, while ${groupRequirement(speciesB).toLowerCase()}. The aquarium must support both social structures without forcing either species into insufficient space.`,
     husbandry: `${speciesA.common_name} is recorded as a ${label(speciesA.diet).toLowerCase()} with ${label(speciesA.care_level).toLowerCase()} care, while ${speciesB.common_name} is a ${label(speciesB.diet).toLowerCase()} with ${label(speciesB.care_level).toLowerCase()} care. Their listed preferred tank styles are ${label(speciesA.preferred_tank_style)} and ${label(speciesB.preferred_tank_style)}. Feeding access, cover, open swimming room, filtration, and observation should be planned around the more demanding requirement rather than averaged between the two species.`,
     keyFindings,
+    decisionGuide: decisionGuide(speciesA, speciesB, result, findings),
     checklist: [
       `Keep temperature within ${sharedTemperature}.`,
       `Keep pH within ${sharedPh}.`,

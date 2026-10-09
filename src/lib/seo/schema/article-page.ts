@@ -4,6 +4,7 @@ import {
   getArticleId,
   getFaqId,
   getWebPageId,
+  ORGANIZATION_ID,
 } from "../identities";
 import { getSiteUrl } from "../site-url";
 
@@ -54,6 +55,7 @@ export function buildArticlePageEntities(input: {
       dateModified: input.dateModified,
       articleSection: input.articleSection,
       keywords: input.keywords,
+      authorId: ORGANIZATION_ID,
     }),
     buildBreadcrumbEntity(input.path, input.breadcrumbs),
     input.visibleFaqs

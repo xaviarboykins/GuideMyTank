@@ -120,5 +120,24 @@ describe("compatibility pair analysis", () => {
     );
 
     expect(analysis.checklist.at(-1)).toContain("separate aquariums");
+    expect(analysis.decisionGuide.at(-1)).toContain("different tank mate");
+  });
+
+  it("turns pair-specific findings into practical decision boundaries", () => {
+    const analysis = analyze(
+      species("Territorial Fish", {
+        temperament: "Aggressive",
+        aggression_level: 9,
+        territory_zone: "bottom",
+      }),
+      species("Peaceful Bottom Fish", { territory_zone: "bottom" }),
+    );
+
+    expect(analysis.decisionGuide.join(" ")).toMatch(
+      /sight lines|adult group sizes|stop conditions/,
+    );
+    expect(analysis.decisionGuide.at(-1)).toMatch(
+      /different tank mate|separation option/,
+    );
   });
 });
